@@ -81,6 +81,7 @@
 												<!--end::Dropdown Menu-->
 											</div>
 											<!--end::Dropdown-->
+
 											<!--begin::Button-->
 											<a href="{{route('dashboard.projects.create') }}" class="btn btn-primary font-weight-bolder">
 											<span class="svg-icon svg-icon-md">
