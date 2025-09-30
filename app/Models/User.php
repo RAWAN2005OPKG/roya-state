@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -13,7 +12,7 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * الأعمدة القابلة للتعبئة
      *
      * @var array<int, string>
      */
@@ -24,7 +23,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * الأعمدة اللي لازم تكون مخفية لما يتحول الموديل لـ JSON
      *
      * @var array<int, string>
      */
@@ -34,12 +33,12 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * الأعمدة اللي Laravel يحولها لأنواع مختلفة تلقائيًا
      *
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+      //  'email_verified_at' => 'rayapalinfo@gmail.com',
+        //'password' => 'khalid@20252', // هذا يخلي Laravel يهاش الباسورد أوتوماتيك
     ];
 }

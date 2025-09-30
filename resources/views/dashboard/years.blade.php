@@ -98,11 +98,13 @@
 @endsection
 
 @push('js')
+
 <script>
     // --- البيانات المجهزة من الخادم ---
     const selectedYear = @json($selectedYear);
     const previousYear = @json($previousYear);
-    const reportData = @json($reportData); // <-- البيانات المجمّعة والجاهزة
+    const reportData = @json($reportData); 
+
 
     // --- دوال مساعدة ---
     function formatCurrency(num) {

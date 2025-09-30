@@ -39,7 +39,7 @@ return new class extends Migration {
             // receiver
             $table->string('receiver_name')->nullable();
             $table->string('receiver_signature')->nullable();
-            // misc
+           
             $table->text('notes')->nullable();
             $table->timestamps();
         });

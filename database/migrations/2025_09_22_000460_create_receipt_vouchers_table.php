@@ -13,9 +13,9 @@ return new class extends Migration {
             $table->unsignedBigInteger('contact_id')->nullable();
             $table->decimal('amount', 15, 2);
             $table->string('currency', 10)->default('شيكل');
-            $table->string('payment_method', 50); // cash, bank_transaction, check
-            $table->string('payment_source', 50)->nullable(); // خزينة/بنك
-            // cash details
+            $table->string('payment_method', 50); 
+            $table->string('payment_source', 50)->nullable(); 
+        
             $table->string('cash_receiver')->nullable();
             $table->string('cash_receiver_other')->nullable();
             $table->string('cash_receiver_job')->nullable();
@@ -27,17 +27,16 @@ return new class extends Migration {
             $table->string('receiver_bank_other')->nullable();
             $table->string('receiver_bank_branch')->nullable();
             $table->string('transaction_id')->nullable();
-            // check details
+           
+            
             $table->string('check_number')->nullable();
             $table->string('check_owner')->nullable();
             $table->string('check_holder')->nullable();
             $table->date('check_due_date')->nullable();
             $table->date('check_receive_date')->nullable();
-            // purpose
-            $table->string('purpose', 50)->nullable(); // project_payment, invoice_payment, other
+            $table->string('purpose', 50)->nullable(); 
             $table->unsignedBigInteger('project_id')->nullable();
-            $table->text('purpose_description')->nullable();
-            // receiver
+            $table->text('purpose_description')->nullable(); 
             $table->string('receiver_name')->nullable();
             $table->string('receiver_signature')->nullable();
             // misc

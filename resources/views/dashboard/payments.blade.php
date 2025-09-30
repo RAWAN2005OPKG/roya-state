@@ -182,41 +182,127 @@
     </div>
 </div>
 
-<!-- HTML Templates for Dynamic Sections -->
-<template id="cash-details-template">
-    <div class="dynamic-section">
-        <h4><i class="fas fa-money-bill-wave"></i> تفاصيل الدفع النقدي</h4>
-        <div class="form-grid">
-            <div class="form-group"><label>من استلم المبلغ</label><input type="text" name="cash_receiver"></div>
-            <div class="form-group"><label>وظيفة المستلم</label><input type="text" name="cash_receiver_job"></div>
-        </div>
-    </div>
-</template>
-<template id="bank-details-template">
-    <div class="dynamic-section">
-        <h4><i class="fas fa-university"></i> تفاصيل البنك</h4>
-        <div class="form-grid">
-            <div class="form-group"><label>البنك المرسل</label><input type="text" name="sender_bank"></div>
-            <div class="form-group"><label>البنك المستقبل</label><input type="text" name="receiver_bank"></div>
-            <div class="form-group" style="grid-column: 1 / -1;"><label>رقم التحويلة</label><input type="text" name="transaction_id"></div>
-        </div>
-    </div>
-</template>
-<template id="check-details-template">
-    <div class="dynamic-section">
-        <h4><i class="fas fa-money-check"></i> تفاصيل الشيك</h4>
-        <div class="form-grid">
-            <div class="form-group"><label>رقم الشيك</label><input type="text" name="check_number"></div>
-            <div class="form-group"><label>اسم صاحب الشيك</label><input type="text" name="check_owner"></div>
-            <div class="form-group"><label>تاريخ الاستحقاق</label><input type="date" name="check_due_date"></div>
-        </div>
-    </div>
-</template>
+                    <!-- قسم الدفع النقدي -->
+                    <div id="cashDetailsSection" class="dynamic-section hidden">
+                        <h4><i class="fas fa-money-bill-wave"></i> تفاصيل الدفع النقدي</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="cashReceiver">من استلم المبلغ</label>
+                                <select id="cashReceiver" name="cash_receiver">
+                                    <option value="">-- اختر المستلم --</option>
+                                    <option value="محمد">محمد</option>
+                                    <option value="خالد">خالد</option>
+                                    <option value="أخرى">أخرى (حدد)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group hidden" id="otherReceiverGroup">
+                                <label for="otherReceiver">اسم المستلم (أخرى)</label>
+                                <input type="text" id="otherReceiver" name="cash_receiver_other" placeholder="اكتب اسم المستلم">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="receiverJob">وظيفة المستلم</label>
+                                <input type="text" id="receiverJob" name="cash_receiver_job" placeholder="مثال: محاسب، مدير">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- قسم تفاصيل البنك -->
+                    <div id="bankDetailsSection" class="dynamic-section hidden">
+                        <h4><i class="fas fa-university"></i> تفاصيل البنك</h4>
+                        <div class="form-grid">
+                            <!-- البنك المرسل -->
+                            <div class="form-group">
+                                <label for="senderBank">البنك المرسل</label>
+                                <select id="senderBank" name="sender_bank">
+                                    <option value="">-- اختر البنك المرسل --</option>
+                                    <option value="بنك القاهرة عمان">بنك القاهرة عمان</option>
+                                    <option value="بنك الصفا">بنك الصفا</option>
+                                    <option value="بنك فلسطين">بنك فلسطين</option>
+                                    <option value="البنك العربي">البنك العربي</option>
+                                    <option value="other">أخرى (حدد)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group hidden" id="otherSenderBankGroup">
+                                <label for="otherSenderBank">اسم البنك المرسل (أخرى)</label>
+                                <input type="text" id="otherSenderBank" name="sender_bank_other" placeholder="اكتب اسم البنك">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="senderBranch">فرع البنك المرسل</label>
+                                <input type="text" id="senderBranch" name="sender_branch" placeholder="اكتب اسم الفرع">
+                            </div>
+
+                            <!-- البنك المستقبل -->
+                            <div class="form-group">
+                                <label for="receiverBank">البنك المستقبل</label>
+                                <select id="receiverBank" name="receiver_bank">
+                                    <option value="">-- اختر البنك المستقبل --</option>
+                                    <option value="بنك القاهرة عمان">بنك القاهرة عمان</option>
+                                    <option value="بنك الصفا">بنك الصفا</option>
+                                    <option value="بنك فلسطين">بنك فلسطين</option>
+                                    <option value="البنك العربي">البنك العربي</option>
+                                    <option value="other">أخرى (حدد)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group hidden" id="otherReceiverBankGroup">
+                                <label for="otherReceiverBank">اسم البنك المستقبل (أخرى)</label>
+                                <input type="text" id="otherReceiverBank" name="receiver_bank_other" placeholder="اكتب اسم البنك">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="receiverBranch">فرع البنك المستقبل</label>
+                                <input type="text" id="receiverBranch" name="receiver_branch" placeholder="اكتب اسم الفرع">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="transactionId">رقم التحويلة</label>
+                                <input type="text" id="transactionId" name="transaction_id" placeholder="أدخل رقم التحويلة">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- قسم تفاصيل الشيك -->
+                    <div id="checkDetailsSection" class="dynamic-section hidden">
+                        <h4><i class="fas fa-money-check"></i> تفاصيل الشيك</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="checkNumber">رقم الشيك</label>
+                                <input type="text" id="checkNumber" name="check_number" placeholder="رقم أو اسم الشيك">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="checkOwner">اسم صاحب الشيك</label>
+                                <input type="text" id="checkOwner" name="check_owner" placeholder="اسم صاحب الشيك">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="checkHolder">مالك الشيك</label>
+                                <input type="text" id="checkHolder" name="check_holder" placeholder="اسم مالك الشيك">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="checkDueDate">تاريخ الاستحقاق</label>
+                                <input type="date" id="checkDueDate" name="check_due_date">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="checkReceiveDate">تاريخ الاستلام</label>
+                                <input type="date" id="checkReceiveDate" name="check_receive_date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 @endsection
 
 @section('script')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
     const CONTACTS_API_URL = '{{ route("api.contacts") }}';
     const PROJECTS_API_URL = '{{ route("api.projects") }}';
 
@@ -258,8 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selector.value) {
             const phone = selectedOption.dataset.phone || 'N/A';
             const idNumber = selectedOption.dataset.idNumber || 'N/A';
-            infoDiv.innerHTML = `<strong>الهوية:</strong> ${idNumber}  
-<strong>الهاتف:</strong> ${phone}`;
+            infoDiv.innerHTML = `<strong>الهوية:</strong> ${idNumber}
+         <strong>الهاتف:</strong> ${phone}`;
             infoDiv.style.display = 'block';
         } else {
             infoDiv.style.display = 'none';

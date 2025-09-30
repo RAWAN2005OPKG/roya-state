@@ -4,132 +4,132 @@
 @section('styles')
 {{-- يمكنك إضافة أي تنسيقات CSS خاصة بهذه الصفحة هنا إذا احتجت --}}
    <style>
-        :root { 
-            --primary-color: #00aaff; 
-            --dark-bg-1: #ffffff; 
-            --dark-bg-2: #f8f9fa; 
-            --text-color: #333333; 
-            --text-muted: #666666; 
-            --border-color: rgba(0, 0, 0, 0.1); 
-            --success-color: #2ecc71; 
-            --danger-color: #e74c3c; 
+        :root {
+            --primary-color: #00aaff;
+            --dark-bg-1: #ffffff;
+            --dark-bg-2: #f8f9fa;
+            --text-color: #333333;
+            --text-muted: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
         }
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            background-color: var(--dark-bg-1); 
-            color: var(--text-color); 
-            margin: 0; 
-            padding-bottom: 40px; 
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--dark-bg-1);
+            color: var(--text-color);
+            margin: 0;
+            padding-bottom: 40px;
         }
-        .main-content { 
-            width: 100%; 
-            padding: 40px; 
-            box-sizing: border-box; 
+        .main-content {
+            width: 100%;
+            padding: 40px;
+            box-sizing: border-box;
         }
-        .page-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 30px; 
-            flex-wrap: wrap; 
-            gap: 15px; 
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        .page-header h1 { 
-            font-size: 2.2rem; 
-            color: var(--text-color); 
-            margin: 0; 
+        .page-header h1 {
+            font-size: 2.2rem;
+            color: var(--text-color);
+            margin: 0;
         }
-        .btn { 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            font-weight: 600; 
-            transition: background-color 0.3s; 
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s;
         }
-        .btn-primary { 
-            background-color: var(--primary-color); 
-            color: #fff; 
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: #fff;
         }
-        .btn-primary:hover { 
-            background-color: #0088cc; 
+        .btn-primary:hover {
+            background-color: #0088cc;
         }
-        .btn-secondary { 
-            background-color: #6c757d; 
-            color: #fff; 
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
         }
-        .btn-secondary:hover { 
-            background-color: #5a6268; 
+        .btn-secondary:hover {
+            background-color: #5a6268;
         }
-        .btn-action { 
-            background: none; 
-            border: none; 
-            color: var(--text-muted); 
-            cursor: pointer; 
-            font-size: 1.1rem; 
-            padding: 5px; 
+        .btn-action {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 5px;
         }
-        .btn-action:hover { 
-            color: var(--primary-color); 
+        .btn-action:hover {
+            color: var(--primary-color);
         }
-        .dashboard { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 25px; 
-            margin-bottom: 30px; 
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
         }
-        .kpi-card { 
-            background-color: var(--dark-bg-2); 
-            padding: 20px; 
-            border-radius: 12px; 
+        .kpi-card {
+            background-color: var(--dark-bg-2);
+            padding: 20px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .kpi-card .label { 
-            color: var(--text-muted); 
-            margin-bottom: 10px; 
+        .kpi-card .label {
+            color: var(--text-muted);
+            margin-bottom: 10px;
             font-size: 0.9rem;
         }
-        .kpi-card .value { 
-            font-size: 1.8rem; 
-            font-weight: bold; 
-            color: var(--primary-color); 
+        .kpi-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
         }
-        .table-container { 
-            background-color: var(--dark-bg-2); 
-            padding: 25px; 
-            border-radius: 12px; 
-            margin-bottom: 30px; 
+        .table-container {
+            background-color: var(--dark-bg-2);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .container-title { 
-            font-size: 1.3rem; 
-            color: var(--text-color); 
-            margin-bottom: 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+        .container-title {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .table-wrapper { 
-            overflow-x: auto; 
+        .table-wrapper {
+            overflow-x: auto;
         }
-        .data-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            min-width: 900px; 
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
         }
-        .data-table th, .data-table td { 
-            padding: 12px 15px; 
-            text-align: right; 
-            border-bottom: 1px solid var(--border-color); 
-            white-space: nowrap; 
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
         }
-        .data-table th { 
-            color: var(--text-muted); 
+        .data-table th {
+            color: var(--text-muted);
             background-color: #f1f3f4;
             font-weight: 600;
         }
@@ -139,67 +139,67 @@
         .data-table tbody tr:hover {
             background-color: #f8f9fa;
         }
-        .modal { 
-            display: none; 
-            position: fixed; 
-            z-index: 1000; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0,0,0,0.7); 
-            backdrop-filter: blur(5px); 
-            align-items: center; 
-            justify-content: center; 
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
         }
-        .modal-content { 
-            background-color: var(--dark-bg-1); 
-            padding: 30px; 
-            border-radius: 12px; 
-            width: 90%; 
-            max-width: 800px; 
-            max-height: 90vh; 
-            overflow-y: auto; 
-            position: relative; 
+        .modal-content {
+            background-color: var(--dark-bg-1);
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
             border: 1px solid var(--border-color);
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .modal-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 15px;
         }
-        .modal-header h2 { 
-            margin: 0; 
+        .modal-header h2 {
+            margin: 0;
             color: var(--text-color);
             font-size: 1.5rem;
         }
-        .close-btn { 
-            background: none; 
-            border: none; 
-            color: var(--text-muted); 
-            font-size: 1.5rem; 
-            cursor: pointer; 
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
             padding: 5px;
             border-radius: 4px;
         }
-        .close-btn:hover { 
-            color: var(--text-color); 
+        .close-btn:hover {
+            color: var(--text-color);
             background-color: #f1f3f4;
         }
-        .form-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 20px; 
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
-        .form-group { 
-            margin-bottom: 15px; 
+        .form-group {
+            margin-bottom: 15px;
         }
-        .form-group.full-width { 
-            grid-column: 1 / -1; 
+        .form-group.full-width {
+            grid-column: 1 / -1;
         }
         .form-group label {
             display: block;
@@ -208,14 +208,14 @@
             font-weight: 500;
             font-size: 0.9rem;
         }
-        .form-group input, .form-group select, .form-group textarea { 
-            width: 100%; 
-            padding: 12px; 
-            background-color: var(--dark-bg-1); 
-            border: 1px solid var(--border-color); 
-            border-radius: 8px; 
-            color: var(--text-color); 
-            box-sizing: border-box; 
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--dark-bg-1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            box-sizing: border-box;
             font-size: 0.9rem;
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -223,46 +223,46 @@
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1);
         }
-        .table-controls { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
-            flex-wrap: wrap; 
-            gap: 15px; 
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        .search-input-container { 
-            position: relative; 
-            flex-grow: 1; 
-            max-width: 400px; 
+        .search-input-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 400px;
         }
-        .search-input-container .search-icon { 
-            position: absolute; 
-            top: 50%; 
-            right: 15px; 
-            transform: translateY(-50%); 
-            color: var(--text-muted); 
+        .search-input-container .search-icon {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            color: var(--text-muted);
         }
-        .search-input { 
-            width: 100%; 
-            padding: 10px 40px 10px 15px; 
-            background-color: var(--dark-bg-1); 
-            border: 1px solid var(--border-color); 
-            border-radius: 8px; 
-            color: var(--text-color); 
-            box-sizing: border-box; 
-            font-size: 1rem; 
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            background-color: var(--dark-bg-1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            box-sizing: border-box;
+            font-size: 1rem;
         }
-        .search-input:focus { 
-            outline: none; 
-            border-color: var(--primary-color); 
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1);
         }
-        #investorInvestmentsTable { 
-            margin-top: 20px; 
+        #investorInvestmentsTable {
+            margin-top: 20px;
         }
-        .hidden { 
-            display: none; 
+        .hidden {
+            display: none;
         }
         .alert {
             padding: 12px 16px;
@@ -419,14 +419,14 @@
 												</tr>
 												<tr>
 													<th>Record ID</th>
-													<th>Order ID</th>
-													<th>Country</th>
-													<th>Ship City</th>
-													<th>Ship Address</th>
-													<th>Company Agent</th>
-													<th>Company Name</th>
-													<th>Ship Date</th>
-													<th>Status</th>
+													<th>الاسم</th>
+													<th>رقم الهوية</th>
+													<th>رقم الجوال</th>
+													<th>اسم المشروع</th>
+													<th>المبلغ</th>
+													<th>طريقة الدفع</th>
+													<th>المبقى</th>
+													<th>الملاحظات</th>
 													<th>Type</th>
 													<th>Actions</th>
 												</tr>
@@ -464,7 +464,7 @@
 									</div>
 								</div>
 								<!--end::Card-->
-				
+
 
     <!-- Modals -->
     <div id="investorModal" class="modal">
@@ -505,7 +505,7 @@
                     حفظ المستثمر
                 </button>
             </form>
-            
+
             <div id="investorDetailsSection" style="display:none; margin-top: 30px;">
                 <h3 style="color: var(--primary-color); border-top: 1px solid var(--border-color); padding-top: 20px;">
                     استثمارات المستثمر
@@ -528,7 +528,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="investmentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -721,7 +721,7 @@
                     document.getElementById('investmentIdNumber').value = investment.idNumber || '';
                     document.getElementById('investmentType').value = investment.type || '';
                     document.getElementById('investmentJob').value = investment.job || '';
-                    
+
                     // Handle bank details if payment method is bank transfer
                     if (investment.paymentMethod === 'معاملة بنكية') {
                         toggleInvestmentBankDetails();
@@ -747,7 +747,7 @@
         // --- FORM HANDLERS ---
         document.getElementById('investorForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const investor = {
                 id: document.getElementById('investorId').value || Date.now().toString(),
                 name: document.getElementById('investorName').value.trim(),
@@ -766,13 +766,13 @@
 
             let investors = getDB('investors');
             const existingIndex = investors.findIndex(inv => inv.id === investor.id);
-            
+
             if (existingIndex >= 0) {
                 investors[existingIndex] = investor;
             } else {
                 investors.push(investor);
             }
-            
+
             setDB('investors', investors);
             renderInvestors();
             closeModal();
@@ -781,7 +781,7 @@
 
         document.getElementById('investmentForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const investment = {
                 id: document.getElementById('investmentId').value || Date.now().toString(),
                 investorId: document.getElementById('investmentInvestor').value,
@@ -830,13 +830,13 @@
 
             let investments = getDB('investments');
             const existingIndex = investments.findIndex(inv => inv.id === investment.id);
-            
+
             if (existingIndex >= 0) {
                 investments[existingIndex] = investment;
             } else {
                 investments.push(investment);
             }
-            
+
             setDB('investments', investments);
             renderInvestors();
             closeModal();
@@ -861,7 +861,7 @@
             const paymentMethod = document.getElementById('investmentPaymentMethod').value;
             const bankDetails = document.getElementById('investmentBankDetails');
             const otherBankGroup = document.getElementById('investmentOtherBankGroup');
-            
+
             if (paymentMethod === 'معاملة بنكية') {
                 bankDetails.classList.remove('hidden');
             } else {
@@ -875,9 +875,9 @@
             const investors = getDB('investors');
             const investments = getDB('investments');
             const tbody = document.getElementById('investorsListBody');
-            
+
             tbody.innerHTML = '';
-            
+
             if (investors.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = `<td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد بيانات مستثمرين</td>`;
@@ -885,11 +885,11 @@
                 updateKPIs();
                 return;
             }
-            
+
             investors.forEach(investor => {
                 const investorInvestments = investments.filter(inv => inv.investorId === investor.id);
                 const totalInvestment = investorInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0);
-                
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${investor.name || '-'}</td>
@@ -909,23 +909,23 @@
                 `;
                 tbody.appendChild(row);
             });
-            
+
             updateKPIs();
         }
 
         function renderInvestorInvestments(investorId) {
             const investments = getDB('investments').filter(inv => inv.investorId === investorId);
             const tbody = document.getElementById('investorInvestmentsBody');
-            
+
             tbody.innerHTML = '';
-            
+
             if (investments.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = `<td colspan="6" style="text-align: center; color: var(--text-muted);">لا توجد استثمارات لهذا المستثمر</td>`;
                 tbody.appendChild(row);
                 return;
             }
-            
+
             investments.forEach(investment => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -950,9 +950,9 @@
         function populateInvestorsDropdown() {
             const investors = getDB('investors');
             const select = document.getElementById('investmentInvestor');
-            
+
             select.innerHTML = '<option value="">اختر المستثمر</option>';
-            
+
             investors.forEach(investor => {
                 const option = document.createElement('option');
                 option.value = investor.id;
@@ -964,12 +964,12 @@
         function updateKPIs() {
             const investors = getDB('investors');
             const investments = getDB('investments');
-            
+
             const totalInvestors = investors.length;
             const totalInvestedCapital = investments.reduce((sum, inv) => sum + (inv.amount || 0), 0);
-            const avgSharePercentage = investments.length > 0 ? 
+            const avgSharePercentage = investments.length > 0 ?
                 (investments.reduce((sum, inv) => sum + (inv.share || 0), 0) / investments.length).toFixed(1) : 0;
-            
+
             document.getElementById('totalInvestors').textContent = totalInvestors;
             document.getElementById('totalInvestedCapital').textContent = formatCurrency(totalInvestedCapital);
             document.getElementById('totalProfitsDistributed').textContent = formatCurrency(0); // Placeholder
@@ -982,12 +982,12 @@
                 let investors = getDB('investors');
                 investors = investors.filter(inv => inv.id !== id);
                 setDB('investors', investors);
-                
+
                 // Also delete related investments
                 let investments = getDB('investments');
                 investments = investments.filter(inv => inv.investorId !== id);
                 setDB('investments', investments);
-                
+
                 renderInvestors();
                 showAlert('تم حذف المستثمر بنجاح', 'success');
             }
@@ -999,13 +999,13 @@
                 investments = investments.filter(inv => inv.id !== id);
                 setDB('investments', investments);
                 renderInvestors();
-                
+
                 // Update investor investments table if modal is open
                 const investorId = document.getElementById('investorId').value;
                 if (investorId) {
                     renderInvestorInvestments(investorId);
                 }
-                
+
                 showAlert('تم حذف الاستثمار بنجاح', 'success');
             }
         }
@@ -1014,7 +1014,7 @@
         document.getElementById('searchInput').addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase().trim();
             const rows = document.querySelectorAll('#investorsListBody tr');
-            
+
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 if (text.includes(searchTerm)) {
@@ -1029,22 +1029,22 @@
         function exportToExcel() {
             const investors = getDB('investors');
             const investments = getDB('investments');
-            
+
             if (investors.length === 0) {
                 alert('لا توجد بيانات للتصدير');
                 return;
             }
-            
+
             // Create CSV content
             let csvContent = "اسم المستثمر,رقم الهوية,الجوال,البريد الإلكتروني,إجمالي الاستثمارات\n";
-            
+
             investors.forEach(investor => {
                 const investorInvestments = investments.filter(inv => inv.investorId === investor.id);
                 const totalInvestment = investorInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0);
-                
+
                 csvContent += `"${investor.name || ''}","${investor.idNumber || ''}","${investor.phone || ''}","${investor.email || ''}","${totalInvestment}"\n`;
             });
-            
+
             // Download CSV
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -1062,10 +1062,10 @@
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type}`;
             alertDiv.textContent = message;
-            
+
             const mainContent = document.querySelector('.main-content');
             mainContent.insertBefore(alertDiv, mainContent.firstChild);
-            
+
             setTimeout(() => {
                 alertDiv.remove();
             }, 3000);
@@ -1080,7 +1080,7 @@
         window.addEventListener('click', function(event) {
             const investorModal = document.getElementById('investorModal');
             const investmentModal = document.getElementById('investmentModal');
-            
+
             if (event.target === investorModal) {
                 closeModal();
             }

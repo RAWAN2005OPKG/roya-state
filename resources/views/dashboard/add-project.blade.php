@@ -1,104 +1,87 @@
-@extends('layouts.container') 
+@extends('layouts.container')
 @section('title', 'إضافة مشروع جديد')
 
 @section('styles')
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
-    
-    * { 
-        margin: 0; 
-        padding: 0; 
-        box-sizing: border-box; 
-        font-family: 'Cairo', 'Arial', sans-serif; 
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Cairo', 'Arial', sans-serif;
     }
-    
-    .background { 
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex; 
-        justify-content: center; 
-        align-items: flex-start; 
-        min-height: 100vh; 
-        direction: rtl; 
-        padding: 40px 20px; 
-        overflow-y: auto; 
+
+    .background {
+        background: linear-gradient(135deg, #efeff0 0%, #cdcacf 100%);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        direction: rtl;
+        padding: 40px 20px;
+        overflow-y: auto;
     }
-    
-    .form-container { 
-        background: #ffffff; 
-        padding: 30px 40px; 
-        border-radius: 20px; 
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); 
-        width: 100%; 
-        max-width: 1100px; 
+
+    .form-container {
+        background: #ffffff;
+        padding: 30px 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 1100px;
         border: 1px solid #e9ecef;
         position: relative;
         overflow: hidden;
     }
-    
-    .form-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
-        background-size: 400% 400%;
-        animation: gradientShift 3s ease infinite;
-    }
-    
+
+
+
     @keyframes gradientShift {
         0%, 100% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
     }
-    
-    .form-header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 30px; 
-        padding-bottom: 20px; 
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
         border-bottom: 2px solid #f8f9fa;
         position: relative;
     }
-    
-    .header-content { 
-        display: flex; 
-        align-items: center; 
-        gap: 15px; 
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
     }
-    
-    .header-icon { 
-        font-size: 2.5rem; 
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        animation: pulse 2s infinite;
-    }
-    
+
+
+
     @keyframes pulse {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.05); }
     }
-    
-    .header-text h1 { 
-        font-size: 1.8rem; 
-        background: linear-gradient(135deg, #667eea, #764ba2);
+
+    .header-text h1 {
+        font-size: 1.8rem;
+        background: linear-gradient(135deg, #cecfd4, #9e9ca0);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin: 0; 
+        margin: 0;
         font-weight: 700;
     }
-    
-    .header-text p { 
-        font-size: 1rem; 
-        color: #6c757d; 
-        margin: 0; 
+
+    .header-text p {
+        font-size: 1rem;
+        color: #000000;
+        margin: 0;
     }
-    
-    .form-section { 
+
+    .form-section {
         margin-bottom: 35px;
         background: #ffffff;
         border-radius: 15px;
@@ -107,25 +90,25 @@
         border: 1px solid #f1f3f4;
         transition: all 0.3s ease;
     }
-    
+
     .form-section:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
     }
-    
-    .section-header { 
-        display: flex; 
-        align-items: center; 
-        gap: 10px; 
-        margin-bottom: 0; 
-        background: linear-gradient(135deg, #667eea, #764ba2);
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 0;
+        background: linear-gradient(135deg, #ffffff, #cac7ce);
         color: white;
-        font-size: 1.2rem; 
+        font-size: 1.2rem;
         padding: 20px 25px;
         position: relative;
         overflow: hidden;
     }
-    
+
     .section-header::before {
         content: '';
         position: absolute;
@@ -136,92 +119,92 @@
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
         transition: left 0.5s;
     }
-    
+
     .section-header:hover::before {
         left: 100%;
     }
-    
-    .section-header i { 
-        margin-left: 5px; 
+
+    .section-header i {
+        margin-left: 5px;
         font-size: 1.3rem;
     }
-    
-    .section-header h3 { 
-        margin: 0; 
-        font-weight: 600; 
+
+    .section-header h3 {
+        margin: 0;
+        font-weight: 600;
         color: white;
     }
-    
-    .form-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-        gap: 25px; 
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
         padding: 25px;
     }
-    
-    .form-group.full-width { 
-        grid-column: 1 / -1; 
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
     }
-    
-    .form-group { 
-        display: flex; 
-        flex-direction: column; 
-        gap: 8px; 
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         position: relative;
     }
-    
-    .form-group label { 
-        font-weight: 600; 
+
+    .form-group label {
+        font-weight: 600;
         color: #495057;
         font-size: 0.95rem;
         transition: all 0.3s ease;
     }
-    
+
     .form-group:focus-within label {
-        color: #667eea;
+        color: #c3c5cf;
         transform: translateY(-2px);
     }
-    
-    .form-group label.required::after { 
-        content: '*'; 
-        color: #dc3545; 
-        margin-right: 5px; 
+
+    .form-group label.required::after {
+        content: '*';
+        color: #dc3545;
+        margin-right: 5px;
         font-weight: bold;
     }
-    
-    input, select, textarea { 
-        width: 100%; 
-        padding: 12px 16px; 
-        background-color: #ffffff; 
-        border: 2px solid #e9ecef; 
-        border-radius: 10px; 
-        color: #495057; 
-        font-size: 1rem; 
+
+    input, select, textarea {
+        width: 100%;
+        padding: 12px 16px;
+        background-color: #ffffff;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        color: #495057;
+        font-size: 1rem;
         transition: all 0.3s ease;
         font-family: inherit;
     }
-    
-    input:focus, select:focus, textarea:focus { 
-        outline: none; 
-        border-color: #667eea; 
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #cacee2;
         box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         transform: translateY(-1px);
     }
-    
+
     input:hover, select:hover, textarea:hover {
-        border-color: #764ba2;
+        border-color: #bcb6c2;
     }
-    
+
     .input-with-currency {
         position: relative;
         display: flex;
         align-items: center;
     }
-    
+
     .input-with-currency input {
         padding-left: 60px;
     }
-    
+
     .input-with-currency .currency {
         position: absolute;
         left: 16px;
@@ -233,43 +216,34 @@
         border-radius: 6px;
         transition: all 0.3s ease;
     }
-    
+
     .form-group:focus-within .currency {
         background: #667eea;
         color: white;
     }
-    
+
     /* تصحيح CSS للأقسام الديناميكية */
-    .dynamic-section { 
+    .dynamic-section {
         background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        padding: 25px; 
-        border-radius: 15px; 
-        margin-top: 20px; 
+        padding: 25px;
+        border-radius: 15px;
+        margin-top: 20px;
         border: 2px dashed #dee2e6;
         position: relative;
         overflow: hidden;
         grid-column: 1 / -1;
     }
-    
+
     .dynamic-section.hidden {
         display: none;
     }
-    
+
     .dynamic-section.show {
         display: block;
         animation: slideDown 0.4s ease;
     }
-    
-    .dynamic-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-    }
-    
+
+
     @keyframes slideDown {
         from {
             opacity: 0;
@@ -280,7 +254,7 @@
             transform: translateY(0);
         }
     }
-    
+
     .dynamic-section h4 {
         background: linear-gradient(135deg, #667eea, #764ba2);
         -webkit-background-clip: text;
@@ -293,7 +267,7 @@
         align-items: center;
         gap: 8px;
     }
-    
+
     .file-upload-area {
         border: 3px dashed #dee2e6;
         border-radius: 15px;
@@ -305,13 +279,9 @@
         position: relative;
         overflow: hidden;
     }
-    
-    .file-upload-area:hover {
-        border-color: #667eea;
-        background: linear-gradient(135deg, #eff6ff, #dbeafe);
-        transform: translateY(-2px);
-    }
-    
+
+
+
     .file-upload-area::before {
         content: '';
         position: absolute;
@@ -322,33 +292,33 @@
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
         transition: left 0.5s;
     }
-    
+
     .file-upload-area:hover::before {
         left: 100%;
     }
-    
+
     .upload-content i {
         font-size: 3rem;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #fcfcfc, #764ba2);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         margin-bottom: 16px;
         display: block;
     }
-    
+
     .upload-content p {
         font-size: 1.1rem;
         color: #495057;
         margin-bottom: 8px;
         font-weight: 500;
     }
-    
+
     .file-types {
         color: #6c757d;
         font-size: 0.9rem;
     }
-    
+
     .media-preview {
         margin-top: 20px;
         position: relative;
@@ -356,7 +326,7 @@
         overflow: hidden;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
-    
+
     .media-preview img,
     .media-preview video {
         width: 100%;
@@ -364,7 +334,7 @@
         object-fit: cover;
         border-radius: 15px;
     }
-    
+
     .remove-media {
         position: absolute;
         top: 12px;
@@ -382,39 +352,39 @@
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
     }
-    
+
     .remove-media:hover {
         background: #c82333;
         transform: scale(1.1);
     }
-    
-    .form-actions { 
-        display: flex; 
-        justify-content: flex-end; 
-        gap: 15px; 
-        margin-top: 30px; 
-        padding-top: 20px; 
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
         border-top: 2px solid #f8f9fa;
-        flex-wrap: wrap; 
+        flex-wrap: wrap;
     }
-    
-    .btn { 
-        padding: 12px 25px; 
-        border: none; 
-        border-radius: 10px; 
-        font-size: 1rem; 
-        font-weight: 600; 
-        cursor: pointer; 
-        transition: all 0.3s ease; 
-        display: flex; 
-        align-items: center; 
+
+    .btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
         gap: 8px;
         position: relative;
         overflow: hidden;
         min-width: 140px;
         justify-content: center;
     }
-    
+
     .btn::before {
         content: '';
         position: absolute;
@@ -425,79 +395,78 @@
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
         transition: left 0.5s;
     }
-    
+
     .btn:hover::before {
         left: 100%;
     }
-    
-    .btn:hover { 
-        transform: translateY(-3px); 
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); 
+
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
-    
+
     .btn:active {
         transform: translateY(-1px);
     }
-    
-    .btn-primary { 
+
+    .btn-primary {
         background: linear-gradient(135deg, #667eea, #764ba2);
-        color: #ffffff; 
+        color: #ffffff;
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
-    
+
     .btn-primary:hover {
         box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
     }
-    
-    .btn-secondary { 
+
+    .btn-secondary {
         background: linear-gradient(135deg, #6c757d, #495057);
-        color: #ffffff; 
+        color: #ffffff;
         box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
     }
-    
-    .btn-success { 
+
+    .btn-success {
         background: linear-gradient(135deg, #28a745, #20c997);
-        color: #ffffff; 
+        color: #ffffff;
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
     }
-    
-    .btn-info { 
-        background: linear-gradient(135deg, #17a2b8, #6f42c1);
-        color: #ffffff; 
+
+    .btn-info {
+        color: #ffffff;
         box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
     }
-    
-    .hidden { 
-        display: none !important; 
+
+    .hidden {
+        display: none !important;
     }
-    
+
     /* تحسينات الاستجابة */
     @media (max-width: 768px) {
         .background {
             padding: 10px;
         }
-        
+
         .form-container {
             padding: 20px;
         }
-        
+
         .form-grid {
             grid-template-columns: 1fr;
         }
-        
+
         .form-actions {
             flex-direction: column;
         }
-        
+
         .btn {
             width: 100%;
         }
-        
+
         .header-text h1 {
             font-size: 1.5rem;
         }
     }
-    
+
     select {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
         background-position: left 12px center;
@@ -506,7 +475,7 @@
         padding-left: 40px;
         appearance: none;
     }
-    
+
     textarea {
         resize: vertical;
         min-height: 120px;
@@ -515,7 +484,7 @@
         pointer-events: none;
         opacity: 0.7;
     }
-    
+
     .btn.loading::after {
         content: '';
         width: 16px;
@@ -526,7 +495,7 @@
         animation: spin 1s linear infinite;
         margin-right: 8px;
     }
-    
+
     @keyframes spin {
         to {
             transform: rotate(360deg);
@@ -548,9 +517,9 @@
             </div>
         </div>
 
-        <form id="addProjectForm" action="{{ route('dashboard.projects.store') }}" method="POST" enctype="multipart/form-data">
+        <form id="addProjectForm" action="{{ route('dashboard.projects.index') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            
+
             <!-- 1. المعلومات الأساسية -->
             <div class="form-section">
                 <div class="section-header"><i class="fas fa-info-circle"></i><h3>المعلومات الأساسية</h3></div>
@@ -563,7 +532,7 @@
                     <div class="form-group"><label for="project_title" class="required">عنوان المشروع</label><input type="text" id="project_title" name="project_title" placeholder="مثال: القدس" required></div>
                     <div class="form-group"><label for="currency" class="required">نوع العملة</label><select id="currency" name="currency" required><option value="">اختر العملة</option><option value="ils"> شيكل</option><option value="jod">دينار</option><option value="usd">دولار</option></select></div>
                     <div class="form-group"><label for="apartment_price" class="required">سعر الشقة</label><input type="text" id="apartment_price" name="apartment_price" placeholder="مثال: 1500000" required></div>
-                    
+
                     <div class="form-group">
                         <label for="down_payment" class="required">الدفعة الأولى اللازمة للشقة</label>
                         <select id="down_payment" name="down_payment" required>
@@ -609,7 +578,7 @@
                             <option value="2000000">2,000,000  </option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group"><label for="project_status" class="required">حالة المشروع الحالية</label><select id="project_status" name="project_status" required><option value="">اختر الحالة</option><option value="on_plan">مشروع على مخطط</option><option value="licensing">قيد الترخيص</option><option value="excavation">قيد الحفر</option><option value="under_construction">قيد الإنشاء</option><option value="ready_structure">مشروع جاهز عظم</option><option value="ready_finished">مشروع جاهز تشطيب</option></select></div>
                     <div class="form-group"><label for="paymentMethod">طريقة الدفع</label><select id="paymentMethod" name="payment_method" required><option value="">-- اختر طريقة الدفع --</option><option value="نقداً">نقداً</option><option value="تحويل بنكي">تحويل بنكي</option><option value="شيك">شيك</option></select></div>
 
@@ -626,12 +595,12 @@
                                     <option value="أخرى">أخرى (حدد)</option>
                                 </select>
                             </div>
-                            
+
                             <div class="form-group hidden" id="otherReceiverGroup">
                                 <label for="otherReceiver">اسم المستلم (أخرى)</label>
                                 <input type="text" id="otherReceiver" name="cash_receiver_other" placeholder="اكتب اسم المستلم">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="receiverJob">وظيفة المستلم</label>
                                 <input type="text" id="receiverJob" name="cash_receiver_job" placeholder="مثال: محاسب، مدير">
@@ -655,17 +624,17 @@
                                     <option value="other">أخرى (حدد)</option>
                                 </select>
                             </div>
-                            
+
                             <div class="form-group hidden" id="otherSenderBankGroup">
                                 <label for="otherSenderBank">اسم البنك المرسل (أخرى)</label>
                                 <input type="text" id="otherSenderBank" name="sender_bank_other" placeholder="اكتب اسم البنك">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="senderBranch">فرع البنك المرسل</label>
                                 <input type="text" id="senderBranch" name="sender_branch" placeholder="اكتب اسم الفرع">
                             </div>
-                            
+
                             <!-- البنك المستقبل -->
                             <div class="form-group">
                                 <label for="receiverBank">البنك المستقبل</label>
@@ -678,17 +647,17 @@
                                     <option value="other">أخرى (حدد)</option>
                                 </select>
                             </div>
-                            
+
                             <div class="form-group hidden" id="otherReceiverBankGroup">
                                 <label for="otherReceiverBank">اسم البنك المستقبل (أخرى)</label>
                                 <input type="text" id="otherReceiverBank" name="receiver_bank_other" placeholder="اكتب اسم البنك">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="receiverBranch">فرع البنك المستقبل</label>
                                 <input type="text" id="receiverBranch" name="receiver_branch" placeholder="اكتب اسم الفرع">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="transactionId">رقم التحويلة</label>
                                 <input type="text" id="transactionId" name="transaction_id" placeholder="أدخل رقم التحويلة">
@@ -704,22 +673,22 @@
                                 <label for="checkNumber">رقم الشيك</label>
                                 <input type="text" id="checkNumber" name="check_number" placeholder="رقم أو اسم الشيك">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="checkOwner">اسم صاحب الشيك</label>
                                 <input type="text" id="checkOwner" name="check_owner" placeholder="اسم صاحب الشيك">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="checkHolder">مالك الشيك</label>
                                 <input type="text" id="checkHolder" name="check_holder" placeholder="اسم مالك الشيك">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="checkDueDate">تاريخ الاستحقاق</label>
                                 <input type="date" id="checkDueDate" name="check_due_date">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="checkReceiveDate">تاريخ الاستلام</label>
                                 <input type="date" id="checkReceiveDate" name="check_receive_date">
@@ -728,7 +697,7 @@
                     </div>
                 </div>
             </div>
-           
+
             <!-- 2. صورة أو فيديو المشروع -->
             <div class="form-section">
                 <div class="section-header"><i class="fas fa-photo-video"></i><h3>صورة أو فيديو المشروع</h3></div>
@@ -765,21 +734,21 @@
     </div>
 </div>
 @endsection
-   
+
 @push('js')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
     console.log('jQuery loaded and ready'); // للتأكد من تحميل jQuery
-    
+
     // إظهار/إخفاء أقسام الدفع الرئيسية
     $('#paymentMethod').on('change', function() {
         const selectedMethod = $(this).val();
         console.log('Payment method selected:', selectedMethod); // للتتبع
-        
+
         // إخفاء جميع الأقسام أولاً
         $('.dynamic-section').removeClass('show').addClass('hidden');
-        
+
         // إظهار القسم المناسب
         if (selectedMethod === 'نقداً') {
             console.log('Showing cash section');
@@ -846,7 +815,7 @@ $(document).ready(function() {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const result = e.target.result;
-                
+
                 if (file.type.startsWith('image/')) {
                     $('#previewImg').attr('src', result).show();
                     $('#previewVideo').hide();
@@ -854,7 +823,7 @@ $(document).ready(function() {
                     $('#previewVideo').attr('src', result).show();
                     $('#previewImg').hide();
                 }
-                
+
                 $('#mediaPreview').fadeIn(300);
                 $('#mediaUploadArea').hide();
             };
@@ -906,7 +875,7 @@ $(document).ready(function() {
         e.preventDefault();
         e.stopPropagation();
         $(this).removeClass('drag-over');
-        
+
         const files = e.originalEvent.dataTransfer.files;
         if (files.length > 0) {
             const file = files[0];
@@ -920,7 +889,7 @@ $(document).ready(function() {
 function exportData() {
     const btn = event.target.closest('.btn');
     btn.classList.add('loading');
-    
+
     setTimeout(() => {
         alert('تم تصدير البيانات بنجاح!');
         btn.classList.remove('loading');

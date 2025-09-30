@@ -403,7 +403,7 @@
             <i class="fas fa-plus-circle"></i>
             تسجيل مصروف جديد
         </h2>
-        
+
         <form id="expenseForm" class="form-grid" action="{{ route('dashboard.expenses.store') }}" method="POST">
             @csrf
             <!-- الحقول الأساسية -->
@@ -411,27 +411,27 @@
                 <label for="expenseDate">تاريخ الدفع</label>
                 <input type="date" id="expenseDate" name="date" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="expensePayee">اسم المستفيد</label>
                 <input type="text" id="expensePayee" name="payee" placeholder="اسم الشخص أو الشركة" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="expensePhone">رقم الجوال</label>
                 <input type="tel" id="expensePhone" name="phone" placeholder="0599123456">
             </div>
-            
+
             <div class="form-group">
                 <label for="expenseJob">العمل/المهنة</label>
                 <input type="text" id="expenseJob" name="job" placeholder="مثال: مقاول، مهندس">
             </div>
-            
+
             <div class="form-group">
                 <label for="expenseIdNumber">رقم الهوية</label>
                 <input type="text" id="expenseIdNumber" name="id_number" placeholder="رقم الهوية الشخصية">
             </div>
-            
+
             <div class="form-group">
                 <label for="expenseProject">المشروع</label>
                 <select id="expenseProject" name="project_id" required>
@@ -439,13 +439,13 @@
                     <option value="0">مصروف عام</option>
                 </select>
             </div>
-            
-       
+
+
             <div class="form-group">
                 <label for="expenseAmount">المبلغ</label>
                 <input type="number" id="expenseAmount" name="amount" min="0" step="0.01" placeholder="0.00" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="currency">العملة</label>
                 <select id="currency" name="currency" required>
@@ -454,7 +454,7 @@
                     <option value="دينار">دينار</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label for="paymentMethod">طريقة الدفع</label>
                 <select id="paymentMethod" name="payment_method" required>
@@ -464,7 +464,7 @@
                     <option value="شيك">شيك</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label for="paymentSource">مصدر الدفع</label>
                 <select id="paymentSource" name="payment_source" required>
@@ -487,12 +487,12 @@
                             <option value="أخرى">أخرى (حدد)</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group hidden" id="otherReceiverGroup">
                         <label for="otherReceiver">اسم المستلم (أخرى)</label>
                         <input type="text" id="otherReceiver" name="cash_receiver_other" placeholder="اكتب اسم المستلم">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="receiverJob">وظيفة المستلم</label>
                         <input type="text" id="receiverJob" name="receiver_job" placeholder="مثال: محاسب، مدير">
@@ -516,17 +516,17 @@
                             <option value="other">أخرى (حدد)</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group hidden" id="otherSenderBankGroup">
                         <label for="otherSenderBank">اسم البنك المرسل (أخرى)</label>
                         <input type="text" id="otherSenderBank" name="other_sender_bank" placeholder="اكتب اسم البنك">
                     </div>
-                    
+
                     <div class="form-group hidden" id="senderBranchGroup">
                         <label for="senderBranch">فرع البنك المرسل</label>
                         <input type="text" id="senderBranch" name="sender_branch" placeholder="اكتب اسم الفرع">
                     </div>
-                    
+
                     <!-- البنك المستقبل -->
                     <div class="form-group">
                         <label for="receiverBank">البنك المستقبل</label>
@@ -539,17 +539,17 @@
                             <option value="other">أخرى (حدد)</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group hidden" id="otherReceiverBankGroup">
                         <label for="otherReceiverBank">اسم البنك المستقبل (أخرى)</label>
                         <input type="text" id="otherReceiverBank" name="other_receiver_bank" placeholder="اكتب اسم البنك">
                     </div>
-                    
+
                     <div class="form-group hidden" id="receiverBranchGroup">
                         <label for="receiverBranch">فرع البنك المستقبل</label>
                         <input type="text" id="receiverBranch" name="receiver_branch" placeholder="اكتب اسم الفرع">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="transactionId">رقم التحويلة</label>
                         <input type="text" id="transactionId" name="transaction_id" placeholder="أدخل رقم التحويلة">
@@ -565,22 +565,22 @@
                         <label for="checkNumber">رقم الشيك</label>
                         <input type="text" id="checkNumber" name="check_number" placeholder="رقم أو اسم الشيك">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="checkOwner">اسم صاحب الشيك</label>
                         <input type="text" id="checkOwner" name="check_owner" placeholder="اسم صاحب الشيك">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="checkHolder">مالك الشيك</label>
                         <input type="text" id="checkHolder" name="check_holder" placeholder="اسم مالك الشيك">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="checkDueDate">تاريخ الاستحقاق</label>
                         <input type="date" id="checkDueDate" name="check_due_date">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="checkReceiveDate">تاريخ الاستلام</label>
                         <input type="date" id="checkReceiveDate" name="check_receive_date">
@@ -600,7 +600,7 @@
         </form>
     </div>
 
- 
+
 								<!--begin::Card-->
 								<div class="card card-custom">
 									<div class="card-header flex-wrap border-0 pt-6 pb-0">
@@ -702,14 +702,14 @@
 												</tr>
 												<tr>
 													<th>Record ID</th>
-													<th>Order ID</th>
-													<th>Country</th>
-													<th>Ship City</th>
-													<th>Ship Address</th>
-													<th>Company Agent</th>
-													<th>Company Name</th>
-													<th>Ship Date</th>
-													<th>Status</th>
+													<th>التاريخ</th>
+													<th>الاسم</th>
+													<th>رقم الهوية</th>
+													<th>رقم الجوال</th>
+													<th>المبلغ</th>
+													<th>طريقة الدفع</th>
+													<th>باق المبلغ</th>
+													<th>المبلغ كامل</th>
 													<th>Type</th>
 													<th>Actions</th>
 												</tr>
@@ -747,25 +747,25 @@
 									</div>
 								</div>
 								<!--end::Card-->
-				
+
 @endsection
 
 @section('script')
 <script>
     // دوال إدارة قاعدة البيانات المحلية
-    function getDB(key) { 
-        return JSON.parse(localStorage.getItem(key)) || []; 
+    function getDB(key) {
+        return JSON.parse(localStorage.getItem(key)) || [];
     }
-    
-    function setDB(key, data) { 
-        localStorage.setItem(key, JSON.stringify(data)); 
+
+    function setDB(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
     }
-    
-    function formatCurrency(num, currency = 'شيكل') { 
-        return new Intl.NumberFormat('ar-SA', { 
-            minimumFractionDigits: 0, 
-            maximumFractionDigits: 2 
-        }).format(num || 0) + ' ' + currency; 
+
+    function formatCurrency(num, currency = 'شيكل') {
+        return new Intl.NumberFormat('ar-SA', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        }).format(num || 0) + ' ' + currency;
     }
 
     // دالة عرض المصروفات
@@ -899,13 +899,13 @@
 
         expenses.push(expenseData);
         setDB('expenses', expenses);
-        
+
         if (typeof Swal !== 'undefined') {
             Swal.fire('تم', 'تم تسجيل المصروف بنجاح', 'success');
         } else {
             alert('تم تسجيل المصروف بنجاح');
         }
-        
+
         e.target.reset();
         document.getElementById('expenseDate').valueAsDate = new Date();
         hideAllDynamicSections();
@@ -930,7 +930,7 @@
         document.getElementById('cashDetailsSection').classList.add('hidden');
         document.getElementById('bankDetailsSection').classList.add('hidden');
         document.getElementById('checkDetailsSection').classList.add('hidden');
-        
+
         // إخفاء الحقول الفرعية
         document.getElementById('otherReceiverGroup').classList.add('hidden');
         document.getElementById('otherSenderBankGroup').classList.add('hidden');
@@ -955,7 +955,7 @@
     function togglePaymentSourceFields() {
         const paymentSource = document.getElementById('paymentSource').value;
         const paymentMethod = document.getElementById('paymentMethod').value;
-        
+
         if (paymentSource === 'بنك' && paymentMethod !== 'تحويل بنكي') {
             document.getElementById('bankDetailsSection').classList.remove('hidden');
         }
@@ -964,7 +964,7 @@
     function toggleCashReceiverFields() {
         const cashReceiver = document.getElementById('cashReceiver').value;
         const otherReceiverGroup = document.getElementById('otherReceiverGroup');
-        
+
         if (cashReceiver === 'أخرى') {
             otherReceiverGroup.classList.remove('hidden');
         } else {
@@ -976,13 +976,13 @@
         const senderBank = document.getElementById('senderBank').value;
         const otherSenderBankGroup = document.getElementById('otherSenderBankGroup');
         const senderBranchGroup = document.getElementById('senderBranchGroup');
-        
+
         if (senderBank === 'other') {
             otherSenderBankGroup.classList.remove('hidden');
         } else {
             otherSenderBankGroup.classList.add('hidden');
         }
-        
+
         if (senderBank && senderBank !== '') {
             senderBranchGroup.classList.remove('hidden');
         } else {
@@ -994,13 +994,13 @@
         const receiverBank = document.getElementById('receiverBank').value;
         const otherReceiverBankGroup = document.getElementById('otherReceiverBankGroup');
         const receiverBranchGroup = document.getElementById('receiverBranchGroup');
-        
+
         if (receiverBank === 'other') {
             otherReceiverBankGroup.classList.remove('hidden');
         } else {
             otherReceiverBankGroup.classList.add('hidden');
         }
-        
+
         if (receiverBank && receiverBank !== '') {
             receiverBranchGroup.classList.remove('hidden');
         } else {
@@ -1012,12 +1012,12 @@
     function loadProjects() {
         const projects = getDB('projects');
         const projectSelect = document.getElementById('expenseProject');
-        
+
         // مسح الخيارات الموجودة (عدا الخيار الافتراضي)
         while (projectSelect.children.length > 2) {
             projectSelect.removeChild(projectSelect.lastChild);
         }
-        
+
         // إضافة المشاريع
         projects.forEach(project => {
             const option = document.createElement('option');
@@ -1031,23 +1031,23 @@
     document.addEventListener('DOMContentLoaded', function() {
         // تعيين التاريخ الحالي
         document.getElementById('expenseDate').valueAsDate = new Date();
-        
+
         // تحميل المشاريع
         loadProjects();
-        
+
         // عرض المصروفات
         renderExpenses();
-        
+
         // إضافة مستمعي الأحداث للنموذج
         document.getElementById('expenseForm').addEventListener('submit', saveExpense);
-        
+
         // إضافة مستمعي الأحداث للحقول الديناميكية
         document.getElementById('paymentMethod').addEventListener('change', togglePaymentMethodFields);
         document.getElementById('paymentSource').addEventListener('change', togglePaymentSourceFields);
         document.getElementById('cashReceiver').addEventListener('change', toggleCashReceiverFields);
         document.getElementById('senderBank').addEventListener('change', toggleSenderBankFields);
         document.getElementById('receiverBank').addEventListener('change', toggleReceiverBankFields);
-        
+
         // إضافة مستمع للبحث
         document.getElementById('searchInput').addEventListener('input', renderExpenses);
     });

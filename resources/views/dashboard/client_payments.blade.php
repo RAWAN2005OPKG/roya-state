@@ -637,6 +637,15 @@
                                 <button class="btn-action" title="عرض السجل المالي للعميل" onclick="viewClientDetails(${client.id})">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                <button class="btn-action" title="تعديل العقد" onclick="editContract(${client.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-action" title="حذف العقد" onclick="deleteContract(${client.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="btn-action" title="طباعة العقد" onclick="printContract(${client.id})">
+                                    <i class="fas fa-print"></i>
+                                </button>
                             </td>
                         </tr>
                     `;
@@ -902,68 +911,7 @@
         }
     }
 
-    /*
-     يولد بيانات عينة للاختبار.
-     */
-    function generateSampleData() {
-        try {
-            const sampleClients = [
-                {
-                    id: 1,
-                    name: 'أحمد محمد',
-                    project: 'مشروع الأندلس',
-                    unit: 'شقة 101',
-                    agreementAmount: 250000,
-                    currency: 'شيكل',
-                    payment_method: 'تقسيط'
-                },
-                {
-                    id: 2,
-                    name: 'فاطمة علي',
-                    project: 'مشروع النخيل',
-                    unit: 'فيلا 205',
-                    agreementAmount: 450000,
-                    currency: 'شيكل',
-                    payment_method: 'معاملة بنكية'
-                },
-                {
-                    id: 3,
-                    name: 'محمد حسن',
-                    project: 'مشروع الأندلس',
-                    unit: 'شقة 302',
-                    agreementAmount: 180000,
-                    currency: 'شيكل',
-                    payment_method: 'كاش'
-                },
-                {
-                    id: 4,
-                    name: 'سارة أحمد',
-                    project: 'مشروع الزهراء',
-                    unit: 'شقة 150',
-                    agreementAmount: 320000,
-                    currency: 'شيكل',
-                    payment_method: 'معاملة بنكية وكاش'
-                }
-            ];
-
-            const samplePayments = [
-                { id: 1, clientId: 1, amount: 50000, date: '2024-01-15' },
-                { id: 2, clientId: 1, amount: 30000, date: '2024-02-15' },
-                { id: 3, clientId: 2, amount: 150000, date: '2024-01-20' },
-                { id: 4, clientId: 3, amount: 180000, date: '2024-01-10' },
-                { id: 5, clientId: 4, amount: 100000, date: '2024-02-01' },
-                { id: 6, clientId: 4, amount: 80000, date: '2024-03-01' }
-            ];
-
-            setDB('clients', sampleClients);
-            setDB('client_payments', samplePayments);
-
-            console.log('تم توليد بيانات عينة بنجاح.');
-        } catch (error) {
-            console.error('خطأ في توليد البيانات العينة:', error);
-            showError('حدث خطأ أثناء توليد البيانات العينة.');
-        }
-    }
+ 
 
     // --- أحداث الصفحة ---
     /**
@@ -999,4 +947,5 @@
 
 </script>
 @endsection
+
 

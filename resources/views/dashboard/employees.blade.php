@@ -434,14 +434,14 @@
     <div class="page-header">
         <h1><i class="fas fa-users"></i> إدارة الموظفين والرواتب</h1>
         <div class="header-actions">
-           
+
             <button class="btn btn-primary" onclick="openEmployeeModal()">
                 <i class="fas fa-user-plus"></i> إضافة موظف جديد
             </button>
         </div>
     </div>
 
-    
+
 								<!--begin::Card-->
 								<div class="card card-custom">
 									<div class="card-header flex-wrap border-0 pt-6 pb-0">
@@ -586,7 +586,7 @@
 									</div>
 								</div>
 								<!--end::Card-->
-				
+
     <!-- قسم التقرير التاريخي -->
     <div id="reportSection" class="report-section">
         <h2 id="reportTitle">
@@ -617,40 +617,40 @@
             إضافة موظف جديد
         </h2>
 
-        <form id="employeeForm" action="{{ route('dashboard.employees.store') }}" method="POST">
+        <form id="employeeForm" action="{{ route('dashboard.employees.create') }}" method="POST">
             @csrf
             <input type="hidden" id="employeeId" name="id">
-            
+
             <div class="form-group">
                 <label for="employeeName">اسم الموظف</label>
                 <input type="text" id="employeeName" name="name" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="employeePosition">المنصب الوظيفي</label>
                 <input type="text" id="employeePosition" name="position" placeholder="مثال: مهندس، محاسب" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="employeeGmail">البريد الإلكتروني</label>
                 <input type="email" id="employeeGmail" name="email" placeholder="example@gmail.com" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="employeePhone">رقم الجوال</label>
                 <input type="tel" id="employeePhone" name="phone" placeholder="0599123456" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="employeeIban">الحساب البنكي (IBAN)</label>
                 <input type="text" id="employeeIban" name="iban" placeholder="PS00XXXX0000000000000000000" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="employeeSalary">الراتب الشهري الأساسي (شيكل)</label>
                 <input type="number" id="employeeSalary" name="salary" min="0" step="0.01" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="currency">العملة</label>
                 <select id="currency" name="currency" required>
@@ -667,12 +667,12 @@
                     <option value="other">أخرى (حدد)</option>
                 </select>
             </div>
-            
+
             <div class="form-group hidden" id="otherBankNameGroup">
                 <label for="otherBankName">اسم محفظة (أخرى)</label>
                 <input type="text" id="otherBankName" name="wallet_other_name" placeholder="اكتب اسم البنك هنا">
             </div>
-            
+
             <div class="form-group">
                 <label for="bankName">البنك</label>
                 <select id="bankName" name="bank_name" required>
@@ -684,17 +684,17 @@
                     <option value="other">أخرى (حدد)</option>
                 </select>
             </div>
-            
+
             <div class="form-group hidden" id="otherBankNameGroup">
                 <label for="otherBankName">اسم البنك (أخرى)</label>
                 <input type="text" id="otherBankName" name="other_bank_name" placeholder="اكتب اسم البنك هنا">
             </div>
-            
+
             <div class="form-group">
                 <label for="bankBranch">فرع البنك</label>
                 <input type="text" id="bankBranch" name="bank_branch" placeholder="اكتب اسم الفرع هنا">
             </div>
-            
+
             <div style="display: flex; gap: 15px; margin-top: 25px;">
                 <button type="submit" class="btn btn-primary" style="flex: 1;">
                     <i class="fas fa-save"></i> حفظ الموظف
@@ -714,21 +714,21 @@
             <i class="fas fa-money-bill-wave"></i>
             تسجيل دفع الراتب
         </h2>
-        
-        <form id="paymentForm" action="{{ route('dashboard.salary-payments.store') }}" method="POST">
+
+        <form id="paymentForm" action="{{ "" }}" method="POST">
             @csrf
             <input type="hidden" id="paymentEmployeeId" name="employee_id">
-            
+
             <div class="form-group">
                 <label for="paymentAmount">المبلغ المدفوع (شيكل)</label>
                 <input type="number" id="paymentAmount" name="amount" min="0" step="0.01" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="paymentNotes">ملاحظات (اختياري)</label>
                 <textarea id="paymentNotes" name="notes" rows="3" placeholder="مثال: خصم 500 شيكل بسبب غياب..."></textarea>
             </div>
-            
+
             <div style="display: flex; gap: 15px; margin-top: 25px;">
                 <button type="submit" class="btn btn-success" style="flex: 1;">
                     <i class="fas fa-check"></i> تأكيد الدفع
@@ -745,19 +745,19 @@
 @section('script')
 <script>
     // دوال إدارة قاعدة البيانات المحلية
-    function getDB(key) { 
-        return JSON.parse(localStorage.getItem(key)) || []; 
+    function getDB(key) {
+        return JSON.parse(localStorage.getItem(key)) || [];
     }
-    
-    function setDB(key, data) { 
-        localStorage.setItem(key, JSON.stringify(data)); 
+
+    function setDB(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
     }
-    
-    function formatCurrency(num) { 
-        return new Intl.NumberFormat('ar-SA', { 
-            minimumFractionDigits: 0, 
-            maximumFractionDigits: 2 
-        }).format(num || 0) + ' شيكل'; 
+
+    function formatCurrency(num) {
+        return new Intl.NumberFormat('ar-SA', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        }).format(num || 0) + ' شيكل';
     }
 
     // دالة الحصول على الشهر والسنة الحالية
@@ -772,7 +772,7 @@
         const salary_payments = getDB('salary_payments');
         const listBody = document.getElementById('employeesListBody');
         listBody.innerHTML = '';
-        
+
         const currentMonth = getCurrentMonthYear();
         const monthName = new Date().toLocaleString('ar', { month: 'long' });
         const year = new Date().getFullYear();
@@ -786,7 +786,7 @@
         employees.forEach(emp => {
             const paymentThisMonth = salary_payments.find(p => p.employeeId === emp.id && p.monthYear === currentMonth);
             let statusHtml;
-            
+
             if (paymentThisMonth) {
                 const paidAmount = parseFloat(paymentThisMonth.amount);
                 const baseSalary = parseFloat(emp.salary);
@@ -804,7 +804,7 @@
                     </button>
                 `;
             }
-            
+
             const row = `
                 <tr>
                     <td><span class="employee-name">${emp.name}</span></td>
@@ -838,7 +838,7 @@
         const form = document.getElementById('employeeForm');
         form.reset();
         document.getElementById('employeeId').value = '';
-        
+
         if (id !== null) {
             document.getElementById('employeeModalTitle').innerHTML = '<i class="fas fa-user-edit"></i> تعديل بيانات الموظف';
             const employee = getDB('employees').find(e => e.id === id);
@@ -853,7 +853,7 @@
                 document.getElementById('currency').value = employee.currency || 'شيكل';
                 document.getElementById('bankName').value = employee.bankName || '';
                 document.getElementById('bankBranch').value = employee.bankBranch || '';
-                
+
                 // إظهار حقل البنك الآخر إذا كان محدداً
                 if (employee.bankName === 'other') {
                     document.getElementById('otherBankNameGroup').classList.remove('hidden');
@@ -871,7 +871,7 @@
         e.preventDefault();
         let employees = getDB('employees');
         const id = document.getElementById('employeeId').value;
-        
+
         const employeeData = {
             name: document.getElementById('employeeName').value,
             position: document.getElementById('employeePosition').value,
@@ -898,15 +898,15 @@
             employeeData.id = Date.now();
             employees.push(employeeData);
         }
-        
+
         setDB('employees', employees);
-        
+
         if (typeof Swal !== 'undefined') {
             Swal.fire('تم', 'تم حفظ بيانات الموظف بنجاح', 'success');
         } else {
             alert('تم حفظ بيانات الموظف بنجاح');
         }
-        
+
         closeModal();
         renderEmployeesList();
     }
@@ -918,13 +918,13 @@
             setDB('employees', employees);
             let payments = getDB('salary_payments').filter(p => p.employeeId !== id);
             setDB('salary_payments', payments);
-            
+
             if (typeof Swal !== 'undefined') {
                 Swal.fire('تم الحذف!', 'تم حذف الموظف وبياناته.', 'success');
             } else {
                 alert('تم حذف الموظف وبياناته.');
             }
-            
+
             renderEmployeesList();
             document.getElementById('reportSection').style.display = 'none';
         };
@@ -954,22 +954,22 @@
     function renderSalaryHistory(employeeId) {
         const reportSection = document.getElementById('reportSection');
         reportSection.style.display = 'block';
-        
+
         const employee = getDB('employees').find(e => e.id === employeeId);
         const payments = getDB('salary_payments')
             .filter(p => p.employeeId === employeeId)
             .sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
-        
+
         document.getElementById('reportTitle').innerHTML = `<i class="fas fa-history"></i> السجل التاريخي للرواتب: ${employee.name}`;
-        
+
         const tableBody = document.getElementById('salaryHistoryBody');
         tableBody.innerHTML = '';
-        
+
         if (payments.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 40px;">لا توجد مدفوعات مسجلة لهذا الموظف بعد.</td></tr>';
             return;
         }
-        
+
         payments.forEach(p => {
             const monthName = new Date(p.monthYear + '-01').toLocaleString('ar', { month: 'long', year: 'numeric' });
             const paymentDate = new Date(p.paymentDate).toLocaleDateString('ar-EG');
@@ -983,7 +983,7 @@
             `;
             tableBody.innerHTML += row;
         });
-        
+
         // التمرير إلى قسم التقرير
         reportSection.scrollIntoView({ behavior: 'smooth' });
     }
@@ -992,31 +992,31 @@
     function openPaymentModal(employeeId) {
         const form = document.getElementById('paymentForm');
         form.reset();
-        
+
         const employee = getDB('employees').find(e => e.id === employeeId);
         document.getElementById('paymentEmployeeId').value = employeeId;
         document.getElementById('paymentAmount').value = employee.salary;
-        
+
         const monthName = new Date().toLocaleString('ar', { month: 'long' });
         document.getElementById('paymentModalTitle').innerHTML = `<i class="fas fa-money-bill-wave"></i> دفع راتب ${employee.name} لشهر ${monthName}`;
-        
+
         openModal('paymentModal');
     }
 
     // دالة تسجيل الدفع
     function recordPayment(e) {
         e.preventDefault();
-        
+
         const employeeId = parseInt(document.getElementById('paymentEmployeeId').value);
         const amount = parseFloat(document.getElementById('paymentAmount').value);
         const notes = document.getElementById('paymentNotes').value;
         const currentMonth = getCurrentMonthYear();
-        
+
         let payments = getDB('salary_payments');
-        
+
         // التحقق من وجود دفعة سابقة لنفس الشهر
         const existingPaymentIndex = payments.findIndex(p => p.employeeId === employeeId && p.monthYear === currentMonth);
-        
+
         const paymentData = {
             employeeId: employeeId,
             monthYear: currentMonth,
@@ -1024,7 +1024,7 @@
             paymentDate: new Date().toISOString().split('T')[0],
             notes: notes
         };
-        
+
         if (existingPaymentIndex > -1) {
             // تحديث الدفعة الموجودة
             payments[existingPaymentIndex] = { ...payments[existingPaymentIndex], ...paymentData };
@@ -1033,15 +1033,15 @@
             paymentData.id = Date.now();
             payments.push(paymentData);
         }
-        
+
         setDB('salary_payments', payments);
-        
+
         if (typeof Swal !== 'undefined') {
             Swal.fire('تم', 'تم تسجيل دفع الراتب بنجاح', 'success');
         } else {
             alert('تم تسجيل دفع الراتب بنجاح');
         }
-        
+
         closeModal();
         renderEmployeesList();
     }
@@ -1067,7 +1067,7 @@
 
         const employees = getDB('employees');
         const payments = getDB('salary_payments');
-        
+
         // إعداد بيانات الموظفين
         const employeesData = employees.map(emp => ({
             'اسم الموظف': emp.name,
@@ -1080,7 +1080,7 @@
             'البنك': emp.bankName === 'other' ? emp.otherBankName : emp.bankName,
             'الفرع': emp.bankBranch
         }));
-        
+
         // إعداد بيانات المدفوعات
         const paymentsData = payments.map(payment => {
             const employee = employees.find(e => e.id === payment.employeeId);
@@ -1092,14 +1092,14 @@
                 'ملاحظات': payment.notes || '-'
             };
         });
-        
+
         const wb = XLSX.utils.book_new();
         const employeesSheet = XLSX.utils.json_to_sheet(employeesData);
         const paymentsSheet = XLSX.utils.json_to_sheet(paymentsData);
-        
+
         XLSX.utils.book_append_sheet(wb, employeesSheet, "الموظفين");
         XLSX.utils.book_append_sheet(wb, paymentsSheet, "المدفوعات");
-        
+
         const today = new Date().toISOString().split('T')[0];
         XLSX.writeFile(wb, `تقرير_الموظفين_والرواتب_${today}.xlsx`);
     }
@@ -1108,11 +1108,11 @@
     document.addEventListener('DOMContentLoaded', function() {
         // عرض قائمة الموظفين
         renderEmployeesList();
-        
+
         // إضافة مستمعي الأحداث للنماذج
         document.getElementById('employeeForm').addEventListener('submit', saveEmployee);
         document.getElementById('paymentForm').addEventListener('submit', recordPayment);
-        
+
         // إضافة مستمع لتغيير البنك
         document.getElementById('bankName').addEventListener('change', function() {
             const otherBankGroup = document.getElementById('otherBankNameGroup');
@@ -1124,7 +1124,7 @@
                 document.getElementById('otherBankName').required = false;
             }
         });
-        
+
         // إغلاق المودال عند النقر خارجه
         window.addEventListener('click', (event) => {
             if (event.target.classList.contains('modal')) {
