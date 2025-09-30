@@ -7,6 +7,7 @@ use App\Models\Investor;
 
 class InvestorController extends Controller
 {
+
     public function store(Request $request)
     {
         $validated = $request->validate([

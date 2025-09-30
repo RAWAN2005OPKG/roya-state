@@ -7,6 +7,7 @@ use App\Models\FundTransfer;
 
 class FundTransferController extends Controller
 {
+
     public function store(Request $request)
     {
         $validated = $request->validate([

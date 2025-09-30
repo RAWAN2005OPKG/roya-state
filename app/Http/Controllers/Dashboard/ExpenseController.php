@@ -7,6 +7,9 @@ use App\Models\Expense;
 
 class ExpenseController extends Controller
 {
+    public function index(){
+        return view("dashboard.expenses");
+    }
     public function store(Request $request)
     {
         $validated = $request->validate([
