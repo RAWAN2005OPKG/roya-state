@@ -1,5 +1,5 @@
 @extends('layouts.container')
-@section('title', 'إضافة مشروع جديد')
+@section('title', '  التنبيهات')
 
 @section('styles')
 

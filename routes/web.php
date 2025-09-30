@@ -24,14 +24,13 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('prbancascheq', [App\Http\Controllers\Dashboard\DashboardController::class, 'index'])->name('prbancascheq');
 
-    /*    Route::get('projects', [App\Http\Controllers\Dashboard\ProjectController::class,'index'])->name("project.index");
+       Route::get('projects', [App\Http\Controllers\Dashboard\ProjectController::class,'index'])->name("project.index");
         Route::get('projects/create', [App\Http\Controllers\Dashboard\ProjectController::class,'create'])->name("project.create");
         Route::get('projects/{project}', [App\Http\Controllers\Dashboard\ProjectController::class,'show'])->name("project.show");
         Route::put('projects/{project}', [App\Http\Controllers\Dashboard\ProjectController::class,'update'])->name("project.upate");
         Route::post('projects', [App\Http\Controllers\Dashboard\ProjectController::class,'store'])->name("project.store");
         Route::delete('projects', [App\Http\Controllers\Dashboard\ProjectController::class,'destroy'])->name("project.destroy");
-*/
-    Route::resource('projects', App\Http\Controllers\Dashboard\ProjectController::class);
+
     Route::resource('employees', App\Http\Controllers\Dashboard\EmployeeController::class);
     Route::resource('receipt-vouchers', App\Http\Controllers\Dashboard\ReceiptVoucherController::class);
     Route::resource('payment-vouchers', App\Http\Controllers\Dashboard\PaymentVoucherController::class);
@@ -43,6 +42,9 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::resource('expenses', App\Http\Controllers\Dashboard\ExpenseController::class)->only(['index', 'store']);
     Route::resource('investors', App\Http\Controllers\Dashboard\InvestorController::class)->only(['index', 'store']);
     Route::resource('investments',App\Http\Controllers\Dashboard\InvestmentController::class)->only(['index', 'store']);
+    Route::resource('alerts', App\Http\Controllers\Dashboard\AlertController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::post('alerts/refresh', [App\Http\Controllers\Dashboard\AlertController::class, 'refreshAlerts'])->name('alerts.refresh');
+
 });
 Route::get('/create-test-user', function () {
 /*

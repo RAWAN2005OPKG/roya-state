@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dashboard;
 
+use App\Http\Controllers\Controller;
 use App\Models\Alert;
 use App\Models\Cheque;
 use App\Models\Contract;
@@ -40,11 +41,11 @@ class AlertController extends Controller
             'priority' => $request->priority,
             'status' => 'active',
             'due_date' => $request->due_date,
-            'created_by' => auth()->id(),
+            'created_by' => auth()->id() ?? 1,
             'assigned_to' => $request->assigned_to,
         ]);
 
-        return redirect()->route('dashboard.alerts')->with('success', 'تم إنشاء التنبيه بنجاح');
+        return redirect()->route('dashboard.alerts.index')->with('success', 'تم إنشاء التنبيه بنجاح');
     }
 
     public function update(Request $request, Alert $alert)
@@ -57,16 +58,15 @@ class AlertController extends Controller
             'status' => $request->status,
         ]);
 
-        return redirect()->route('dashboard.alerts')->with('success', 'تم تحديث التنبيه بنجاح');
+        return redirect()->route('dashboard.alernt.index')->with('success', 'تم تحديث التنبيه بنجاح');
     }
 
     public function destroy(Alert $alert)
     {
         $alert->delete();
-        return redirect()->route('dashboard.alerts')->with('success', 'تم حذف التنبيه بنجاح');
+        return redirect()->route('dashboard.alernt.index')->with('success', 'تم حذف التنبيه بنجاح');
     }
 
-    // دالة لإنشاء تنبيهات الشيكات المستحقة
     public function generateChequeAlerts()
     {
         $upcomingCheques = Cheque::where('status', 'in_wallet')
@@ -75,7 +75,6 @@ class AlertController extends Controller
             ->get();
 
         foreach ($upcomingCheques as $cheque) {
-            // تحقق من وجود تنبيه مسبق لهذا الشيك
             $existingAlert = Alert::where('related_id', $cheque->id)
                 ->where('related_type', 'cheque')
                 ->where('type', 'cheque_due')
@@ -92,7 +91,7 @@ class AlertController extends Controller
                     'related_id' => $cheque->id,
                     'related_type' => 'cheque',
                     'due_date' => $cheque->due_date,
-                    'created_by' => 1, // Admin user
+                    'created_by' => auth()->id() ?? 1,
                 ]);
             }
         }
@@ -100,7 +99,6 @@ class AlertController extends Controller
         return $upcomingCheques->count();
     }
 
-    // دالة لإنشاء تنبيهات العقود المنتهية الصلاحية
     public function generateContractAlerts()
     {
         $expiringContracts = Contract::where('status', 'active')
@@ -114,8 +112,6 @@ class AlertController extends Controller
 
         foreach ($expiringContracts as $contract) {
             $endDate = Carbon::parse($contract->first_payment_date)->addMonths($contract->duration_months);
-            
-            // تحقق من وجود تنبيه مسبق لهذا العقد
             $existingAlert = Alert::where('related_id', $contract->id)
                 ->where('related_type', 'contract')
                 ->where('type', 'contract_expiry')
@@ -132,7 +128,7 @@ class AlertController extends Controller
                     'related_id' => $contract->id,
                     'related_type' => 'contract',
                     'due_date' => $endDate,
-                    'created_by' => 1, // Admin user
+                    'created_by' => auth()->id() ?? 1,
                 ]);
             }
         }
@@ -140,7 +136,6 @@ class AlertController extends Controller
         return $expiringContracts->count();
     }
 
-    // دالة لإنشاء تنبيهات الدفعات المستحقة
     public function generatePaymentAlerts()
     {
         $upcomingPayments = Investment::where('status', 'active')
@@ -150,7 +145,6 @@ class AlertController extends Controller
             ->get();
 
         foreach ($upcomingPayments as $investment) {
-            // تحقق من وجود تنبيه مسبق لهذا الاستثمار
             $existingAlert = Alert::where('related_id', $investment->id)
                 ->where('related_type', 'investment')
                 ->where('type', 'payment_due')
@@ -167,7 +161,7 @@ class AlertController extends Controller
                     'related_id' => $investment->id,
                     'related_type' => 'investment',
                     'due_date' => $investment->payment_date,
-                    'created_by' => 1, // Admin user
+                    'created_by' => auth()->id() ?? 1,
                 ]);
             }
         }
@@ -175,7 +169,6 @@ class AlertController extends Controller
         return $upcomingPayments->count();
     }
 
-    // دالة لتحديث جميع التنبيهات
     public function refreshAlerts()
     {
         $chequeAlerts = $this->generateChequeAlerts();
@@ -184,16 +177,16 @@ class AlertController extends Controller
 
         $totalAlerts = $chequeAlerts + $contractAlerts + $paymentAlerts;
 
-        return redirect()->route('dashboard.alerts')->with('success', "تم تحديث التنبيهات بنجاح. تم إنشاء {$totalAlerts} تنبيه جديد");
+        return redirect()->route('dashboard.alerts.index')->with('success', "تم تحديث التنبيهات بنجاح. تم إنشاء {$totalAlerts} تنبيه جديد");
     }
 
-    // دالة للحصول على عدد التنبيهات النشطة
+
     public function getActiveAlertsCount()
     {
         return Alert::where('status', 'active')->count();
     }
 
-    // دالة للحصول على التنبيهات عالية الأولوية
+
     public function getHighPriorityAlerts()
     {
         return Alert::where('status', 'active')
