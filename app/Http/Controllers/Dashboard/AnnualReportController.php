@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dashboard;
 
-use App\Models\ClientPayment; 
-use App\Models\Expense;       
+use App\Http\Controllers\Controller;
+use App\Models\ClientPayment;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -45,11 +46,11 @@ class AnnualReportController extends Controller
             # صافي ربح السنة الحالية
             $revenueCurrent = $monthlyRevenue->where('year', $selectedYear)->where('month', $m)->first()->total_revenue ?? 0;
             $expensesCurrent = $monthlyExpenses->where('year', $selectedYear)->where('month', $m)->first()->total_expenses ?? 0;
-            
+
             # صافي ربح السنة السابقة
             $revenuePrevious = $monthlyRevenue->where('year', $previousYear)->where('month', $m)->first()->total_revenue ?? 0;
             $expensesPrevious = $monthlyExpenses->where('year', $previousYear)->where('month', $m)->first()->total_expenses ?? 0;
-            
+
             $reportData[] = [
                 'month' => $m,
                 'month_name' => Carbon::create()->month($m)->translatedFormat('F'),
@@ -58,7 +59,7 @@ class AnnualReportController extends Controller
             ];
         }
 
-        return view('dashboard.years', [ 
+        return view('dashboard.years', [
             'selectedYear' => $selectedYear,
             'previousYear' => $previousYear,
             'reportData' => $reportData,

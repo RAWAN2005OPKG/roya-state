@@ -175,7 +175,7 @@
                     </li>
 
                     <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.alernt') }}" class="menu-link">
+                        <a href="{{url('dashboard.alerts.index') }}" class="menu-link">
                             <span class="svg-icon menu-icon"></span>
                             <span class="menu-text">التنبيهات</span>
                         </a>

@@ -1,17 +1,29 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dashboard;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Contract;
 
 class ContractController extends Controller
 {
+    /**
+     * عرض صفحة إنشاء عقد جديد
+     */
+    public function create()
+    {
+        return view('dashboard.contracts');
+    }
+
+    /**
+     * حفظ عقد جديد
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             // بيانات العقد
-            'contract_id' => ['required', 'string', 'max:255'],
+            'contract_id' => ['required', 'string', 'max:255', 'unique:contracts,contract_id'],
             'signing_date' => ['required', 'date'],
             'status' => ['nullable', 'in:active,draft'],
 
@@ -38,34 +50,42 @@ class ContractController extends Controller
             'remaining_amount' => ['nullable', 'numeric', 'min:0'],
 
             // تفاصيل الدفع النقدي
-            'cash_receiver' => ['nullable', 'string', 'max:255'],
-            'cash_receiver_other' => ['nullable', 'string', 'max:255'],
-            'cash_receiver_job' => ['nullable', 'string', 'max:255'],
-            'cash_receipt_date' => ['nullable', 'date'],
+            'cash_amount' => ['nullable', 'numeric', 'min:0'],
+            'cash_receipt_number' => ['nullable', 'string', 'max:255'],
 
-            // تفاصيل البنك
-            'sender_bank' => ['nullable', 'string', 'max:255'],
-            'sender_bank_other' => ['nullable', 'string', 'max:255'],
-            'sender_bank_branch' => ['nullable', 'string', 'max:255'],
-            'receiver_bank' => ['nullable', 'string', 'max:255'],
-            'receiver_bank_other' => ['nullable', 'string', 'max:255'],
-            'receiver_bank_branch' => ['nullable', 'string', 'max:255'],
-            'transaction_reference' => ['nullable', 'string', 'max:255'],
-            'transaction_date' => ['nullable', 'date'],
+            // تفاصيل التحويل البنكي
+            'bank_name' => ['nullable', 'string', 'max:255'],
+            'account_number' => ['nullable', 'string', 'max:255'],
+            'transaction_id' => ['nullable', 'string', 'max:255'],
+            'transfer_date' => ['nullable', 'date'],
 
             // تفاصيل الشيك
             'check_number' => ['nullable', 'string', 'max:255'],
-            'check_owner' => ['nullable', 'string', 'max:255'],
+            'check_amount' => ['nullable', 'numeric', 'min:0'],
             'check_holder' => ['nullable', 'string', 'max:255'],
             'check_bank' => ['nullable', 'string', 'max:255'],
-            'check_bank_other' => ['nullable', 'string', 'max:255'],
             'check_bank_branch' => ['nullable', 'string', 'max:255'],
             'check_due_date' => ['nullable', 'date'],
             'check_receipt_date' => ['nullable', 'date'],
         ]);
 
-        Contract::create($validated);
+        try {
+            // إنشاء العقد
+            Contract::create($validated);
 
-        return back()->with('success', 'تم حفظ العقد بنجاح');
+            return redirect()->route('dashboard.client-payments.index')
+                           ->with('success', 'تم حفظ العقد بنجاح');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'حدث خطأ أثناء حفظ العقد: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * عرض قائمة العقود (اختياري لو كنتِ عايزة صفحة العقود النشطة)
+     */
+    public function index()
+    {
+        $contracts = Contract::all();
+        return view('dashboard.client-payments.index', compact('contracts'));
     }
 }

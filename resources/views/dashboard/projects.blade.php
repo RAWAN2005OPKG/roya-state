@@ -129,7 +129,7 @@ License: You must have a valid license purchased only from themeforest(the above
 									<a href="#" class=""></a>
 									<!--end::Button-->
 									<!--begin::Button-->
-									<a href="{{url('dashboard/projects/create') }}" class="btn btn-light-primary font-weight-bold ml-2">Add Project</a>
+									<a href="{{url('dashboard/add-project/create') }}" class="btn btn-light-primary font-weight-bold ml-2">Add Project</a>
 									<!--end::Button-->
 									<!--begin::Dropdown-->
 									<div class="dropdown dropdown-inline ml-2" data-toggle="tooltip" title="Quick actions" data-placement="left">

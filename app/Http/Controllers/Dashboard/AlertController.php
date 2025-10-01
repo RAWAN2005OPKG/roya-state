@@ -20,7 +20,7 @@ class AlertController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('dashboard.alernt', compact('alerts'));
+        return view('dashboard.alerts.index', compact('alerts'));
     }
 
     public function store(Request $request)
@@ -58,13 +58,13 @@ class AlertController extends Controller
             'status' => $request->status,
         ]);
 
-        return redirect()->route('dashboard.alernt.index')->with('success', 'تم تحديث التنبيه بنجاح');
+        return redirect()->route('dashboard.alerts.index')->with('success', 'تم تحديث التنبيه بنجاح'); // تصحيح المسار
     }
 
     public function destroy(Alert $alert)
     {
         $alert->delete();
-        return redirect()->route('dashboard.alernt.index')->with('success', 'تم حذف التنبيه بنجاح');
+        return redirect()->route('dashboard.alerts.index')->with('success', 'تم حذف التنبيه بنجاح'); // تصحيح المسار
     }
 
     public function generateChequeAlerts()
@@ -180,12 +180,10 @@ class AlertController extends Controller
         return redirect()->route('dashboard.alerts.index')->with('success', "تم تحديث التنبيهات بنجاح. تم إنشاء {$totalAlerts} تنبيه جديد");
     }
 
-
     public function getActiveAlertsCount()
     {
         return Alert::where('status', 'active')->count();
     }
-
 
     public function getHighPriorityAlerts()
     {
@@ -196,3 +194,5 @@ class AlertController extends Controller
             ->get();
     }
 }
+
+

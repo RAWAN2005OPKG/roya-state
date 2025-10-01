@@ -695,7 +695,7 @@
 </style>
 @endsection
 
-@section('content') 
+@section('content')
 
 <main class="main-content">
     <div class="page-header">
@@ -1083,7 +1083,7 @@
 @endsection
 @section('scripts')
 <script>
-    // تعريف المتغيرات العامة وقاعدة البيانات 
+    // تعريف المتغيرات العامة وقاعدة البيانات
     let clients = [];
     let payments = [];
     let currentClientId = null;
@@ -1145,7 +1145,7 @@
             alert('خطأ: ' + message);
         }
     }
-    
+
     function showInfo(message) {
         if (typeof Swal !== 'undefined') {
             Swal.fire({ title: 'معلومات', text: message, icon: 'info', confirmButtonText: 'حسناً' });
@@ -1154,7 +1154,7 @@
         }
     }
 
-    // تحميل وحفظ البيانات 
+    // تحميل وحفظ البيانات
     function loadData() {
         clients = getDB('clients');
         payments = getDB('client_payments');
@@ -1233,7 +1233,7 @@
         });
     }
 
-    // تحديث مؤشرات الأداء الرئيسية (KPIs) 
+    // تحديث مؤشرات الأداء الرئيسية (KPIs)
     function updateKPIs() {
         const totalClients = clients.length;
         const totalAgreements = clients.reduce((sum, c) => sum + (parseFloat(c.agreementAmount) || 0), 0);
@@ -1246,11 +1246,11 @@
         document.getElementById('kpiTotalRemaining').textContent = formatCurrency(totalRemaining);
     }
 
-    // تعبئة قائمة المشاريع 
+    // تعبئة قائمة المشاريع
     function populateProjectFilter() {
         const projectFilterSelect = document.getElementById('clientProject');
         if (!projectFilterSelect) return;
-        
+
         const currentVal = projectFilterSelect.value;
         projectFilterSelect.innerHTML = '<option value="">اختر مشروعاً</option>';
 
@@ -1269,7 +1269,7 @@
         const modal = document.getElementById('clientModal');
         const form = document.getElementById('clientForm');
         const title = document.getElementById('clientModalTitle');
-        
+
         form.reset();
         document.getElementById('clientId').value = '';
         ['bankDetailsSection', 'checkDetailsSection', 'clientOtherPaidToGroup', 'otherBankNameGroup', 'otherBankBranchGroup'].forEach(id => {
@@ -1291,7 +1291,7 @@
                 document.getElementById('clientAgreementAmount').value = client.agreementAmount;
                 document.getElementById('client_payment_method').value = client.payment_method;
                 document.getElementById('client_currency').value = client.currency;
-                
+
                 // التعامل مع حقل "تم الدفع لمن"
                 const paidToSelect = document.getElementById('client_paid_to');
                 const isStandardOption = [...paidToSelect.options].some(opt => opt.value === client.paid_to);
@@ -1404,7 +1404,7 @@
         document.getElementById('paymentModal').style.display = 'none';
     }
 
-    //  معالجة النماذج 
+    //  معالجة النماذج
     if (window.USE_LOCAL_CLIENTS_LOCALSTORAGE) document.getElementById('clientForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -1489,7 +1489,7 @@
 
         const paymentId = document.getElementById('paymentId').value;
         const clientId = document.getElementById('paymentClientId').value;
-        
+
         let paid_to = document.getElementById('payment_paid_to').value;
         if (paid_to === 'other') {
             paid_to = document.getElementById('paymentOtherPaidTo').value.trim();
@@ -1556,7 +1556,7 @@
         viewClientFinancialReport(clientId);
     });
 
-    //  وظائف الإجراءات (تعديل، حذف، عرض) 
+    //  وظائف الإجراءات (تعديل، حذف، عرض)
     window.editClient = function(clientId) {
         openClientModal(clientId);
     }
@@ -1690,10 +1690,10 @@
         XLSX.writeFile(wb, `مدفوعات_${client.name}_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
-    // إعداد الأحداث عند تحميل الصفحة 
+    // إعداد الأحداث عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', function() {
         if (window.USE_LOCAL_CLIENTS_LOCALSTORAGE) { loadData(); }
-         
+
          // دالة لإدارة عرض الأقسام الديناميكية
          function setupDynamicSections(methodSelectId, bankSectionId, checkSectionId) {
              document.getElementById(methodSelectId).addEventListener('change', function() {
@@ -1732,7 +1732,7 @@
              }
          });
     });
-    
+
     // اجعلها false لتعطيل تخزين المتصفح والاكتفاء بإرسال النماذج إلى الخادم
     window.USE_LOCAL_CLIENTS_LOCALSTORAGE = false;
 </script>

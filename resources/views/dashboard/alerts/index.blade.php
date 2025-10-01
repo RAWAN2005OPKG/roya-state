@@ -1,5 +1,5 @@
 @extends('layouts.container')
-@section('title', '  التنبيهات')
+@section('title', 'إضافة مشروع جديد')
 
 @section('styles')
 
@@ -9,7 +9,7 @@
 
 
 <!--begin::Card-->
-								<div class="card card-custom gutter-b">
+	<div class="card card-custom gutter-b">
 									<div class="card-header flex-wrap border-0 pt-6 pb-0">
 										<div class="card-title">
 											<h3 class="card-label">Scrollable Table
@@ -81,11 +81,9 @@
 												<!--end::Dropdown Menu-->
 											</div>
 											<!--end::Dropdown-->
+
 											<!--begin::Button-->
-											<a href="#" class="btn btn-primary font-weight-bolder">
-											<span class="svg-icon svg-icon-md">
-												<!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->
-												<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+<a href="{{ route('dashboard.alerts.create') }}" class="btn btn-primary font-weight-bolder">												<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
 													<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 														<rect x="0" y="0" width="24" height="24" />
 														<circle fill="#000000" cx="9" cy="15" r="6" />
@@ -93,7 +91,7 @@
 													</g>
 												</svg>
 												<!--end::Svg Icon-->
-											</span>New Record</a>
+											</span >New Record</a>
 											<!--end::Button-->
 										</div>
 									</div>
@@ -129,6 +127,7 @@
 													<td>1</td>
 													<td nowrap="nowrap"></td>
 												</tr>
+
 											</tbody>
 										</table>
 										<!--end: Datatable-->

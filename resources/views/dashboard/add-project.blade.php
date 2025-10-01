@@ -517,9 +517,7 @@
             </div>
         </div>
 
-        <form id="addProjectForm" action="{{ route('dashboard.projects.index') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-
+<form id="addProjectForm" action="{{ route('dashboard.project.store') }}" method="POST" enctype="multipart/form-data">
             <!-- 1. المعلومات الأساسية -->
             <div class="form-section">
                 <div class="section-header"><i class="fas fa-info-circle"></i><h3>المعلومات الأساسية</h3></div>
