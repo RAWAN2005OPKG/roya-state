@@ -58,13 +58,13 @@ class AlertController extends Controller
             'status' => $request->status,
         ]);
 
-        return redirect()->route('dashboard.alerts.index')->with('success', 'تم تحديث التنبيه بنجاح'); // تصحيح المسار
+        return redirect()->route('dashboard.alerts.index')->with('success', 'تم تحديث التنبيه بنجاح');
     }
 
     public function destroy(Alert $alert)
     {
         $alert->delete();
-        return redirect()->route('dashboard.alerts.index')->with('success', 'تم حذف التنبيه بنجاح'); // تصحيح المسار
+        return redirect()->route('dashboard.alerts.index')->with('success', 'تم حذف التنبيه بنجاح');
     }
 
     public function generateChequeAlerts()

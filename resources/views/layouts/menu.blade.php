@@ -143,7 +143,7 @@
                         </div>
                     </li>
                     <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.client_payments') }}" class="menu-link">
+                        <a href="{{url('dashboard.client-payments') }}" class="menu-link">
                             <span class="svg-icon menu-icon"></span>
                             <span class="menu-text">العقود</span>
                         </a>
@@ -175,7 +175,7 @@
                     </li>
 
                     <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.alerts.index') }}" class="menu-link">
+                        <a href="{{url('dashboard.alerts') }}" class="menu-link">
                             <span class="svg-icon menu-icon"></span>
                             <span class="menu-text">التنبيهات</span>
                         </a>

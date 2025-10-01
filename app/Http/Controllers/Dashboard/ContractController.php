@@ -8,37 +8,40 @@ use App\Models\Contract;
 
 class ContractController extends Controller
 {
-    /**
-     * عرض صفحة إنشاء عقد جديد
-     */
-    public function create()
+    public function index()
     {
-        return view('dashboard.contracts');
+        $contracts = Contract::all();
+        return view('dashboard.new-contract', compact('contracts'));
     }
 
-    /**
-     * حفظ عقد جديد
-     */
+    public function create()
+    {
+        return view('dashboard.new-contract');
+    }
+
+
     public function store(Request $request)
     {
+
         $validated = $request->validate([
-            // بيانات العقد
+
+
             'contract_id' => ['required', 'string', 'max:255', 'unique:contracts,contract_id'],
             'signing_date' => ['required', 'date'],
             'status' => ['nullable', 'in:active,draft'],
 
-            // بيانات المستثمر
+
             'client_name' => ['required', 'string', 'max:255'],
             'client_email' => ['required', 'email', 'max:255'],
             'client_phone' => ['required', 'string', 'max:50'],
             'client_alt_phone' => ['nullable', 'string', 'max:50'],
             'client_id_number' => ['required', 'string', 'max:100'],
 
-            // بيانات العقار
+
             'property_type' => ['nullable', 'string', 'max:255'],
             'property_location' => ['nullable', 'string', 'max:255'],
 
-            // التفاصيل المالية
+
             'investment_amount' => ['required', 'numeric', 'min:0'],
             'duration_months' => ['required', 'integer', 'min:1'],
             'payment_method' => ['required', 'in:cash,bank_transaction,check'],
@@ -48,20 +51,14 @@ class ContractController extends Controller
             'down_payment_other' => ['nullable', 'numeric', 'min:0'],
             'profit_percentage' => ['nullable', 'numeric', 'min:0'],
             'remaining_amount' => ['nullable', 'numeric', 'min:0'],
-
-            // تفاصيل الدفع النقدي
-            'cash_amount' => ['nullable', 'numeric', 'min:0'],
+            'cash_amount' => ['nullable', 'numeric', 'min:0', 'required_if:payment_method,cash'],
             'cash_receipt_number' => ['nullable', 'string', 'max:255'],
-
-            // تفاصيل التحويل البنكي
-            'bank_name' => ['nullable', 'string', 'max:255'],
-            'account_number' => ['nullable', 'string', 'max:255'],
+            'bank_name' => ['nullable', 'string', 'max:255', 'required_if:payment_method,bank_transaction'],
+            'account_number' => ['nullable', 'string', 'max:255', 'required_if:payment_method,bank_transaction'],
             'transaction_id' => ['nullable', 'string', 'max:255'],
             'transfer_date' => ['nullable', 'date'],
-
-            // تفاصيل الشيك
-            'check_number' => ['nullable', 'string', 'max:255'],
-            'check_amount' => ['nullable', 'numeric', 'min:0'],
+            'check_number' => ['nullable', 'string', 'max:255', 'required_if:payment_method,check'],
+            'check_amount' => ['nullable', 'numeric', 'min:0', 'required_if:payment_method,check'],
             'check_holder' => ['nullable', 'string', 'max:255'],
             'check_bank' => ['nullable', 'string', 'max:255'],
             'check_bank_branch' => ['nullable', 'string', 'max:255'],
@@ -69,23 +66,21 @@ class ContractController extends Controller
             'check_receipt_date' => ['nullable', 'date'],
         ]);
 
-        try {
-            // إنشاء العقد
-            Contract::create($validated);
 
-            return redirect()->route('dashboard.client-payments.index')
-                           ->with('success', 'تم حفظ العقد بنجاح');
-        } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'حدث خطأ أثناء حفظ العقد: ' . $e->getMessage());
-        }
+        Project::create($data);
+
+        return redirect()->route('dashboard.client-payments')->with('success', 'تم إضافة المشروع بنجاح!');
     }
 
-    /**
-     * عرض قائمة العقود (اختياري لو كنتِ عايزة صفحة العقود النشطة)
-     */
-    public function index()
+
+     # حذف مشروع (وظيفة destroy)
+
+    public function destroy(Project $project)
     {
-        $contracts = Contract::all();
-        return view('dashboard.client-payments.index', compact('contracts'));
+        $project->delete(); # حذف المشروع من قاعدة البيانات
+
+        # بعد الحذف، قم بإعادة توجيه المستخدم إلى صفحة قائمة المشاريع
+        return redirect()->route('dashboard.new-contract')->with('success', 'تم حذف المشروع بنجاح!');
     }
 }
+

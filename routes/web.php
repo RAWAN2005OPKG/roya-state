@@ -47,13 +47,15 @@ Route::delete('projects', [App\Http\Controllers\Dashboard\ProjectController::cla
     Route::resource('investments',App\Http\Controllers\Dashboard\InvestmentController::class)->only(['index', 'store']);
     Route::resource('alerts', App\Http\Controllers\Dashboard\AlertController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::post('alerts/refresh', [App\Http\Controllers\Dashboard\AlertController::class, 'refreshAlerts'])->name('alerts.refresh');
-    Route::get('alerts/create', [App\Http\Controllers\Dashboard\AlertController::class, 'create'])->name('alerts.create'); // إضافي لو عايزة زر "إضافة تنبيه"
+    Route::get('alerts/create', [App\Http\Controllers\Dashboard\AlertController::class, 'create'])->name('alerts.create');
       Route::get('/annual-report', [App\Http\Controllers\Dashboard\AnnualReportController::class, 'index'])->name('report.annual');
-Route::resource('client-payments', App\Http\Controllers\Dashboard\ClientPaymentController::class)->only(['index', 'store', 'update', 'destroy']);
-Route::get('daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'index'])->name('daily.index');
-    Route::post('daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'store'])->name('daily.store');
+Route::get('/dashboard/client-payments', [App\Http\Controllers\Dashboard\ContractController::class, 'index'])->name('dashboard.client-payments');
+Route::get('/dashboard/contracts/create', [App\Http\Controllers\Dashboard\ContractController::class, 'create'])->name('dashboard.contracts.create');
+Route::post('/dashboard/contracts', [App\Http\Controllers\Dashboard\ContractController::class, 'store'])->name('dashboard.contracts.store');
+Route::delete('/dashboard/contracts/{contract}', [App\Http\Controllers\Dashboard\ContractController::class, 'destroy'])->name('dashboard.contracts.destroy');
+Route::post('daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'store'])->name('daily.store');
 Route::get('annual-report', [App\Http\Controllers\Dashboard\AnnualReportController::class, 'index'])->name('report.annual');
-Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::class)->only(['index', 'create', 'store']);
+
 
 
 });

@@ -129,7 +129,7 @@ class ProjectController extends Controller
 
         Project::create($data);
 
-        return redirect()->route('dashboard.projects')->with('success', 'تم إضافة المشروع بنجاح!');
+        return redirect()->route('dashboard.project.index')->with('success', 'تم إضافة المشروع بنجاح!');
     }
 
 
@@ -140,7 +140,7 @@ class ProjectController extends Controller
         $project->delete(); # حذف المشروع من قاعدة البيانات
 
         # بعد الحذف، قم بإعادة توجيه المستخدم إلى صفحة قائمة المشاريع
-        return redirect()->route('dashboard.projects')->with('success', 'تم حذف المشروع بنجاح!');
+        return redirect()->route('dashboard.project.index')->with('success', 'تم حذف المشروع بنجاح!');
     }
 }
 
