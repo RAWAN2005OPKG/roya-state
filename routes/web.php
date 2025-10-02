@@ -18,7 +18,7 @@ use App\Http\Controllers\DashboardController;
 
 Auth::routes();
 
-Route::view('/', 'dashboard.login')->name('home');
+Route::view('/', 'dashboard.login')->name('login.page');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
@@ -33,30 +33,41 @@ Route::post('projects', [App\Http\Controllers\Dashboard\ProjectController::class
 Route::delete('projects', [App\Http\Controllers\Dashboard\ProjectController::class, 'destroy'])->name("project.destroy");
 
 
-
     Route::resource('employees', App\Http\Controllers\Dashboard\EmployeeController::class);
+
     Route::resource('receipt-vouchers', App\Http\Controllers\Dashboard\ReceiptVoucherController::class);
+
     Route::resource('payment-vouchers', App\Http\Controllers\Dashboard\PaymentVoucherController::class);
     Route::resource('cash', App\Http\Controllers\Dashboard\CashTransactionController::class);
     Route::resource('bank', App\Http\Controllers\Dashboard\BankTransactionController::class);
     Route::resource('cheques', App\Http\Controllers\Dashboard\ChequeController::class);
+
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class);
+
     Route::resource('expenses', App\Http\Controllers\Dashboard\ExpenseController::class)->only(['index', 'store']);
+
     Route::resource('investors', App\Http\Controllers\Dashboard\InvestorController::class)->only(['index', 'store']);
     Route::resource('investments',App\Http\Controllers\Dashboard\InvestmentController::class)->only(['index', 'store']);
-    Route::resource('alerts', App\Http\Controllers\Dashboard\AlertController::class)->only(['index', 'store', 'update', 'destroy']);
+
+
+    Route::get('client-payments', [App\Http\Controllers\Dashboard\ContractController::class, 'index'])->name('dashboard.client-payments');
+
+    Route::get('contracts/create', [App\Http\Controllers\Dashboard\ContractController::class, 'create'])->name('dashboard.contracts.create');
+    Route::post('contracts', [App\Http\Controllers\Dashboard\ContractController::class, 'store'])->name('dashboard.contracts.store');
+     Route::delete('contracts/{contract}', [App\Http\Controllers\Dashboard\ContractController::class, 'destroy'])->name('dashboard.contracts.destroy');
+
+    Route::resource('customers', App\Http\Controllers\Dashboard\CustomerController::class);
+
+     Route::get('daily', [App\Http\Controllers\Dashboard\DailyReportController::class, 'index'])->name('dashboard');
+     Route::post('dashboard/daily', [App\Http\Controllers\Dashboard\DailyReportController::class, 'store'])->name('dashboard.daily.store');
+
+    Route::get('years', [App\Http\Controllers\Dashboard\AnnualReportController::class, 'index'])->name('report.annual');
+
     Route::post('alerts/refresh', [App\Http\Controllers\Dashboard\AlertController::class, 'refreshAlerts'])->name('alerts.refresh');
-    Route::get('alerts/create', [App\Http\Controllers\Dashboard\AlertController::class, 'create'])->name('alerts.create');
-      Route::get('/annual-report', [App\Http\Controllers\Dashboard\AnnualReportController::class, 'index'])->name('report.annual');
-Route::get('/dashboard/client-payments', [App\Http\Controllers\Dashboard\ContractController::class, 'index'])->name('dashboard.client-payments');
-Route::get('/dashboard/contracts/create', [App\Http\Controllers\Dashboard\ContractController::class, 'create'])->name('dashboard.contracts.create');
-Route::post('/dashboard/contracts', [App\Http\Controllers\Dashboard\ContractController::class, 'store'])->name('dashboard.contracts.store');
-Route::delete('/dashboard/contracts/{contract}', [App\Http\Controllers\Dashboard\ContractController::class, 'destroy'])->name('dashboard.contracts.destroy');
-Route::post('daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'store'])->name('daily.store');
-Route::get('annual-report', [App\Http\Controllers\Dashboard\AnnualReportController::class, 'index'])->name('report.annual');
+    Route::resource('alerts', App\Http\Controllers\Dashboard\AlertController::class);
 
-
+    Route::resource('contracts',App\Http\Controllers\Dashboard\ContractController::class)->except(['edit', 'update', 'show']);
 
 });
 

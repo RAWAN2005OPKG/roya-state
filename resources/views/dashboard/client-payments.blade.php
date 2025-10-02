@@ -499,7 +499,7 @@
 											<!--end::Dropdown-->
 
 											<!--begin::Button-->
-											<a href="{{route('dashboard.new-contract') }}" class="btn btn-primary font-weight-bolder">
+<a href="{{ route('dashboard.contracts.create') }}" class="btn btn-primary font-weight-bolder">
 											@csrf
                                                 <span class="svg-icon svg-icon-md">
 												<!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->

@@ -20,7 +20,7 @@ class AlertController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('dashboard.alerts.index', compact('alerts'));
+        return view('dashboard.alerts', compact('alerts'));
     }
 
     public function store(Request $request)

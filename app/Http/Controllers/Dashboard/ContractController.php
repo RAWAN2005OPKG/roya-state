@@ -4,44 +4,39 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Contract;
+use App\Models\Contract; // تأكد من أن هذا الموديل موجود
 
 class ContractController extends Controller
 {
+    // دالة لعرض قائمة كل العقود
     public function index()
     {
-        $contracts = Contract::all();
-        return view('dashboard.new-contract', compact('contracts'));
+        $contracts = Contract::latest()->paginate(15);
+        // يجب أن يعرض صفحة "قائمة" العقود
+return view('dashboard.client-payments', compact('contracts'));
     }
 
+    // دالة لعرض صفحة "إنشاء عقد جديد"
     public function create()
     {
+        // يعرض صفحة النموذج لإنشاء عقد جديد
         return view('dashboard.new-contract');
     }
 
-
+    // دالة لحفظ العقد الجديد في قاعدة البيانات
     public function store(Request $request)
     {
-
         $validated = $request->validate([
-
-
             'contract_id' => ['required', 'string', 'max:255', 'unique:contracts,contract_id'],
             'signing_date' => ['required', 'date'],
             'status' => ['nullable', 'in:active,draft'],
-
-
             'client_name' => ['required', 'string', 'max:255'],
             'client_email' => ['required', 'email', 'max:255'],
             'client_phone' => ['required', 'string', 'max:50'],
             'client_alt_phone' => ['nullable', 'string', 'max:50'],
             'client_id_number' => ['required', 'string', 'max:100'],
-
-
             'property_type' => ['nullable', 'string', 'max:255'],
             'property_location' => ['nullable', 'string', 'max:255'],
-
-
             'investment_amount' => ['required', 'numeric', 'min:0'],
             'duration_months' => ['required', 'integer', 'min:1'],
             'payment_method' => ['required', 'in:cash,bank_transaction,check'],
@@ -66,21 +61,17 @@ class ContractController extends Controller
             'check_receipt_date' => ['nullable', 'date'],
         ]);
 
+        // يجب استخدام موديل Contract وليس Project
+        Contract::create($validated);
 
-        Project::create($data);
-
-        return redirect()->route('dashboard.client-payments')->with('success', 'تم إضافة المشروع بنجاح!');
+        // إعادة التوجيه إلى صفحة "قائمة" العقود
+        return redirect()->route('dashboard.client-payments.index')->with('success', 'تم إنشاء العقد بنجاح!');
     }
 
-
-     # حذف مشروع (وظيفة destroy)
-
-    public function destroy(Project $project)
+    // دالة لحذف العقد
+    public function destroy(Contract $contract)
     {
-        $project->delete(); # حذف المشروع من قاعدة البيانات
-
-        # بعد الحذف، قم بإعادة توجيه المستخدم إلى صفحة قائمة المشاريع
-        return redirect()->route('dashboard.new-contract')->with('success', 'تم حذف المشروع بنجاح!');
+        $contract->delete();
+        return redirect()->route('dashboard.client-payments')->with('success', 'تم حذف العقد بنجاح!');
     }
 }
-

@@ -878,7 +878,7 @@
     <div class="modal-content">
         <h2 id="clientModalTitle">إضافة عميل جديد</h2>
         <a href="#" class="btn-back" onclick="closeClientModal(); return false;"><i class="fas fa-arrow-right"></i> العودة لصفحة العميل</a>
-        <form id="clientForm" action="{{ route('dashboard.customers.store') }}" method="POST" enctype="multipart/form-data">
+        <form id="clientForm" action="{{ route('dashboard.customers.create') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="hidden" id="clientId">
             <div class="form-grid">
@@ -986,7 +986,7 @@
 <div id="paymentModal" class="modal">
     <div class="modal-content">
         <h2 id="paymentModalTitle">إضافة دفعة جديدة</h2>
-        <form id="paymentForm" action="{{ route('dashboard.customer-payments.store') }}" method="POST">
+        <form id="paymentForm" action="{{ route('dashboard.customer') }}" method="POST">
             @csrf
             <input type="hidden" id="paymentId">
             <input type="hidden" id="paymentClientId">

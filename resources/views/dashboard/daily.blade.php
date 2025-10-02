@@ -21,34 +21,34 @@
         --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
-    .search-actions { 
-        display: flex; 
-        gap: 15px; 
-        align-items: center; 
+    .search-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
         margin-bottom: 20px;
         flex-wrap: wrap;
     }
-    .search-box { 
-        flex: 1; 
+    .search-box {
+        flex: 1;
         min-width: 250px;
         position: relative;
     }
-    .search-box input { 
-        width: 100%; 
-        padding: 12px 45px 12px 15px; 
-        border: 2px solid #ddd; 
+    .search-box input {
+        width: 100%;
+        padding: 12px 45px 12px 15px;
+        border: 2px solid #ddd;
         border-radius: 10px;
         font-size: 1rem;
     }
-    .search-box i { 
-        position: absolute; 
-        right: 15px; 
-        top: 50%; 
-        transform: translateY(-50%); 
+    .search-box i {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
         color: #666;
     }
     .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-    
+
     .form-section { margin-bottom: 35px; }
     /* إعادة تعيين الأنماط الأساسية */
     * {
@@ -683,7 +683,7 @@
 <div id="manualReportModal" class="modal">
     <div class="modal-content">
         <h2>التقرير اليومي</h2>
-        <form id="manualReportForm" action="{{ route('dashboard.daily.manual-report.store') }}" method="POST">
+<form id="manualReportForm" action="{{ route('dashboard.daily.store') }}" method="POST">
             @csrf
             <div class="form-group">
                 <label for="manualReportDate">تاريخ التقرير</label>
@@ -740,15 +740,15 @@
 
     // دوال المساعدة
     function formatCurrency(num) {
-        return new Intl.NumberFormat('ar-SA', { 
-            minimumFractionDigits: 0, 
-            maximumFractionDigits: 2 
+        return new Intl.NumberFormat('ar-SA', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
         }).format(num || 0) + ' شيكل';
     }
 
     function isSameDay(date1, date2) {
-        return date1.getFullYear() === date2.getFullYear() && 
-               date1.getMonth() === date2.getMonth() && 
+        return date1.getFullYear() === date2.getFullYear() &&
+               date1.getMonth() === date2.getMonth() &&
                date1.getDate() === date2.getDate();
     }
 
@@ -790,7 +790,7 @@
 
         function createComparisonRow(label, todayValue, yesterdayValue) {
             const diff = todayValue - yesterdayValue;
-            const diffText = diff > 0 ? `↑ ${formatCurrency(diff)}` : 
+            const diffText = diff > 0 ? `↑ ${formatCurrency(diff)}` :
                            diff < 0 ? `↓ ${formatCurrency(Math.abs(diff))}` : `-`;
             const diffClass = diff > 0 ? 'diff-up' : diff < 0 ? 'diff-down' : '';
             return `<tr>
@@ -894,7 +894,7 @@
         // إضافة التقرير إلى البيانات المحلية (في التطبيق الحقيقي، يتم إرساله للخادم)
         const existingReportIndex = manualReportsData.findIndex(r => r.report_date === reportDate);
         const reportData = { report_date: reportDate, achievements, issues, decisions };
-        
+
         if (existingReportIndex > -1) {
             manualReportsData[existingReportIndex] = reportData;
         } else {
@@ -934,12 +934,12 @@
         }
 
         const reportElement = document.querySelector('.main-content');
-        
+
         if (typeof Swal !== 'undefined') {
-            Swal.fire({ 
-                title: 'جاري التجهيز...', 
-                allowOutsideClick: false, 
-                didOpen: () => Swal.showLoading() 
+            Swal.fire({
+                title: 'جاري التجهيز...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
             });
         }
 
@@ -963,7 +963,7 @@
             }
 
             pdf.save(`التقرير_اليومي_${document.getElementById('reportDate').value}.pdf`);
-            
+
             if (typeof Swal !== 'undefined') {
                 Swal.close();
             }
@@ -976,7 +976,7 @@
         const reportDateInput = document.getElementById('reportDate');
         const revenueDate = document.getElementById('revenueDate');
         const expenseDate = document.getElementById('expenseDate');
-        
+
         const today = new Date().toISOString().split('T')[0];
         if (reportDateInput) reportDateInput.value = today;
         if (revenueDate) revenueDate.value = today;

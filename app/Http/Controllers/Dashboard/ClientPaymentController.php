@@ -16,7 +16,7 @@ class ClientPaymentController extends Controller
             ->orderBy('date', 'desc')
             ->paginate(20);
 
-        return view('dashboard.client-payments.creat', compact('payments'));
+        return view('dashboard.client-payments', compact('payments'));
     }
 
     public function store(Request $request)
@@ -56,7 +56,7 @@ class ClientPaymentController extends Controller
             ]);
         }
 
-        return redirect()->route('dashboard.client-payments.index')->with('success', 'تم حفظ الدفعة بنجاح');
+        return redirect()->route('dashboard.client-payments')->with('success', 'تم حفظ الدفعة بنجاح');
     }
 
     public function update(Request $request, ClientPayment $clientPayment)
@@ -95,7 +95,7 @@ class ClientPaymentController extends Controller
             }
         }
 
-        return redirect()->route('dashboard.client-payments.index')->with('success', 'تم تحديث الدفعة بنجاح');
+        return redirect()->route('dashboard.client-payments')->with('success', 'تم تحديث الدفعة بنجاح');
     }
 
     public function destroy(ClientPayment $clientPayment)
@@ -107,6 +107,6 @@ class ClientPaymentController extends Controller
             ->delete();
 
         $clientPayment->delete();
-        return redirect()->route('dashboard.client-payments.index')->with('success', 'تم حذف الدفعة بنجاح');
+        return redirect()->route('dashboard.client-payments')->with('success', 'تم حذف الدفعة بنجاح');
     }
 }

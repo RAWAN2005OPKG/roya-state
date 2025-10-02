@@ -103,7 +103,7 @@
     // --- البيانات المجهزة من الخادم ---
     const selectedYear = @json($selectedYear);
     const previousYear = @json($previousYear);
-    const reportData = @json($reportData); 
+    const reportData = @json($reportData);
 
 
     // --- دوال مساعدة ---
@@ -185,13 +185,13 @@
     document.addEventListener('DOMContentLoaded', function() {
         const yearSelector = document.getElementById('yearSelector');
         const currentServerYear = selectedYear;
-        
+
         // ملء قائمة السنوات
         for (let year = new Date().getFullYear() + 1; year >= 2020; year--) {
             const option = new Option(year, year);
             yearSelector.add(option);
         }
-        
+
         // تحديد السنة المختارة حاليًا في القائمة
         yearSelector.value = currentServerYear;
 
@@ -199,7 +199,7 @@
         yearSelector.addEventListener('change', function() {
             const newYear = this.value;
             // بناء الرابط الجديد مع السنة المختارة
-            window.location.href = `{{ route('report.annual') }}?year=${newYear}`;
+        window.location.href = `{{ route('dashboard.report.annual') }}?year=${newYear}`;
         });
 
         // إنشاء التقرير بالبيانات التي تم تحميلها من الخادم

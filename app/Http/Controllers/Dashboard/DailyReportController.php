@@ -15,7 +15,7 @@ class DailyReportController extends Controller
         $reportDate = $request->input('report_date', now()->toDateString());
         $manualReport = ManualReport::where('report_date', $reportDate)->first();
         $sales = Sale::whereDate('sale_date', $reportDate)->get();
-        $expenses = Expense::whereDate('expense_date', $reportDate)->get();
+        $expenses = Expense::whereDate('date', $reportDate)->get();
 
         if ($request->ajax()) {
             return response()->json([
@@ -25,7 +25,7 @@ class DailyReportController extends Controller
             ]);
         }
 
-        return view('dashboard', compact('manualReport', 'sales', 'expenses', 'reportDate'));
+        return view('dashboard.daily', compact('manualReport', 'sales', 'expenses', 'reportDate'));
     }
 
     public function store(Request $request)
@@ -45,7 +45,8 @@ class DailyReportController extends Controller
                 'decisions' => $validated['decisions'] ?? null,
             ]
         );
+         return redirect()->route('dashboard')->with('success', 'تم حفظ التقرير اليومي بنجاح');
 
-        return redirect()->route('dashboard.daily.index')->with('success', 'تم حفظ التقرير اليومي بنجاح');
+
     }
 }

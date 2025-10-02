@@ -9,6 +9,17 @@ use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
+
+    public function index()
+    {
+
+        $customers = Customer::latest()->get();
+
+        return view('dashboard.customers', [
+            'customers' => $customers
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -38,6 +49,6 @@ class CustomerController extends Controller
 
         Customer::create($validated);
 
-        return back()->with('success', 'تم حفظ العميل بنجاح');
+        return redirect()->route('dashboard.customers.index')->with('success', 'تم حفظ العميل بنجاح');
     }
 }

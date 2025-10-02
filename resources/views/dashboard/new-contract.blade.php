@@ -532,5 +532,4 @@
         togglePaymentDetails();
     });
 </script>
-@endsection
-
+@endpush
