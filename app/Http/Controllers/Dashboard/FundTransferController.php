@@ -4,17 +4,16 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\FundTransfer;
+use App\Models\FundsTransfer; // سننشئ هذا الموديل في الخطوة التالية
 
-class FundTransferController extends Controller
+class FundsTransferController extends Controller
 {
-
     public function store(Request $request)
     {
         $validated = $request->validate([
             'date' => ['required', 'date'],
-            'from_account' => ['required', 'string', 'max:50'],
-            'to_account' => ['required', 'string', 'max:50', 'different:from_account'],
+            'from_account' => ['required', 'string', 'in:cash,cheques,bank'],
+            'to_account' => ['required', 'string', 'in:cash,cheques,bank', 'different:from_account'],
             'name' => ['required', 'string', 'max:255'],
             'id_number' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:50'],
@@ -23,9 +22,8 @@ class FundTransferController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        FundTransfer::create($validated);
+        FundsTransfer::create($validated);
 
-
-        return redirect()->route('dashboard.prbancascheq')->with('success', 'تم الإضافة  بنجاح!');
+        return redirect()->route('dashboard.treasury')->with('success', 'تم تسجيل عملية التحويل بنجاح!');
     }
 }

@@ -986,7 +986,7 @@
 <div id="paymentModal" class="modal">
     <div class="modal-content">
         <h2 id="paymentModalTitle">إضافة دفعة جديدة</h2>
-        <form id="paymentForm" action="{{ route('dashboard.customer') }}" method="POST">
+<form id="paymentForm" action="{{ route('dashboard.payments.store') }}" method="POST">
             @csrf
             <input type="hidden" id="paymentId">
             <input type="hidden" id="paymentClientId">

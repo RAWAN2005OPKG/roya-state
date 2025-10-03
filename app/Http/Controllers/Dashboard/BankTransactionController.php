@@ -40,7 +40,7 @@ class BankTransactionController extends Controller
         BankTransaction::create($validated);
 
 
-        return redirect()->route('dashboard.prbancascheq')->with('success', 'تم الإضافة  بنجاح!');
+        return redirect()->route('dashboard.bank.index')->with('success', 'تم تسجيل الحركة البنكية بنجاح!');
     }
 }
 

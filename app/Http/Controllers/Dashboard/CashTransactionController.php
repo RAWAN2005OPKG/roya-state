@@ -16,7 +16,6 @@ class CashTransactionController extends Controller
             'amount' => ['required', 'numeric', 'min:0.01'],
             'currency' => ['required', 'string', 'max:10'],
             'project_name' => ['nullable', 'string', 'max:255'],
-            'source' => ['nullable', 'string', 'max:255'],
             'beneficiary' => ['nullable', 'string', 'max:255'],
             'operator' => ['required', 'string', 'max:255'],
             'operator_role' => ['nullable', 'string', 'max:255'],
@@ -28,7 +27,6 @@ class CashTransactionController extends Controller
 
         CashTransaction::create($validated);
 
-
-        return redirect()->route('dashboard.prbancascheq')->with('success', 'تم الإضافة  بنجاح!');
+        return redirect()->route('dashboard.cash.index')->with('success', 'تم تسجيل حركة الكاش بنجاح!');
     }
 }

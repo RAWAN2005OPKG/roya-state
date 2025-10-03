@@ -37,6 +37,6 @@ class ChequeController extends Controller
         Cheque::create($validated);
 
 
-        return redirect()->route('dashboard.prbancascheq')->with('success', 'تم الإضافة  بنجاح!');
+        return redirect()->route('dashboard.cheques.index')->with('success', 'تمت إضافة الشيك بنجاح!');
     }
 }

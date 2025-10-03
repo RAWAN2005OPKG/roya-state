@@ -101,7 +101,7 @@
                         <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                     </li>
                     <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.main') }}" class="menu-link">
+                        <a href="{{url('dashboard.treasury') }}" class="menu-link">
                             <span class="svg-icon menu-icon"></span>
                             <span class="menu-text">الخزينة العامة</span>
                         </a>

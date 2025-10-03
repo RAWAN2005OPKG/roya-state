@@ -19,10 +19,10 @@ use App\Http\Controllers\DashboardController;
 Auth::routes();
 
 Route::view('/', 'dashboard.login')->name('login.page');
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
- Route::get('prbancascheq', [App\Http\Controllers\Dashboard\DashboardController::class, 'index'])->name('prbancascheq');
+ Route::get('prbancascheq', [App\Http\Controllers\Dashboard\DashboardController::class, 'index'])->name('home');
 
 
 Route::get('projects', [App\Http\Controllers\Dashboard\ProjectController::class, 'index'])->name("project.index");
@@ -37,10 +37,32 @@ Route::delete('projects', [App\Http\Controllers\Dashboard\ProjectController::cla
 
     Route::resource('receipt-vouchers', App\Http\Controllers\Dashboard\ReceiptVoucherController::class);
 
-    Route::resource('payment-vouchers', App\Http\Controllers\Dashboard\PaymentVoucherController::class);
-    Route::resource('cash', App\Http\Controllers\Dashboard\CashTransactionController::class);
-    Route::resource('bank', App\Http\Controllers\Dashboard\BankTransactionController::class);
-    Route::resource('cheques', App\Http\Controllers\Dashboard\ChequeController::class);
+   Route::get('/treasury', function () {
+        return view('dashboard.treasury');
+    })->name('treasury');
+    Route::get('/contracts/create', [App\Http\Controllers\Dashboard\ContractController::class, 'create'])->name('contracts.create');
+    Route::post('/contracts', [App\Http\Controllers\Dashboard\ContractController::class, 'store'])->name('contracts.store');
+    Route::get('/cash', function() {
+        $transactions = \App\Models\CashTransaction::latest()->get();
+        return view('dashboard.cash', compact('transactions'));
+    })->name('cash.index');
+    Route::post('/cash', [App\Http\Controllers\Dashboard\CashTransactionController::class, 'store'])->name('cash.store');
+    Route::get('/bank', function() {
+        $transactions = \App\Models\BankTransaction::latest()->get();
+        return view('dashboard.bank', compact('transactions'));
+    })->name('bank.index');
+    Route::post('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'store'])->name('bank.store');
+    Route::get('/cheques', function() {
+        $cheques = \App\Models\Cheque::latest()->get();
+        return view('dashboard.cheques', compact('cheques'));
+    })->name('cheques.index');
+    Route::post('/cheques', [App\Http\Controllers\Dashboard\ChequeController::class, 'store'])->name('cheques.store');
+    Route::post('/project-transfers', [App\Http\Controllers\Dashboard\ProjectTransferController::class, 'store'])->name('project-transfers.store');
+    Route::get('/general-ledger', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('general-ledger.index');
+    Route::post('/funds-transfers', [App\Http\Controllers\Dashboard\FundsTransferController::class, 'store'])->name('funds-transfers.store');
+Route::get('/treasury', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('treasury');
+Route::get('/payments', [App\Http\Controllers\Dashboard\PaymentVoucherController::class, 'index'])->name('payments.index');
+    Route::get('/add-transaction', [App\Http\Controllers\Dashboard\DashboardController::class, 'index'])->name('add_transaction.create');
 
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class);
@@ -58,6 +80,7 @@ Route::delete('projects', [App\Http\Controllers\Dashboard\ProjectController::cla
      Route::delete('contracts/{contract}', [App\Http\Controllers\Dashboard\ContractController::class, 'destroy'])->name('dashboard.contracts.destroy');
 
     Route::resource('customers', App\Http\Controllers\Dashboard\CustomerController::class);
+Route::post('/payments', [App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('payments.store');
 
      Route::get('daily', [App\Http\Controllers\Dashboard\DailyReportController::class, 'index'])->name('dashboard');
      Route::post('dashboard/daily', [App\Http\Controllers\Dashboard\DailyReportController::class, 'store'])->name('dashboard.daily.store');

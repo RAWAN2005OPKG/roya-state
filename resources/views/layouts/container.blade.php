@@ -273,7 +273,7 @@
 		<!--end::Global Config-->
 		@yield('script')
 		@stack('scripts')
-
+        @yield('scripts')
 	</body>
 	<!--end::Body-->
 </html>
