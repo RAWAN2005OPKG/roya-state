@@ -21,25 +21,7 @@
     </div>
 
 
-    <div class="col-lg-6">
-        <!--begin::Card-->
-        <div class="card card-custom gutter-b">
-            <!--begin::Header-->
-            <div class="card-header h-auto">
-                <!--begin::Title-->
-                <div class="card-title py-5">
-                    <h3 class="card-label">Line Chart 10</h3>
-                </div>
-                <!--end::Title-->
-            </div>
-            <!--end::Header-->
-            <div class="card-body">
-                <!--begin::Chart-->
-                <div id="chart_10"></div>
-                <!--end::Chart-->
-            </div>
-        </div>
-        <!--end::Card-->
+
     </div>
     <div class="col-lg-6">
         <!--begin::Card-->
@@ -235,41 +217,7 @@
 
    <script>
 
-        var _demo3 = function () {
-		const apexChart = "#chart_10";
-		var options = {
-			series: [{
-				name: "Desktops",
-				data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
-			}],
-			chart: {
-				height: 350,
-				type: 'line',
-				zoom: {
-					enabled: false
-				}
-			},
-			dataLabels: {
-				enabled: false
-			},
-			stroke: {
-				curve: 'straight'
-			},
-			grid: {
-				row: {
-					colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-					opacity: 0.5
-				},
-			},
-			xaxis: {
-				categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-			},
-			colors: [primary]
-		};
 
-		var chart = new ApexCharts(document.querySelector(apexChart), options);
-		chart.render();
-	}
     var _demo2 = function () {
 		const apexChart = "#chart_2";
 		var options = {

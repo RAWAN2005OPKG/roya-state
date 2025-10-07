@@ -120,9 +120,6 @@
 </style>
 @endsection
 
-{{-- ================================================================= --}}
-{{--  قسم المحتوى (HTML) - تم إصلاح الأخطاء وإضافة الحقول المفقودة --}}
-{{-- ================================================================= --}}
 @section('content')
 <main class="main-content">
     <!-- رأس الصفحة -->
@@ -245,11 +242,85 @@
         </form>
     </div>
 </main>
+
+<div class="table-container" style="background-color: #fff; padding: 30px; border-radius: 16px; box-shadow: var(--shadow); margin-top: 30px; overflow-x: auto;">
+
+    <!-- رأس الجدول وأزرار التحكم -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid var(--border-color);">
+        <h2 style="font-size: 1.8rem; color: var(--primary-color); margin: 0; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-list-ul"></i> المصروفات المسجلة
+        </h2>
+        
+        <!-- مجموعة أزرار التحكم -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{{ route('dashboard.expenses.create') }}" style="background-color: var(--primary-color); color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-plus"></i> إضافة جديد
+            </a>
+            <a href="{{ route('dashboard.expenses.trash.index') }}" style="background-color: #f3f4f6; color: #4b5563; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-trash"></i> سلة المحذوفات
+            </a>
+            
+            <!-- أزرار التصدير والطباعة -->
+            <a href="{{ route('dashboard.expenses.export.excel') }}" style="background-color: #107c41; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-file-excel"></i> Excel
+            </a>
+            <a href="#" style="background-color: #b91c1c; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-file-pdf"></i> PDF
+            </a>
+            <button onclick="window.print()" style="background-color: #6b7280; color: #fff; padding: 8px 15px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border: none; cursor: pointer; font-family: inherit;">
+                <i class="fas fa-print"></i> طباعة
+            </button>
+        </div>
+    </div>
+
+    <!-- رسالة النجاح -->
+    @if(session('success'))
+        <div style="padding: 15px; background-color: #d1fae5; color: #065f46; border-radius: 8px; margin-bottom: 20px;">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <!-- جدول البيانات -->
+    <table style="width: 100%; border-collapse: collapse; text-align: right;">
+        <thead style="background-color: var(--light-bg);">
+            <tr>
+                <th style="padding: 12px 15px; border-bottom: 2px solid var(--border-color);">التاريخ</th>
+                <th style="padding: 12px 15px; border-bottom: 2px solid var(--border-color);">المستفيد</th>
+                <th style="padding: 12px 15px; border-bottom: 2px solid var(--border-color);">المبلغ</th>
+                <th style="padding: 12px 15px; border-bottom: 2px solid var(--border-color);">طريقة الدفع</th>
+                <th style="padding: 12px 15px; border-bottom: 2px solid var(--border-color);">تحكم</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($expenses as $expense)
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 12px 15px;">{{ $expense->date->format('Y-m-d') }}</td>
+                    <td style="padding: 12px 15px;">{{ $expense->payee }}</td>
+                    <td style="padding: 12px 15px;">{{ number_format($expense->amount, 2) }} {{ $expense->currency }}</td>
+                    <td style="padding: 12px 15px;">{{ $expense->payment_method }}</td>
+                    <td style="padding: 12px 15px; display: flex; gap: 10px;">
+                        <!-- زر التعديل -->
+                        <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" style="color: #2563eb; text-decoration: none; font-weight: 600;">تعديل</a>
+
+                        <!-- زر الحذف (نقل إلى السلة) -->
+                        <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من نقل هذا المصروف إلى سلة المحذوفات؟');" style="margin:0;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" style="background: none; border: none; color: #dc2626; cursor: pointer; font-weight: 600; padding: 0; font-family: inherit; font-size: inherit;">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">لا توجد مصروفات مسجلة حتى الآن.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
 @endsection
 
-{{-- ================================================================= --}}
-{{--  قسم الجافاسكريبت (JavaScript) - الكود النهائي والمبسط         --}}
-{{-- ================================================================= --}}
 @section('script')
 <script>
 document.addEventListener('DOMContentLoaded', function() {

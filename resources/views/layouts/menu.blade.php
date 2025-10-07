@@ -118,6 +118,13 @@
                             <span class="menu-text">المستثمرون</span>
                         </a>
                     </li>
+                    <li class="menu-item" aria-haspopup="true">
+                     <a href="{{ url('dashboard.investments.index') }}" class="menu-link">
+                   <span class="svg-icon menu-icon"></span>
+                   <span class="menu-text">الاستثمارات</span>
+                    </a>
+                        </li>
+
                     <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
                         <a href="javascript:;" class="menu-link menu-toggle">
                             <span class="svg-icon menu-icon"></span>

@@ -1026,27 +1026,23 @@
                 <!-- قسم تفاصيل البنك الديناميكي للدفعة -->
                 <div id="paymentBankDetailsSection" class="dynamic-section">
                     <h3 class="section-header"><i class="fas fa-bank"></i> تفاصيل المعاملة البنكية</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="paymentBankName">اختر البنك</label>
-                            <select id="paymentBankName">
-                                <option value="">-- اختر من القائمة --</option>
-                                <option value="بنك القاهرة عمان">بنك القاهرة عمان</option>
-                                <option value="بنك الصفا">بنك الصفا</option>
-                                <option value="بنك فلسطين">بنك فلسطين</option>
-                                <option value="البنك العربي">البنك العربي</option>
-                                <option value="other">أخرى (حدد)</option>
-                            </select>
-                        </div>
-                        <div class="form-group" id="paymentOtherBankNameGroup" style="display: none;">
-                            <label for="paymentOtherBankName">اسم البنك</label>
-                            <input type="text" id="paymentOtherBankName" placeholder="اكتب اسم البنك هنا">
-                        </div>
-                        <div class="form-group" id="paymentOtherBankBranchGroup" style="display: none;">
-                            <label for="paymentOtherBankBranch">اسم فرع البنك</label>
-                            <input type="text" id="paymentOtherBankBranch" placeholder="اكتب اسم الفرع هنا">
-                        </div>
+               <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="senderBank">البنك المرسل</label>
+                        <select id="senderBank" name="sender_bank"><option value="">-- اختر البنك --</option><option value="بنك القاهرة عمان">بنك القاهرة عمان</option><option value="بنك الصفا">بنك الصفا</option><option value="بنك فلسطين">بنك فلسطين</option><option value="البنك العربي">البنك العربي</option><option value="other">أخرى</option></select>
                     </div>
+                    <div class="form-group hidden" id="otherSenderBankGroup"><label for="otherSenderBank">اسم البنك المرسل (أخرى)</label><input type="text" id="otherSenderBank" name="other_sender_bank"></div>
+                    <div class="form-group"><label for="transactionId">رقم التحويلة</label><input type="text" id="transactionId" name="transaction_id"></div>
+
+               <div class="form-group">
+                        <label for="senderBank">البنك المستقبل</label>
+                        <select id="senderBank" name="sender_bank"><option value="">-- اختر البنك --</option><option value="بنك القاهرة عمان">بنك القاهرة عمان</option><option value="بنك الصفا">بنك الصفا</option><option value="بنك فلسطين">بنك فلسطين</option><option value="البنك العربي">البنك العربي</option><option value="other">أخرى</option></select>
+                    </div>
+                    <div class="form-group hidden" id="otherSenderBankGroup"><label for="otherSenderBank">اسم البنك المرسل (أخرى)</label><input type="text" id="otherSenderBank" name="other_sender_bank"></div>
+                    <div class="form-group"><label for="transactionId">رقم التحويلة</label><input type="text" id="transactionId" name="transaction_id"></div>
+                </div>
+                </div>
                 </div>
                 <!-- قسم تفاصيل الشيك الديناميكي للدفعة -->
                 <div id="paymentCheckDetailsSection" class="dynamic-section">
