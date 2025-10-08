@@ -11,11 +11,29 @@ use Maatwebsite\Excel\Facades\Excel;
 class ExpenseController extends Controller
 {
 
-    public function index()
-    {
-        $expenses = Expense::latest()->get();
-        return view ("dashboard.expenses", ['expenses' => $expenses]);
+  public function index(Request $request)
+{
+    $query = Expense::query();
+
+    if ($request->has('search') && $request->search != '') {
+        $searchTerm = $request->search;
+        $query->where(function($q) use ($searchTerm) {
+            $q->where('payee', 'LIKE', "%{$searchTerm}%")
+              ->orWhere('notes', 'LIKE', "%{$searchTerm}%")
+              ->orWhere('payment_method', 'LIKE', "%{$searchTerm}%")
+              ->orWhere('transaction_id', 'LIKE', "%{$searchTerm}%");
+        });
     }
+
+    $query->latest();
+
+    $expenses = $query->paginate(15);
+
+    return view('dashboard.expenses.index', [
+        'expenses' => $expenses,
+        'search' => $request->search ?? ''
+    ]);
+}
 
 
     public function create()

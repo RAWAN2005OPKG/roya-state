@@ -273,7 +273,10 @@
 		<!--end::Global Config-->
 		@yield('script')
 		@stack('scripts')
+
         @yield('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 	</body>
 	<!--end::Body-->
 </html>

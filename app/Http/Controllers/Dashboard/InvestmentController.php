@@ -12,11 +12,40 @@ use Maatwebsite\Excel\Facades\Excel;
 class InvestmentController extends Controller
 {
 
-    public function index()
-    {
-        $investments = Investment::with('investor')->latest()->get();
-        return view('dashboard.investments.index', compact('investments'));
+   public function index(Request $request)
+{
+    // 1. ابدأ ببناء استعلام (Query) مع جلب العلاقة
+    $query = Investment::with('investor');
+
+    // 2. تطبيق البحث
+    if ($request->has('search') && $request->search != '') {
+        $searchTerm = $request->search;
+        $query->where(function($q) use ($searchTerm) {
+            $q->where('project', 'LIKE', "%{$searchTerm}%")
+              ->orWhere('type', 'LIKE', "%{$searchTerm}%")
+              // البحث في الجدول المرتبط (investors)
+              ->orWhereHas('investor', function ($subQuery) use ($searchTerm) {
+                  $subQuery->where('name', 'LIKE', "%{$searchTerm}%");
+              });
+        });
     }
+
+    $sortBy = $request->get('sort_by', 'date');
+    $sortOrder = $request->get('sort_order', 'desc');
+    $allowedSortBy = ['date', 'project', 'amount', 'share_percentage'];
+    if (in_array($sortBy, $allowedSortBy)) {
+        $query->orderBy($sortBy, $sortOrder);
+    }
+
+    $investments = $query->paginate(15);
+
+    return view('dashboard.investments.index', [
+        'investments' => $investments,
+        'search' => $request->search ?? '',
+        'sort_by' => $sortBy,
+        'sort_order' => $sortOrder,
+    ]);
+}
 
 
     public function create()
