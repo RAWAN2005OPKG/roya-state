@@ -12,6 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+       $schedule->command('app:check-for-alerts')->daily(); // يمكنك تغيير daily() إلى everyMinute() للاختبار
+
         // $schedule->command('inspire')->hourly();
     }
 

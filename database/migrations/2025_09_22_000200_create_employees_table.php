@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->string('bank_name')->nullable();
             $table->string('other_bank_name')->nullable();
             $table->string('bank_branch')->nullable();
+             $table->softDeletes();
             $table->timestamps();
         });
     }

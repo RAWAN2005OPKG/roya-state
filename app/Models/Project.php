@@ -4,48 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; // ✅ تأكد من وجود هذا السطر
 
 class Project extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes; // ✅ تأكد من وجود SoftDeletes هنا
 
-    protected $fillable = [
-        'name',
-        'start_date',
-        'owner_name',
-        'owner_phone',
-        'owner_id',
-        'project_title',
-        'currency',
-        'apartment_price',
-        'down_payment',
-        'project_status',
-        'payment_method',
-        'cash_receiver',
-        'cash_receiver_other',
-        'cash_receiver_job',
-        'sender_bank',
-        'sender_bank_other',
-        'sender_branch',
-        'receiver_bank',
-        'receiver_bank_other',
-        'receiver_branch',
-        'transaction_id',
-        'check_number',
-        'check_owner',
-        'check_holder',
-        'check_due_date',
-        'check_receive_date',
-        'project_media',
-        'land_cost',
-        'excavation_cost',
-        'engineers_cost',
-        'licensing_cost',
-        'materials_cost',
-        'finishing_cost',
-        'total_budget',
-    ];
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $guarded = []; // استخدام guarded أسهل إذا كانت كل الحقول قابلة للتعبئة
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'start_date' => 'date',
         'check_due_date' => 'date',

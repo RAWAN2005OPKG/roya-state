@@ -143,7 +143,6 @@
                         <ul class="navi flex-column navi-hover py-2">
                             <li class="navi-item"><a href="#" onclick="printTable()" class="navi-link"><i class="la la-print"></i> طباعة</a></li>
                             <li class="navi-item"><a href="{{ route('dashboard.contracts.export.excel') }}" class="navi-link"><i class="la la-file-excel-o"></i> Excel</a></li>
-                            <li class="navi-item"><a href="{{ route('dashboard.contracts.export.pdf') }}" class="navi-link"><i class="la la-file-pdf-o"></i> PDF</a></li>
                         </ul>
                     </div>
                 </div>
@@ -181,7 +180,9 @@
                                    </a>
                                     <a href="{{ route('dashboard.contracts.show', $contract->id) }}" class="btn-action" title="عرض"><i class="fas fa-eye"></i></a>
                                     <a href="{{ route('dashboard.contracts.edit', $contract->id) }}" class="btn-action" title="تعديل"><i class="fas fa-edit"></i></a>
-                               <form action="{{ route('dashboard.contracts.destroy', $contract->id ) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟');">
+                                  <a href="{{ route('dashboard.contracts.export.pdf', $contract->id) }}" class="btn btn-sm btn-clean btn-icon" title="تصدير PDF"><i class="fas fa-file-pdf text-danger"></i></a>
+
+                                    <form action="{{ route('dashboard.contracts.destroy', $contract->id ) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" class="btn-action delete" title="حذف" onclick="confirmDelete({{ $contract->id }})">
