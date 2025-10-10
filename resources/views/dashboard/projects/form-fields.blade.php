@@ -1,10 +1,8 @@
           <div class="form-section">
                 <div class="section-header"><i class="fas fa-info-circle"></i><h3>المعلومات الأساسية</h3></div>
                 <div class="form-grid">
-                    <div class="form-group"><label>تاريخ الاستحقاق</label><input type="date" id="dueDate" name="due_date" required></div>
-                    <div class="form-group"><label for="owner_name" class="required">اسم مالك المشروع</label><input type="text" id="owner_name" name="owner_name" placeholder="مثال: أحمد علي" required></div>
-                    <div class="form-group"><label for="owner_phone" class="required">رقم الجوال</label><input type="text" id="owner_phone" name="owner_phone" placeholder="مثال: 0599123456" required></div>
-                    <div class="form-group"><label for="owner_id" class="required">رقم الهوية</label><input type="text" id="owner_id" name="owner_id" placeholder="مثال: 412345678" required></div>
+                    <div class="form-group"><label>تاريخ  الانشاء</label><input type="date" id="dueDate" name="due_date" required></div>
+
                     <div class="form-group"><label for="name" class="required">اسم المشروع</label><input type="text" id="name" name="project_name" placeholder="أدخل اسم المشروع" required></div>
                     <div class="form-group"><label for="project_title" class="required">عنوان المشروع</label><input type="text" id="project_title" name="project_title" placeholder="مثال: القدس" required></div>
                     <div class="form-group"><label for="currency" class="required">نوع العملة</label><select id="currency" name="currency" required><option value="">اختر العملة</option><option value="ils"> شيكل</option><option value="jod">دينار</option><option value="usd">دولار</option></select></div>
@@ -186,16 +184,3 @@
                 </div>
             </div>
 
-            <!-- 4. التكاليف التقديرية -->
-            <div class="form-section">
-                <div class="section-header"><i class="fas fa-calculator"></i><h3>التكاليف التقديرية للمشروع</h3></div>
-                <div class="form-grid">
-                    <div class="form-group"><label for="land_cost">تكلفة الأرض</label><div class="input-with-currency"><input type="number" class="cost-input" id="land_cost" name="land_cost" placeholder="0"><span class="currency"> </span></div></div>
-                    <div class="form-group"><label for="excavation_cost">تكلفة الحفر</label><div class="input-with-currency"><input type="number" class="cost-input" id="excavation_cost" name="excavation_cost" placeholder="0"><span class="currency"> </span></div></div>
-                    <div class="form-group"><label for="engineers_cost">تكلفة المهندسين</label><div class="input-with-currency"><input type="number" class="cost-input" id="engineers_cost" name="engineers_cost" placeholder="0"><span class="currency"> </span></div></div>
-                    <div class="form-group"><label for="licensing_cost">تكاليف التراخيص</label><div class="input-with-currency"><input type="number" class="cost-input" id="licensing_cost" name="licensing_cost" placeholder="0"><span class="currency"> </span></div></div>
-                    <div class="form-group"><label for="materials_cost">تكاليف المواد الخام</label><div class="input-with-currency"><input type="number" class="cost-input" id="materials_cost" name="materials_cost" placeholder="0"><span class="currency"> </span></div></div>
-                    <div class="form-group"><label for="finishing_cost">تكاليف التشطيبات</label><div class="input-with-currency"><input type="number" class="cost-input" id="finishing_cost" name="finishing_cost" placeholder="0"><span class="currency"> </span></div></div>
-                    <div class="form-group full-width"><label for="total_budget">إجمالي التكاليف التقديرية</label><div class="input-with-currency"><input type="text" id="total_budget" name="total_budget" readonly><span class="currency"> </span></div></div>
-                </div>
-            </div>
