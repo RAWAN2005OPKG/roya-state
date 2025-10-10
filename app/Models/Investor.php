@@ -14,6 +14,7 @@ class Investor extends Model
         'id_number',
         'phone',
         'email',
+        'jobs',
         'address',
         'notes',
     ];

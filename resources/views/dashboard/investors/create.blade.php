@@ -10,8 +10,10 @@
         .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; box-sizing: border-box; }
         .btn-submit { background-color: #4f46e5; color: #fff; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
         .form-errors { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-    </style>
-@endsection
+        .payment-methods-group { display: flex; gap: 25px; align-items: center; flex-wrap: wrap; padding: 10px 0; }
+        .payment-methods-group label { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; cursor: pointer; }
+        .payment-methods-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+    </style>@endsection
 
 @section('content')
 <main class="main-content">
@@ -36,12 +38,16 @@
                 <input type="text" id="name" name="name" value="{{ old('name') }}" required>
             </div>
             <div class="form-group">
-                <label for="id_number">رقم الهوية</label>
+                <label for="id_number" >رقم الهوية او رقم الجواز</label>
                 <input type="text" id="id_number" name="id_number" value="{{ old('id_number') }}">
             </div>
             <div class="form-group">
                 <label for="phone">رقم الجوال</label>
                 <input type="tel" id="phone" name="phone" value="{{ old('phone') }}">
+            </div>
+              <div class="form-group">
+                <label for="jobs">وظيفة المستثمر</label>
+                <input type="text" id="address" name="jobs" value="{{ old('jobs') }}">
             </div>
             <div class="form-group">
                 <label for="email">البريد الإلكتروني</label>

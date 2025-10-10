@@ -22,7 +22,7 @@ Auth::routes();
 
 
 Route::view('/', 'dashboard.login')->name('login.page');
-Route::get('/home', [ zHomeController::class, 'index'])->name('home');
+Route::get('/home', [ HomeController::class, 'index'])->name('home');
 
 
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
