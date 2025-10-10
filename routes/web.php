@@ -22,79 +22,78 @@ Auth::routes();
 
 
 Route::view('/', 'dashboard.login')->name('login.page');
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/home', [ zHomeController::class, 'index'])->name('home');
 
 
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
 
-    Route::get('/expenses/export/excel', [ExpenseController::class, 'exportExcel'])->name('expenses.export.excel');
-    Route::prefix('expenses/trash')->name('expenses.trash.')->controller(ExpenseController::class)->group(function () {
+    Route::get('/expenses/export/excel', [ App\Http\Controllers\Dashboard\ExpenseController::class, 'exportExcel'])->name('expenses.export.excel');
+    Route::prefix('expenses/trash')->name('expenses.trash.')->controller( App\Http\Controllers\Dashboard\ExpenseController::class)->group(function () {
         Route::get('/', 'trash')->name('index');
         Route::put('/{id}/restore', 'restore')->name('restore');
         Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
     });
-    Route::resource('expenses', ExpenseController::class);
+    Route::resource('expenses',  App\Http\Controllers\Dashboard\ExpenseController::class);
 
     // 3. المستثمرون (Investors)
-    Route::get('/investors/export/excel', [InvestorController::class, 'exportExcel'])->name('investors.export.excel');
-    Route::prefix('investors/trash')->name('investors.trash.')->controller(InvestorController::class)->group(function () {
+    Route::get('/investors/export/excel', [ App\Http\Controllers\Dashboard\InvestorController::class, 'exportExcel'])->name('investors.export.excel');
+    Route::prefix('investors/trash')->name('investors.trash.')->controller( App\Http\Controllers\Dashboard\InvestorController::class)->group(function () {
         Route::get('/', 'trash')->name('index');
         Route::put('/{id}/restore', 'restore')->name('restore');
         Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
     });
-    Route::resource('investors', InvestorController::class)->except(['show']);
+    Route::resource('investors',  App\Http\Controllers\Dashboard\InvestorController::class)->except(['show']);
 
     // 4. الاستثمارات (Investments)
-    Route::get('/investments/export/excel', [InvestmentController::class, 'exportExcel'])->name('investments.export.excel');
-    Route::prefix('investments/trash')->name('investments.trash.')->controller(InvestmentController::class)->group(function () {
+    Route::get('/investments/export/excel', [ App\Http\Controllers\Dashboard\InvestmentController::class, 'exportExcel'])->name('investments.export.excel');
+    Route::prefix('investments/trash')->name('investments.trash.')->controller( App\Http\Controllers\Dashboard\InvestmentController::class)->group(function () {
         Route::get('/', 'trash')->name('index');
         Route::put('/{id}/restore', 'restore')->name('restore');
         Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
     });
-    Route::resource('investments', InvestmentController::class)->except(['show']);
+    Route::resource('investments',  App\Http\Controllers\Dashboard\InvestmentController::class)->except(['show']);
 
     // 5. العقود (Contracts)
-    Route::get('/contracts/export/excel', [ContractController::class, 'exportExcel'])->name('contracts.export.excel');
-    Route::get('/contracts/export/pdf/{id}', [ContractController::class, 'exportPdf'])->name('contracts.export.pdf');
-    Route::prefix('contracts/trash')->name('contracts.trash.')->controller(ContractController::class)->group(function () {
+    Route::get('/contracts/export/excel', [ App\Http\Controllers\Dashboard\ContractController::class, 'exportExcel'])->name('contracts.export.excel');
+    Route::get('/contracts/export/pdf/{id}', [ App\Http\Controllers\Dashboard\ContractController::class, 'exportPdf'])->name('contracts.export.pdf');
+    Route::prefix('contracts/trash')->name('contracts.trash.')->controller( App\Http\Controllers\Dashboard\ContractController::class)->group(function () {
         Route::get('/', 'trash')->name('index');
         Route::put('/{id}/restore', 'restore')->name('restore');
         Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
     });
-    Route::resource('contracts', ContractController::class);
+    Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController::class);
 
     // 6. العملاء (Customers)
-    Route::get('/customers/export/excel', [CustomerController::class, 'exportExcel'])->name('customers.export.excel');
-    Route::prefix('customers/trash')->name('customers.trash.')->controller(CustomerController::class)->group(function () {
+    Route::get('/customers/export/excel', [ App\Http\Controllers\Dashboard\CustomerController::class, 'exportExcel'])->name('customers.export.excel');
+    Route::prefix('customers/trash')->name('customers.trash.')->controller( App\Http\Controllers\Dashboard\CustomerController::class)->group(function () {
         Route::get('/', 'trash')->name('index');
         Route::put('/{id}/restore', 'restore')->name('restore');
         Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
     });
-    Route::resource('customers', CustomerController::class)->except(['show']);
+    Route::resource('customers',  App\Http\Controllers\Dashboard\CustomerController::class)->except(['show']);
 
     // 7. الموظفون (Employees)
-    Route::get('/employees/export/excel', [EmployeeController::class, 'exportExcel'])->name('employees.export.excel');
-    Route::get('/employees/{employee}/pay', [EmployeeController::class, 'showPayForm'])->name('employees.pay.form');
-    Route::post('/employees/pay', [EmployeeController::class, 'storePayment'])->name('employees.pay.store');
-    Route::prefix('employees/trash')->name('employees.trash.')->controller(EmployeeController::class)->group(function () {
+    Route::get('/employees/export/excel', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'exportExcel'])->name('employees.export.excel');
+    Route::get('/employees/{employee}/pay', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'showPayForm'])->name('employees.pay.form');
+    Route::post('/employees/pay', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'storePayment'])->name('employees.pay.store');
+    Route::prefix('employees/trash')->name('employees.trash.')->controller(App\Http\Controllers\Dashboard\EmployeeController::class)->group(function () {
         Route::get('/', 'trash')->name('index');
         Route::put('/{id}/restore', 'restore')->name('restore');
         Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
     });
-    Route::resource('employees', EmployeeController::class);
+    Route::resource('employees', App\Http\Controllers\Dashboard\EmployeeController::class);
 
     // 8. المشاريع (Projects)
-    Route::get('/projects/export/excel', [ProjectController::class, 'exportExcel'])->name('projects.export.excel');
-    Route::prefix('projects/trash')->name('projects.trash.')->controller(ProjectController::class)->group(function () {
+    Route::get('/projects/export/excel', [App\Http\Controllers\Dashboard\ProjectController::class, 'exportExcel'])->name('projects.export.excel');
+    Route::prefix('projects/trash')->name('projects.trash.')->controller(App\Http\Controllers\Dashboard\ProjectController::class)->group(function () {
         Route::get('/', 'trash')->name('index');
         Route::put('/{id}/restore', 'restore')->name('restore');
         Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
     });
-    Route::resource('projects', ProjectController::class);
+    Route::resource('projects',App\Http\Controllers\Dashboard\ProjectController::class);
 
-    // 9. التقرير اليومي (Daily Report)
-    Route::get('/daily-report', [DailyReportController::class, 'index'])->name('daily.index');
-    Route::post('/daily-report', [DailyReportController::class, 'store'])->name('daily.store');
+    Route::get('/daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'index'])->name('daily.index');
+    Route::post('/daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'store'])->name('daily.store');
 
     Route::resource('receipt-vouchers', App\Http\Controllers\Dashboard\ReceiptVoucherController::class)->except(['show']);
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->except(['show']);

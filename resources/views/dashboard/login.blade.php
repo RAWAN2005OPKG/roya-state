@@ -7,7 +7,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
    <!--===============================================================================================-->
-	<link rel="icon" type="image/png" href="images/icons/favicon.ico"/>
+	<link rel="icon" type="image/png" href="4677.png"/>
 <!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="{{asset('Login_v3/vendor/bootstrap/css/bootstrap.min.css') }}">
 <!--===============================================================================================-->
@@ -40,7 +40,7 @@
 					</span>
 
 					<span class="login100-form-title p-b-34 p-t-27">
-						{{ __('Login') }}
+						{{ __('منصة الراية للاستثمار و العقارات ') }}
 					</span>
 
 					<div class="wrap-input100 validate-input" data-validate = "Enter Email">
