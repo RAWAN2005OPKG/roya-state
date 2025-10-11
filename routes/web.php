@@ -53,6 +53,18 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     });
     Route::resource('investments',  App\Http\Controllers\Dashboard\InvestmentController::class)->except(['show']);
 
+    Route::get('/reportproject/export/excel', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'exportExcel'])->name('dashboard.reportproject.export.excel');
+
+   Route::name('reportproject.')->group(function () {
+        Route::get('reportproject/trash', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'trash'])->name('trash.index');
+        Route::put('reportproject/trash/{id}/restore', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'restore'])->name('trash.restore');
+        Route::delete('reportproject/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'forceDelete'])->name('trash.forceDelete');
+
+        Route::get('reportproject/export/excel', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'exportExcel'])->name('export.excel');
+    });
+
+    Route::resource('reportproject', App\Http\Controllers\Dashboard\ReportProjectController::class);
+
     // 5. العقود (Contracts)
     Route::get('/contracts/export/excel', [ App\Http\Controllers\Dashboard\ContractController::class, 'exportExcel'])->name('contracts.export.excel');
     Route::get('/contracts/export/pdf/{id}', [ App\Http\Controllers\Dashboard\ContractController::class, 'exportPdf'])->name('contracts.export.pdf');

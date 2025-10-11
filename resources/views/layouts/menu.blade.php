@@ -141,9 +141,9 @@
                                     </a>
                                 </li>
                                 <li class="menu-item" aria-haspopup="true">
-                                    <a href="{{url('dashboard.add-project') }}" class="menu-link">
+                                    <a href="{{url('dashboard.reportproject.index') }}" class="menu-link">
                                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                                        <span class="menu-text">تسجيل مشروع جديد</span>
+                                        <span class="menu-text">تحليل جميع المشاريع</span>
                                     </a>
                                 </li>
                             </ul>
