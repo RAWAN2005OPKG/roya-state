@@ -133,10 +133,16 @@
                     <label for="date">تاريخ الاستثمار *</label>
                     <input type="date" id="date" name="date" value="{{ old('date', $investment->date->format('Y-m-d')) }}" required>
                 </div>
-
-                <div class="form-group">
-                    <label for="project">المشروع *</label>
-                    <input type="text" id="project" name="project" value="{{ old('project', $investment->project) }}" required>
+   <div class="form-group">
+                    <label for="projects">المشروع *</label>
+                    <select id="projects" name="projects" required>
+                        <option value="">-- اختر المشروع --</option>
+                        @foreach ($projects as $project)
+                            <option value="{{ $project->id }}" {{ old('projects', $investment->projects) == $project->id ? 'selected' : '' }}>
+                                {{ $project->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -174,40 +180,55 @@
 
                 <h3 class="section-title">بيانات الدفع</h3>
 
-                <div class="form-group">
-                    <label for="payment_method">طريقة الدفع</label>
-                    <select id="payment_method" name="payment_method">
-                        <option value="">-- اختر طريقة الدفع --</option>
-                        <option value="cash" @selected(old('payment_method', $investment->payment_method) == 'cash')>كاش</option>
-                        <option value="check" @selected(old('payment_method', $investment->payment_method) == 'check')>شيك</option>
-                        <option value="bank_transaction" @selected(old('payment_method', $investment->payment_method) == 'bank_transaction')>تحويل بنكي</option>
-                    </select>
-                </div>
+                  <div class="form-section">
+                    <h4 class="form-section-title">4. تفاصيل الدفع</h4>
+                    <div class="row">
+                        {{-- طرق الدفع --}}
+                        <div class="col-12 form-group mb-4">
+                            <label>طرق الدفع المستخدمة *</label>
+                            <div class="payment-methods-group">
+                                @php
+                                    $paymentMethods = explode(',', old('payment_method', $contract->payment_method));
+                                @endphp
+                                <label>
+                                    <input type="checkbox" name="payment_methods[]" value="cash" id="payment_cash" @if(in_array('cash', $paymentMethods)) checked @endif> كاش
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="payment_methods[]" value="check" id="payment_check" @if(in_array('check', $paymentMethods)) checked @endif> شيك
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="payment_methods[]" value="bank_transaction" id="payment_bank" @if(in_array('bank_transaction', $paymentMethods)) checked @endif> تحويل بنكي
+                                </label>
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label for="payee">لمن تم الدفع</label>
-                    <input type="text" id="payee" name="payee" value="{{ old('payee', $investment->payee) }}">
-                </div>
 
-                <div class="form-group">
-                    <label for="payment_date">تاريخ الدفع</label>
-                    <input type="date" id="payment_date" name="payment_date" value="{{ old('payment_date', $investment->payment_date?->format('Y-m-d')) }}">
-                </div>
-
-                {{-- تفاصيل بنكية تظهر فقط عند اختيار "تحويل بنكي" --}}
-                <div id="bank-details" class="hidden">
-                    <h3 class="section-title">تفاصيل بنكية</h3>
-                    <div class="form-group">
-                        <label for="bank_name">اسم البنك</label>
-                        <input type="text" id="bank_name" name="bank_name" value="{{ old('bank_name', $investment->bank_name) }}">
+                <div id="cash-details" class="form-section hidden">
+                    <h5 class="form-section-title" style="font-size: 1.1rem; border-color: #10b981;">تفاصيل الدفع النقدي</h5>
+                    <div class="row">
+                        <div class="col-md-4 form-group mb-3"><label>من استلم المبلغ</label><input type="text" name="cash_receiver" class="form-control" value="{{ old('cash_receiver', $contract->cash_receiver) }}"></div>
+                        <div class="col-md-4 form-group mb-3"><label>وظيفة المستلم</label><input type="text" name="cash_receiver_job" class="form-control" value="{{ old('cash_receiver_job', $contract->cash_receiver_job) }}"></div>
+                        <div class="col-md-4 form-group mb-3"><label>تاريخ الاستلام</label><input type="date" name="cash_receipt_date" class="form-control" value="{{ old('cash_receipt_date', $contract->cash_receipt_date ? $contract->cash_receipt_date->format('Y-m-d') : '') }}"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="other_bank_name">اسم بنك آخر</label>
-                        <input type="text" id="other_bank_name" name="other_bank_name" value="{{ old('other_bank_name', $investment->other_bank_name) }}">
+                </div>
+
+                <div id="bank-details" class="form-section hidden">
+                    <h5 class="form-section-title" style="font-size: 1.1rem; border-color: #3b82f6;">تفاصيل التحويل البنكي</h5>
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3"><label>البنك المرسل</label><input type="text" name="sender_bank" class="form-control" value="{{ old('sender_bank', $contract->sender_bank) }}"></div>
+                        <div class="col-md-6 form-group mb-3"><label>البنك المستقبل</label><input type="text" name="receiver_bank" class="form-control" value="{{ old('receiver_bank', $contract->receiver_bank) }}"></div>
+                        <div class="col-md-6 form-group mb-3"><label>رقم مرجع التحويل</label><input type="text" name="transaction_reference" class="form-control" value="{{ old('transaction_reference', $contract->transaction_reference) }}"></div>
+                        <div class="col-md-6 form-group mb-3"><label>تاريخ التحويل</label><input type="date" name="transaction_date" class="form-control" value="{{ old('transaction_date', $contract->transaction_date ? $contract->transaction_date->format('Y-m-d') : '') }}"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="transaction_id">رقم التحويلة</label>
-                        <input type="text" id="transaction_id" name="transaction_id" value="{{ old('transaction_id', $investment->transaction_id) }}">
+                </div>
+
+                <div id="check-details" class="form-section hidden">
+                    <h5 class="form-section-title" style="font-size: 1.1rem; border-color: #f59e0b;">تفاصيل الشيك</h5>
+                    <div class="row">
+                        <div class="col-md-4 form-group mb-3"><label>رقم الشيك</label><input type="text" name="check_number" class="form-control" value="{{ old('check_number', $contract->check_number) }}"></div>
+                        <div class="col-md-4 form-group mb-3"><label>اسم مالك الشيك</label><input type="text" name="check_owner" class="form-control" value="{{ old('check_owner', $contract->check_owner) }}"></div>
+                        <div class="col-md-4 form-group mb-3"><label>البنك المسحوب عليه</label><input type="text" name="check_bank" class="form-control" value="{{ old('check_bank', $contract->check_bank) }}"></div>
+                        <div class="col-md-4 form-group mb-3"><label>تاريخ الاستحقاق</label><input type="date" name="check_due_date" class="form-control" value="{{ old('check_due_date', $contract->check_due_date ? $contract->check_due_date->format('Y-m-d') : '') }}"></div>
                     </div>
                 </div>
 
@@ -231,17 +252,27 @@
 
 @section('script')
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const paymentSelect = document.getElementById('payment_method');
-        const bankDetails = document.getElementById('bank-details');
+      document.addEventListener('DOMContentLoaded', function () {
+            const cashCheckbox = document.getElementById('payment_cash');
+            const bankCheckbox = document.getElementById('payment_bank');
+            const checkCheckbox = document.getElementById('payment_check');
 
-        function toggleBankDetails() {
-            const isBank = paymentSelect.value === 'bank_transaction';
-            bankDetails.classList.toggle('hidden', !isBank);
-        }
+            const cashDetails = document.getElementById('cash-details');
+            const bankDetails = document.getElementById('bank-details');
+            const checkDetails = document.getElementById('check-details');
 
-        paymentSelect.addEventListener('change', toggleBankDetails);
-        toggleBankDetails();
-    });
+            function togglePaymentDetails() {
+                cashDetails.classList.toggle('hidden', !cashCheckbox.checked);
+                bankDetails.classList.toggle('hidden', !bankCheckbox.checked);
+                checkDetails.classList.toggle('hidden', !checkCheckbox.checked);
+            }
+
+            cashCheckbox.addEventListener('change', togglePaymentDetails);
+            bankCheckbox.addEventListener('change', togglePaymentDetails);
+            checkCheckbox.addEventListener('change', togglePaymentDetails);
+
+            // استدعاء عند التحميل لإظهار الأقسام الصحيحة بناءً على البيانات المحفوظة
+            togglePaymentDetails();
+        });
 </script>
 @endsection

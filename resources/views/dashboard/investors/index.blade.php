@@ -47,20 +47,17 @@
             <div style="padding: 15px; background-color: #d1fae5; color: #065f46; border-radius: 8px; margin-bottom: 20px;">{{ session('success') }}</div>
         @endif
 
-        <!-- 3. جدول البيانات مع ميزة الترتيب -->
         <div style="overflow-x: auto;">
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>
-                            {{-- رابط الترتيب حسب الاسم --}}
                             <a href="{{ route('dashboard.investors.index', ['sort_by' => 'name', 'sort_order' => ($sort_by == 'name' && $sort_order == 'asc') ? 'desc' : 'asc', 'search' => $search]) }}" class="sortable-link">
                                 الاسم
                                 @if($sort_by == 'name') <i class="fas fa-sort-{{ $sort_order == 'asc' ? 'up' : 'down' }}"></i> @endif
                             </a>
                         </th>
                         <th>
-                            {{-- رابط الترتيب حسب رقم الهوية --}}
                             <a href="{{ route('dashboard.investors.index', ['sort_by' => 'id_number', 'sort_order' => ($sort_by == 'id_number' && $sort_order == 'asc') ? 'desc' : 'asc', 'search' => $search]) }}" class="sortable-link">
                                 رقم الهوية
                                 @if($sort_by == 'id_number') <i class="fas fa-sort-{{ $sort_order == 'asc' ? 'up' : 'down' }}"></i> @endif
@@ -69,7 +66,6 @@
                         <th>الجوال</th>
                         <th>البريد الإلكتروني</th>
                         <th>
-                            {{-- رابط الترتيب حسب تاريخ الإنشاء --}}
                             <a href="{{ route('dashboard.investors.index', ['sort_by' => 'created_at', 'sort_order' => ($sort_by == 'created_at' && $sort_order == 'asc') ? 'desc' : 'asc', 'search' => $search]) }}" class="sortable-link">
                                 تاريخ الإضافة
                                 @if($sort_by == 'created_at') <i class="fas fa-sort-{{ $sort_order == 'asc' ? 'up' : 'down' }}"></i> @endif

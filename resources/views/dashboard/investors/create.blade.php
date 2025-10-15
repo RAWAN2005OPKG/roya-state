@@ -2,7 +2,6 @@
 @section('title', 'إضافة مستثمر جديد')
 
 @section('styles')
-    {{-- يمكنك نسخ نفس الأنماط من صفحة المصروفات هنا لتوحيد الشكل --}}
     <style>
         .form-container { background-color: #fff; padding: 30px; border-radius: 16px; max-width: 800px; margin: 40px auto; }
         .form-group { margin-bottom: 20px; }
@@ -47,7 +46,7 @@
             </div>
               <div class="form-group">
                 <label for="jobs">وظيفة المستثمر</label>
-                <input type="text" id="address" name="jobs" value="{{ old('jobs') }}">
+                <input type="text" id="jobs" name="jobs" value="{{ old('jobs') }}">
             </div>
             <div class="form-group">
                 <label for="email">البريد الإلكتروني</label>

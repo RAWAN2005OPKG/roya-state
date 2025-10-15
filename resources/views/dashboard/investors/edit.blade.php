@@ -2,7 +2,6 @@
 @section('title', 'تعديل بيانات المستثمر')
 
 @section('styles')
-    {{-- يمكنك نسخ نفس الأنماط من صفحة الإضافة --}}
     <style>
         .form-container { background-color: #fff; padding: 30px; border-radius: 16px; max-width: 800px; margin: 40px auto; }
         .form-group { margin-bottom: 20px; }
@@ -34,7 +33,7 @@
 
         <form action="{{ route('dashboard.investors.update', $investor->id) }}" method="POST">
             @csrf
-            @method('PUT') {{-- هذا السطر مهم جدًا لطلبات التحديث --}}
+            @method('PUT')
 
             <div class="form-group">
                 <label for="name">اسم المستثمر *</label>
@@ -50,7 +49,7 @@
             </div>
             <div class="form-group">
                 <label for="jobs">وظيفة المستثمر</label>
-                <input type="text" id="address" name="jobs" value="{{ old('jobs', $investor->jobs) }}">
+                <input type="text" id="jobs" name="jobs" value="{{ old('jobs', $investor->jobs) }}">
             </div>
             <div class="form-group">
                 <label for="email">البريد الإلكتروني</label>
@@ -58,7 +57,7 @@
             </div>
             <div class="form-group">
                 <label for="address">العنوان</label>
-                <input type="text" id="address" name="address" value="{{ old('address', $investor->address) }}">
+                <input type="text" id="jobs" name="address" value="{{ old('address', $investor->address) }}">
             </div>
             <div class="form-group">
                 <label for="notes">ملاحظات</label>

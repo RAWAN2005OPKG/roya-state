@@ -4,31 +4,51 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('investments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('investor_id')->constrained('investors')->cascadeOnDelete();
-            $table->date('date');
-            $table->string('project');
+
+            $table->foreignId('investor_id')->constrained('investors')->onDelete('cascade');
+            $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
+
+            $table->string('project')->nullable();
             $table->string('type')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('id_number')->nullable();
-            $table->string('job')->nullable();
-            $table->string('currency', 10)->default('شيكل');
-            $table->decimal('amount', 15, 2);
-            $table->decimal('share_percentage', 5, 2)->default(0);
-            $table->enum('status', ['active', 'completed', 'cancelled'])->default('active');
+            $table->decimal('amount', 15, 2)->nullable();
+            $table->string('currency')->nullable();
+            $table->decimal('share_percentage', 5, 2)->nullable();
+
             $table->string('payment_method')->nullable();
-            $table->string('payee')->nullable();
-            $table->date('payment_date')->nullable();
-            $table->string('bank_name')->nullable();
-            $table->string('other_bank_name')->nullable();
-            $table->string('transaction_id')->nullable();
+            $table->decimal('down_payment_other', 15, 2)->nullable();
+            $table->date('first_payment_date')->nullable();
+            $table->decimal('remaining_amount', 15, 2)->nullable();
+
+            // تفاصيل الدفع النقدي
+            $table->string('cash_receiver')->nullable();
+            $table->string('cash_receiver_job')->nullable();
+            $table->date('cash_receipt_date')->nullable();
+
+            // تفاصيل التحويل البنكي
+            $table->string('sender_bank')->nullable();
+            $table->string('receiver_bank')->nullable();
+            $table->string('transaction_reference')->nullable();
+            $table->date('transaction_date')->nullable();
+
+            // تفاصيل الشيك
+            $table->string('check_number')->nullable();
+            $table->string('check_owner')->nullable();
+            $table->string('check_bank')->nullable();
+            $table->date('check_due_date')->nullable();
+
             $table->string('contract_id')->nullable();
             $table->text('notes')->nullable();
+            $table->string('status')->default('active');
+            $table->date('date')->nullable();
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

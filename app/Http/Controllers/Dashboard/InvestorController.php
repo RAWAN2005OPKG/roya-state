@@ -56,8 +56,7 @@ class InvestorController extends Controller
             'id_number' => ['nullable', 'string', 'max:100', 'unique:investors,id_number'],
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255', 'unique:investors,email'],
-            'jobs' => ['nullable', 'jobs', 'max:255', 'unique:investors,jobss'],
-
+            'jobs' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
         ]);
@@ -77,6 +76,7 @@ class InvestorController extends Controller
             'id_number' => ['nullable', 'string', 'max:100', 'unique:investors,id_number,' . $investor->id],
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255', 'unique:investors,email,' . $investor->id],
+            'jobs' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
         ]);

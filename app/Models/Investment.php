@@ -10,39 +10,47 @@ class Investment extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $guarded = [];
+    protected $table = 'investments';
 
+    // الحقول القابلة للتعبئة
     protected $fillable = [
         'investor_id',
-        'date',
+        'project_id',
         'project',
         'type',
-        'phone',
-        'id_number',
-        'job',
-        'currency',
         'amount',
+        'currency',
         'share_percentage',
-        'status',
         'payment_method',
-        'payee',
-        'payment_date',
-        'bank_name',
-        'other_bank_name',
-        'transaction_id',
+        'down_payment_other',
+        'first_payment_date',
+        'remaining_amount',
+        'cash_receiver',
+        'cash_receiver_job',
+        'cash_receipt_date',
+        'sender_bank',
+        'receiver_bank',
+        'transaction_reference',
+        'transaction_date',
+        'check_number',
+        'check_owner',
+        'check_bank',
+        'check_due_date',
         'contract_id',
         'notes',
+        'status',
+        'date',
     ];
 
-    protected $casts = [
-        'date' => 'date',
-        'payment_date' => 'date',
-        'amount' => 'decimal:2',
-        'share_percentage' => 'decimal:2',
-    ];
-
+    // العلاقة مع المستثمر
     public function investor()
     {
         return $this->belongsTo(Investor::class);
+    }
+
+    // العلاقة مع المشروع
+    public function projectRelation()
+    {
+        return $this->belongsTo(Project::class, 'project_id');
     }
 }

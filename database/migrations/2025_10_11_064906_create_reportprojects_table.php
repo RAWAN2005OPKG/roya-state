@@ -1,14 +1,14 @@
 <?php
-// database/migrations/2023_10_11_create_projects_table.php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProjectsTable extends Migration
+return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::create('reportprojects', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('project_title');
@@ -24,8 +24,8 @@ class CreateProjectsTable extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('projects');
+        Schema::dropIfExists('reportprojects');
     }
-}
+};

@@ -2,7 +2,6 @@
 @section('title', 'سلة المحذوفات - المستثمرون')
 
 @section('styles')
-    {{-- يمكنك نسخ نفس الأنماط من صفحة المصروفات هنا لتوحيد الشكل --}}
     <style>
         .table-container { background-color: #fff; padding: 30px; border-radius: 16px; max-width: 1200px; margin: 40px auto; }
         .container-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e5e7eb; }
