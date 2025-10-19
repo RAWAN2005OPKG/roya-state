@@ -13,6 +13,7 @@ return new class extends Migration
 
             $table->foreignId('investor_id')->constrained('investors')->onDelete('cascade');
             $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
+            $table->date('date')->nullable();
 
             $table->string('project')->nullable();
             $table->string('type')->nullable();

@@ -3,25 +3,29 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Project;
 use Illuminate\Http\Request;
-use App\Exports\ProjectsExport; 
-use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Project;
+use App\Models\Investment;
+use App\Models\Investor;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProjectsExport;
 
 class ProjectController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Project::query();
+        $query = Project::with('investments.investor');
         $search = $request->input('search');
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
 
         if ($search) {
-            $query->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('owner_name', 'LIKE', "%{$search}%")
-                  ->orWhere('project_title', 'LIKE', "%{$search}%");
+            $query->where('project_name', 'LIKE', "%{$search}%")
+                  ->orWhere('project_title', 'LIKE', "%{$search}%")
+                  ->orWhereHas('investments.investor', function($q) use ($search) {
+                      $q->where('name', 'LIKE', "%{$search}%");
+                  });
         }
 
         $projects = $query->orderBy($sortBy, $sortOrder)->paginate(10);
@@ -31,7 +35,8 @@ class ProjectController extends Controller
 
     public function create()
     {
-        return view('dashboard.projects.create');
+        $project = new Project();
+        return view('dashboard.projects.create', compact('project'));
     }
 
     public function store(Request $request)
@@ -43,7 +48,16 @@ class ProjectController extends Controller
         }
 
         Project::create($validated);
+
         return redirect()->route('dashboard.projects.index')->with('success', 'تم إضافة المشروع بنجاح.');
+    }
+
+    public function show(Project $project)
+    {
+        $project->load('investments.investor');
+        $totalInvested = $project->totalInvested();
+
+        return view('dashboard.projects.show', compact('project', 'totalInvested'));
     }
 
     public function edit(Project $project)
@@ -53,10 +67,9 @@ class ProjectController extends Controller
 
     public function update(Request $request, Project $project)
     {
-        $validated = $this->validateProject($request, $project->id);
+        $validated = $this->validateProject($request);
 
         if ($request->hasFile('project_media')) {
-            // حذف الملف القديم إذا وجد
             if ($project->project_media) {
                 Storage::disk('public')->delete($project->project_media);
             }
@@ -64,6 +77,7 @@ class ProjectController extends Controller
         }
 
         $project->update($validated);
+
         return redirect()->route('dashboard.projects.index')->with('success', 'تم تحديث المشروع بنجاح.');
     }
 
@@ -75,8 +89,8 @@ class ProjectController extends Controller
 
     public function trash()
     {
-        $trashedProjects = \App\Models\Project::onlyTrashed()->paginate(10);
-        return view('dashboard.projects.trash', ['projects' => $trashedProjects]);
+        $trashedProjects = Project::onlyTrashed()->paginate(10);
+        return view('dashboard.projects.trash', compact('trashedProjects'));
     }
 
     public function restore($id)
@@ -88,11 +102,13 @@ class ProjectController extends Controller
     public function forceDelete($id)
     {
         $project = Project::withTrashed()->findOrFail($id);
+
         if ($project->project_media) {
             Storage::disk('public')->delete($project->project_media);
         }
+
         $project->forceDelete();
-        return back()->with('success', 'تم حذف المشروع نهائياً.');
+        return back()->with('success', 'تم حذف المشروع نهائيًا.');
     }
 
     public function exportExcel()
@@ -100,45 +116,17 @@ class ProjectController extends Controller
         return Excel::download(new ProjectsExport, 'projects.xlsx');
     }
 
-    private function validateProject(Request $request, $projectId = null)
+    private function validateProject(Request $request)
     {
-        $rules = [
-            'name' => ['required', 'string', 'max:255'],
-            'start_date' => ['nullable', 'date'],
-            'owner_name' => ['required', 'string', 'max:255'],
-            'owner_phone' => ['required', 'string', 'max:50'],
-            'owner_id' => ['required', 'string', 'max:50'],
+        return $request->validate([
+            'due_date' => ['nullable', 'date'],
+            'project_name' => ['required', 'string', 'max:255'],
             'project_title' => ['required', 'string', 'max:255'],
-            'currency' => ['nullable', 'string', 'max:10'],
-            'apartment_price' => ['nullable', 'numeric'],
-            'down_payment' => ['nullable', 'numeric'],
-            'project_status' => ['nullable', 'string', 'max:50'],
-            'payment_method' => ['nullable', 'string', 'max:50'],
-            'cash_receiver' => ['nullable', 'string', 'max:100'],
-            'cash_receiver_other' => ['nullable', 'string', 'max:100'],
-            'cash_receiver_job' => ['nullable', 'string', 'max:100'],
-            'sender_bank' => ['nullable', 'string', 'max:100'],
-            'sender_bank_other' => ['nullable', 'string', 'max:100'],
-            'sender_branch' => ['nullable', 'string', 'max:100'],
-            'receiver_bank' => ['nullable', 'string', 'max:100'],
-            'receiver_bank_other' => ['nullable', 'string', 'max:100'],
-            'receiver_branch' => ['nullable', 'string', 'max:100'],
-            'transaction_id' => ['nullable', 'string', 'max:100'],
-            'check_number' => ['nullable', 'string', 'max:100'],
-            'check_owner' => ['nullable', 'string', 'max:100'],
-            'check_holder' => ['nullable', 'string', 'max:100'],
-            'check_due_date' => ['nullable', 'date'],
-            'check_receive_date' => ['nullable', 'date'],
+            'currency' => ['required', 'string', 'max:10'],
+            'apartment_price' => ['required', 'numeric'],
+            'down_payment' => ['required', 'numeric'],
+            'project_status' => ['required', 'string', 'max:50'],
             'project_media' => ['nullable', 'file', 'mimes:jpg,jpeg,png,mp4', 'max:20480'],
-            'land_cost' => ['nullable', 'numeric'],
-            'excavation_cost' => ['nullable', 'numeric'],
-            'engineers_cost' => ['nullable', 'numeric'],
-            'licensing_cost' => ['nullable', 'numeric'],
-            'materials_cost' => ['nullable', 'numeric'],
-            'finishing_cost' => ['nullable', 'numeric'],
-            'total_budget' => ['nullable', 'numeric'],
-        ];
-
-        return $request->validate($rules);
+        ]);
     }
 }

@@ -41,16 +41,18 @@ class Investment extends Model
         'status',
         'date',
     ];
-
+protected $casts = [
+    'date' => 'datetime',
+];
     // العلاقة مع المستثمر
-    public function investor()
-    {
-        return $this->belongsTo(Investor::class);
-    }
+public function investor()
+{
+    return $this->belongsTo(Investor::class);
+}
 
-    // العلاقة مع المشروع
-    public function projectRelation()
-    {
-        return $this->belongsTo(Project::class, 'project_id');
-    }
+public function projectRelation()
+{
+    return $this->belongsTo(Project::class, 'project_id');
+}
+
 }
