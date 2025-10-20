@@ -10,12 +10,10 @@ class Investment extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'investments';
-
-    // الحقول القابلة للتعبئة
     protected $fillable = [
-        'investor_id',
-        'project_id',
+        'investor_id',   // أضيفي هذا
+        'project_id',    // أضيفي هذا
+        'date',
         'project',
         'type',
         'amount',
@@ -39,20 +37,15 @@ class Investment extends Model
         'contract_id',
         'notes',
         'status',
-        'date',
     ];
-protected $casts = [
-    'date' => 'datetime',
-];
-    // العلاقة مع المستثمر
-public function investor()
-{
-    return $this->belongsTo(Investor::class);
-}
 
-public function projectRelation()
-{
-    return $this->belongsTo(Project::class, 'project_id');
-}
+    public function investor()
+    {
+        return $this->belongsTo(Investor::class);
+    }
 
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 }

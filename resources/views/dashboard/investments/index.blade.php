@@ -88,7 +88,9 @@
                                 </span>
                             </td>
                             <td style="padding: 12px 15px;">{{ $investment->payment_method ?? '-' }}</td>
-                            <td style="padding: 12px 15px;">{{ $investment->date->format('Y-m-d') }}</td>
+<td style="padding: 12px 15px;">
+    {{ $investment->date ? $investment->date->format('Y-m-d') : '-' }}
+</td>
                             <td class="no-print" style="display: flex; gap: 10px; padding: 12px 15px;"> {{-- إخفاء خلية التحكم عند الطباعة --}}
                                 <a href="{{ route('dashboard.investments.edit', $investment->id) }}" style="color: #2563eb; text-decoration: none; font-weight: 600;">تعديل</a>
                                 <form action="{{ route('dashboard.investments.destroy', $investment->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟');">

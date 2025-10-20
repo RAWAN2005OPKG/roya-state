@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,26 +9,21 @@ class Project extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'projects';
-
     protected $fillable = [
-        'due_date',
         'project_name',
-        'project_title',
-        'currency',
-        'apartment_price',
-        'down_payment',
-        'project_status',
-        'project_media',
+        'description',
+        'budget',
+        'start_date',
+        'end_date',
     ];
 
-    public function investments()
-    {
-        return $this->hasMany(Investment::class);
-    }
+   public function investments()
+{
+    return $this->hasMany(Investment::class);
+}
+public function totalInvested()
+{
+    return $this->investments()->sum('amount'); // حقل 'amount' هو مبلغ الاستثمار
+}
 
-    public function totalInvested()
-    {
-        return $this->investments()->sum('amount');
-    }
 }

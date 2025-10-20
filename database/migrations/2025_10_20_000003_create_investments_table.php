@@ -46,7 +46,6 @@ return new class extends Migration
             $table->string('contract_id')->nullable();
             $table->text('notes')->nullable();
             $table->string('status')->default('active');
-            $table->date('date')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
