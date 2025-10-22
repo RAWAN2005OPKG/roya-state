@@ -6,8 +6,8 @@
         {{-- تاريخ الإنشاء --}}
         <div class="form-group">
             <label>تاريخ الانشاء</label>
-            <input type="date" name="due_date"
-                   value="{{ old('due_date', $project->due_date ?? '') }}"
+            <input type="start_date" name="start_date"
+                   value="{{ old('start_date', $project->due_date ?? '') }}"
                    @if(!empty($readonly)) readonly @endif>
         </div>
 
@@ -56,6 +56,15 @@
                 @endfor
             </select>
         </div>
+        {{-- الميزانية --}}
+     <div class="form-group">
+    <label>ميزانية المشروع</label>
+    <input type="number" name="budget"
+           value="{{ old('budget', $project->budget ?? '') }}"
+           placeholder="أدخل ميزانية المشروع"
+           min="0" step="0.01"
+           @if(!empty($readonly)) readonly @endif>
+    </div>
 
         {{-- حالة المشروع --}}
         <div class="form-group">
@@ -69,6 +78,13 @@
                 <option value="ready_structure" @if(($project->project_status ?? '') == 'ready_structure') selected @endif>مشروع جاهز عظم</option>
                 <option value="ready_finished" @if(($project->project_status ?? '') == 'ready_finished') selected @endif>مشروع جاهز تشطيب</option>
             </select>
+        </div>
+
+         <div class="form-group">
+            <label>تاريخ الانتهاء</label>
+            <input type="end_date" name="end_date"
+                   value="{{ old('end_date', $project->end_date ?? '') }}"
+                   @if(!empty($readonly)) readonly @endif>
         </div>
 
 

@@ -13,6 +13,7 @@ use App\Exports\ProjectsExport;
 
 class ProjectController extends Controller
 {
+    //  عرض جميع المشاريع
     public function index(Request $request)
     {
         $query = Project::with('investments.investor');
@@ -23,7 +24,7 @@ class ProjectController extends Controller
         if ($search) {
             $query->where('project_name', 'LIKE', "%{$search}%")
                   ->orWhere('project_title', 'LIKE', "%{$search}%")
-                  ->orWhereHas('investments.investor', function($q) use ($search) {
+                  ->orWhereHas('investments.investor', function ($q) use ($search) {
                       $q->where('name', 'LIKE', "%{$search}%");
                   });
         }
@@ -33,12 +34,14 @@ class ProjectController extends Controller
         return view('dashboard.projects.index', compact('projects', 'search', 'sortBy', 'sortOrder'));
     }
 
+    //  صفحة إنشاء مشروع جديد
     public function create()
     {
         $project = new Project();
         return view('dashboard.projects.create', compact('project'));
     }
 
+    //  تخزين مشروع جديد
     public function store(Request $request)
     {
         $validated = $this->validateProject($request);
@@ -52,6 +55,7 @@ class ProjectController extends Controller
         return redirect()->route('dashboard.projects.index')->with('success', 'تم إضافة المشروع بنجاح.');
     }
 
+    //  عرض تفاصيل المشروع
     public function show(Project $project)
     {
         $project->load('investments.investor');
@@ -60,11 +64,13 @@ class ProjectController extends Controller
         return view('dashboard.projects.show', compact('project', 'totalInvested'));
     }
 
+    //  تعديل مشروع
     public function edit(Project $project)
     {
         return view('dashboard.projects.edit', compact('project'));
     }
 
+    //  تحديث بيانات المشروع
     public function update(Request $request, Project $project)
     {
         $validated = $this->validateProject($request);
@@ -81,24 +87,28 @@ class ProjectController extends Controller
         return redirect()->route('dashboard.projects.index')->with('success', 'تم تحديث المشروع بنجاح.');
     }
 
+    //  نقل المشروع إلى سلة المحذوفات
     public function destroy(Project $project)
     {
         $project->delete();
         return back()->with('success', 'تم نقل المشروع إلى سلة المحذوفات.');
     }
 
+    //  عرض المشاريع المحذوفة
     public function trash()
     {
         $trashedProjects = Project::onlyTrashed()->paginate(10);
         return view('dashboard.projects.trash', compact('trashedProjects'));
     }
 
+    //  استعادة مشروع من السلة
     public function restore($id)
     {
         Project::withTrashed()->findOrFail($id)->restore();
         return back()->with('success', 'تم استعادة المشروع بنجاح.');
     }
 
+    //  حذف مشروع نهائيًا
     public function forceDelete($id)
     {
         $project = Project::withTrashed()->findOrFail($id);
@@ -111,21 +121,25 @@ class ProjectController extends Controller
         return back()->with('success', 'تم حذف المشروع نهائيًا.');
     }
 
+    //  تصدير المشاريع إلى Excel
     public function exportExcel()
     {
         return Excel::download(new ProjectsExport, 'projects.xlsx');
     }
 
+    //  دالة التحقق من صحة البيانات (Validation)
     private function validateProject(Request $request)
     {
         return $request->validate([
-            'due_date' => ['nullable', 'date'],
             'project_name' => ['required', 'string', 'max:255'],
-            'project_title' => ['required', 'string', 'max:255'],
-            'currency' => ['required', 'string', 'max:10'],
-            'apartment_price' => ['required', 'numeric'],
-            'down_payment' => ['required', 'numeric'],
-            'project_status' => ['required', 'string', 'max:50'],
+            'project_title' => ['nullable', 'string', 'max:255'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date'],
+            'currency' => ['nullable', 'string', 'max:10'],
+            'apartment_price' => ['nullable', 'numeric'],
+            'down_payment' => ['nullable', 'numeric'],
+            'budget' => ['nullable', 'numeric'],
+            'project_status' => ['nullable', 'string', 'max:50'],
             'project_media' => ['nullable', 'file', 'mimes:jpg,jpeg,png,mp4', 'max:20480'],
         ]);
     }

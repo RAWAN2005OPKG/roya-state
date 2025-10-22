@@ -36,7 +36,6 @@
                             <th>اسم المشروع</th>
                             <th>عنوان المشروع</th>
                             <th>تاريخ الإنشاء</th>
-                            <th>المالك</th>
                             <th>العملة</th>
                             <th>سعر الشقة</th>
                             <th>الدفعة الأولى</th>
@@ -50,7 +49,6 @@
                         @forelse($projects as $project)
                             <tr>
                                 <td>{{ $project->project_name }}</td>
-                                <td>{{ $project->project_title }}</td>
                                 <td>{{ $project->due_date?->format('Y-m-d') ?? '-' }}</td>
                                 <td>{{ $project->owner_name ?? '-' }}</td>
                                 <td>{{ strtoupper($project->currency ?? 'USD') }}</td>

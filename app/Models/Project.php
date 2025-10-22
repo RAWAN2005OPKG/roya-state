@@ -9,13 +9,18 @@ class Project extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'project_name',
-        'description',
-        'budget',
-        'start_date',
-        'end_date',
-    ];
+   protected $fillable = [
+    'project_name',
+    'project_title',
+    'start_date',
+    'end_date',
+    'currency',
+    'apartment_price',
+    'down_payment',
+    'project_status',
+    'project_media',
+    'budget',
+];
 
    public function investments()
 {

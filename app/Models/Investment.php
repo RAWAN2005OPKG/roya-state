@@ -11,8 +11,8 @@ class Investment extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'investor_id',   // أضيفي هذا
-        'project_id',    // أضيفي هذا
+        'investor_id',
+        'project_id',
         'date',
         'project',
         'type',
@@ -39,11 +39,21 @@ class Investment extends Model
         'status',
     ];
 
+    protected $casts = [
+        'date' => 'datetime',
+        'first_payment_date' => 'datetime',
+        'cash_receipt_date' => 'datetime',
+        'transaction_date' => 'datetime',
+        'check_due_date' => 'datetime',
+    ];
+
+    // 🔗 علاقة مع المستثمر
     public function investor()
     {
         return $this->belongsTo(Investor::class);
     }
 
+    // 🔗 علاقة مع المشروع
     public function project()
     {
         return $this->belongsTo(Project::class);

@@ -1,142 +1,242 @@
 @extends('layouts.container')
-@section('title', 'إدارة الاستثمارات')
 
-{{-- 1. إضافة قسم الأنماط CSS للطباعة --}}
+@section('title', 'قائمة الاستثمارات')
+
 @section('styles')
 <style>
-    /* أنماط خاصة بالطباعة (مهم جداً) */
-    @media print {
-        body * {
-            visibility: hidden; /* إخفاء كل شيء في الصفحة أولاً */
-        }
-        .printable-area, .printable-area * {
-            visibility: visible; /* إظهار منطقة الطباعة ومحتوياتها فقط */
-        }
-        .printable-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-        }
-        .no-print {
-            display: none !important; /* إخفاء العناصر التي لا نريدها في الطباعة */
-        }
+/* ====== النمط العام للصفحة ====== */
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: #f9fafb;
+    color: #1f2937;
+    margin: 0;
+    padding: 0;
+}
+
+.main-content {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    margin-top: 30px;
+}
+
+/* ====== العنوان ====== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+.page-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #4f46e5;
+    letter-spacing: 0.3px;
+}
+
+/* ====== الأزرار ====== */
+.btn {
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+}
+
+.btn-primary {
+    background-color: #4f46e5;
+    border: none;
+    color: #fff;
+    box-shadow: 0 3px 6px rgba(79, 70, 229, 0.2);
+}
+.btn-primary:hover {
+    background-color: #4338ca;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    color: #4f46e5;
+    border: 2px solid #4f46e5;
+}
+.btn-outline-primary:hover {
+    background-color: #4f46e5;
+    color: #fff;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border: 2px solid #dc3545;
+}
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* ====== الجدول ====== */
+.table {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.table th {
+    background: linear-gradient(135deg, #4f46e5, #6d28d9);
+    color: #fff;
+    text-align: center;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.table td {
+    text-align: center;
+    padding: 12px;
+    font-size: 0.9rem;
+    color: #1f2937;
+    vertical-align: middle;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f3f4f6;
+}
+.table tr:hover {
+    background-color: #eef2ff;
+    transition: background-color 0.2s ease;
+}
+
+/* ====== الشارات (الحالة مثلاً) ====== */
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.badge-success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+.badge-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+.badge-danger {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* ====== تحسين على الشاشات الصغيرة ====== */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
     }
+    .btn {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+    .table th, .table td {
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+}
 </style>
 @endsection
 
+
 @section('content')
-<main class="main-content" style="padding-top: 40px;">
-    {{-- تم إضافة ID هنا لمنطقة الطباعة --}}
-    <div id="investments-table-area" style="background-color: #fff; padding: 30px; border-radius: 16px; max-width: 1400px; margin: auto; overflow-x: auto;">
+<div class="container">
+    <h2 class="text-center">قائمة الاستثمارات</h2>
 
-        {{-- رأس الصفحة مع الأزرار --}}
-        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px;">
-            <h2 style="font-size: 1.8rem; color: #4f46e5; margin: 0;">إدارة الاستثمارات</h2>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <a href="{{ route('dashboard.investments.create') }}" style="background-color: #4f46e5; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none;">إضافة استثمار</a>
-                <a href="{{ route('dashboard.investments.trash.index') }}" style="background-color: #f3f4f6; color: #4b5563; padding: 8px 15px; border-radius: 8px; text-decoration: none;">سلة المحذوفات</a>
-                <a href="{{ route('dashboard.investments.export.excel') }}" style="background-color: #107c41; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none;">تصدير Excel</a>
+    <a href="{{ route('dashboard.investments.create') }}" class="btn btn-primary mb-3">إضافة استثمار جديد</a>
 
-                {{-- 2. إضافة زر الطباعة --}}
-                <button onclick="printTable()" style="background-color: #3b82f6; color: #fff; padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600;">
-                    <i class="fas fa-print"></i> طباعة
-                </button>
-            </div>
-        </div>
-
-        {{-- 3. إضافة نموذج البحث --}}
-        <div class="no-print" style="margin-bottom: 20px;">
-            <form action="{{ route('dashboard.investments.index') }}" method="GET">
-                <input type="text" name="search" placeholder="ابحث باسم المستثمر أو المشروع..." value="{{ $search }}" style="width: 100%; max-width: 400px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px;">
-                <button type="submit" style="background-color: #4f46e5; color: #fff; padding: 10px 15px; border-radius: 8px; border: none; cursor: pointer;">بحث</button>
-            </form>
-        </div>
-
-        @if(session('success'))
-            <div class="no-print" style="padding: 15px; background-color: #d1fae5; color: #065f46; border-radius: 8px; margin-bottom: 20px;">{{ session('success') }}</div>
-        @endif
-
-        {{-- منطقة الطباعة تبدأ من هنا --}}
-        <div class="printable-area">
-            <table style="width: 100%; border-collapse: collapse; text-align: right; min-width: 1200px;">
-                <thead>
-                    <tr style="background-color: #f9fafb;">
-                        <th style="padding: 12px 15px;">المستثمر</th>
-                        <th style="padding: 12px 15px;">المشروع</th>
-                        <th style="padding: 12px 15px;">المبلغ</th>
-                        <th style="padding: 12px 15px;">الحصة</th>
-                        <th style="padding: 12px 15px;">الحالة</th>
-                        <th style="padding: 12px 15px;">طريقة الدفع</th>
-                        <th style="padding: 12px 15px;">تاريخ الاستثمار</th>
-                        <th class="no-print" style="padding: 12px 15px;">تحكم</th> {{-- إخفاء عمود التحكم عند الطباعة --}}
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($investments as $investment)
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 12px 15px;">{{ $investment->investor->name ?? 'غير محدد' }}</td>
-                            <td style="padding: 12px 15px;">{{ $investment->project }}</td>
-                            <td style="padding: 12px 15px;">{{ number_format($investment->amount, 2) }} {{ $investment->currency }}</td>
-                            <td style="padding: 12px 15px;">{{ $investment->share_percentage ?? 0 }}%</td>
-                            <td style="padding: 12px 15px;">
-                                <span style="padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;
-                                    @if($investment->status == 'active') background-color: #d1fae5; color: #065f46;
-                                    @elseif($investment->status == 'completed') background-color: #dbeafe; color: #1e40af;
-                                    @else background-color: #fee2e2; color: #991b1b; @endif">
-                                    {{ $investment->status == 'active' ? 'نشط' : ($investment->status == 'completed' ? 'مكتمل' : 'ملغي') }}
-                                </span>
-                            </td>
-                            <td style="padding: 12px 15px;">{{ $investment->payment_method ?? '-' }}</td>
-<td style="padding: 12px 15px;">
-    {{ $investment->date ? $investment->date->format('Y-m-d') : '-' }}
-</td>
-                            <td class="no-print" style="display: flex; gap: 10px; padding: 12px 15px;"> {{-- إخفاء خلية التحكم عند الطباعة --}}
-                                <a href="{{ route('dashboard.investments.edit', $investment->id) }}" style="color: #2563eb; text-decoration: none; font-weight: 600;">تعديل</a>
-                                <form action="{{ route('dashboard.investments.destroy', $investment->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" style="background: none; border: none; color: #dc2626; cursor: pointer; padding: 0; font-weight: 600;">حذف</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="8" style="padding: 20px; text-align: center;">لا توجد نتائج تطابق بحثك.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        {{-- نهاية منطقة الطباعة --}}
-
-        {{-- روابط التنقل بين الصفحات --}}
-        <div class="no-print" style="margin-top: 25px;">
-            {{-- إضافة appends للحفاظ على نتيجة البحث عند التنقل بين الصفحات --}}
-            {{ $investments->appends(request()->query())->links() }}
-        </div>
-
-    </div>
-</main>
+    @if($investments->count() > 0)
+    <table id="investmentsTable" class="table table-bordered text-center align-middle shadow-sm">
+        <thead>
+            <tr>
+                <th>اسم المستثمر</th>
+                <th>اسم المشروع</th>
+                <th>المبلغ</th>
+                <th>طريقة الدفع</th>
+                <th>المستلم نقدًا</th>
+                <th>بنك المرسل</th>
+                <th>بنك المستلم</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($investments as $investment)
+            <tr>
+                <td>{{ $investment->investor->name ?? 'غير محدد' }}</td> <!-- إضافة نص افتراضي إذا كان فارغًا -->
+                <td>{{ $investment->project->name ?? 'غير محدد' }}</td> <!-- إضافة نص افتراضي وتأكيد العلاقة -->
+                <td>{{ number_format($investment->amount, 2) }}</td>
+                <td>{{ $investment->payment_method }}</td>
+                <td>{{ $investment->cash_receiver ?? '-' }}</td>
+                <td>{{ $investment->sender_bank ?? '-' }}</td>
+                <td>{{ $investment->receiver_bank ?? '-' }}</td>
+                <td>
+                    @if($investment->status == 'active')
+                        <span class="badge bg-success">نشط</span>
+                    @elseif($investment->status == 'completed')
+                        <span class="badge bg-primary">مكتمل</span>
+                    @else
+                        <span class="badge bg-secondary">ملغي</span>
+                    @endif
+                </td>
+                <td>{{ $investment->date ? $investment->date->format('Y-m-d') : '-' }}</td>
+                <td>
+                    <a href="{{ route('dashboard.investments.edit', $investment->id) }}" class="btn btn-sm btn-outline-primary">تعديل</a>
+                    <form action="{{ route('dashboard.investments.destroy', $investment->id) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+                    </form>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @else
+        <p class="text-muted text-center">لا توجد استثمارات بعد.</p>
+    @endif
+</div>
 @endsection
 
-{{-- 4. إضافة قسم السكريبت لدالة الطباعة --}}
-@section('script')
+@section('scripts')
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 <script>
-    function printTable() {
-        const printTitle = "<h2>تقرير الاستثمارات</h2>";
-        const tableArea = document.querySelector('.printable-area').innerHTML;
-
-        const printWindow = window.open('', '', 'height=600,width=800');
-        printWindow.document.write('<html><head><title>طباعة التقرير</title>');
-        printWindow.document.write('<style>body { font-family: Cairo, sans-serif; direction: rtl; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ddd; padding: 8px; text-align: right; } th { background-color: #f2f2f2; } .no-print { display: none; } </style>');
-        printWindow.document.write('</head><body>');
-        printWindow.document.write(printTitle);
-        printWindow.document.write(tableArea);
-        printWindow.document.write('</body></html>');
-
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-    }
+$(document).ready(function() {
+    $('#investmentsTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'excelHtml5',
+            'print'
+        ],
+        language: {
+            search: "بحث:",
+            paginate: {
+                previous: "السابق",
+                next: "التالي"
+            },
+            info: "إظهار _START_ إلى _END_ من أصل _TOTAL_ استثمار",
+            infoEmpty: "لا توجد بيانات متاحة",
+            zeroRecords: "لا توجد نتائج مطابقة"
+        },
+        responsive: true, // إضافة responsive للجدول
+        pageLength: 10 // عدد الصفوف الافتراضي
+    });
+});
 </script>
 @endsection
