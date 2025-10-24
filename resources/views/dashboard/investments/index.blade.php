@@ -4,146 +4,22 @@
 
 @section('styles')
 <style>
-/* ====== النمط العام للصفحة ====== */
-body {
-    font-family: 'Cairo', sans-serif;
-    background-color: #f9fafb;
-    color: #1f2937;
-    margin: 0;
-    padding: 0;
-}
-
-.main-content {
-    background-color: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    padding: 25px;
-    margin-top: 30px;
-}
-
-/* ====== العنوان ====== */
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-}
-.page-header h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #4f46e5;
-    letter-spacing: 0.3px;
-}
-
-/* ====== الأزرار ====== */
-.btn {
-    border-radius: 10px;
-    padding: 10px 18px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.25s ease;
-}
-
-.btn-primary {
-    background-color: #4f46e5;
-    border: none;
-    color: #fff;
-    box-shadow: 0 3px 6px rgba(79, 70, 229, 0.2);
-}
-.btn-primary:hover {
-    background-color: #4338ca;
-    transform: translateY(-2px);
-}
-
-.btn-outline-primary {
-    color: #4f46e5;
-    border: 2px solid #4f46e5;
-}
-.btn-outline-primary:hover {
-    background-color: #4f46e5;
-    color: #fff;
-}
-
-.btn-outline-danger {
-    color: #dc3545;
-    border: 2px solid #dc3545;
-}
-.btn-outline-danger:hover {
-    background-color: #dc3545;
-    color: #fff;
-}
-
-/* ====== الجدول ====== */
-.table {
-    width: 100%;
-    background-color: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
-}
-
-.table th {
-    background: linear-gradient(135deg, #4f46e5, #6d28d9);
-    color: #fff;
-    text-align: center;
-    padding: 14px;
-    font-weight: 600;
-    font-size: 0.95rem;
-}
-
-.table td {
-    text-align: center;
-    padding: 12px;
-    font-size: 0.9rem;
-    color: #1f2937;
-    vertical-align: middle;
-}
-
-.table tr:nth-child(even) {
-    background-color: #f3f4f6;
-}
-.table tr:hover {
-    background-color: #eef2ff;
-    transition: background-color 0.2s ease;
-}
-
-/* ====== الشارات (الحالة مثلاً) ====== */
-.badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-.badge-success {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-.badge-warning {
-    background-color: #fef3c7;
-    color: #92400e;
-}
-.badge-danger {
-    background-color: #fee2e2;
-    color: #b91c1c;
-}
-
-/* ====== تحسين على الشاشات الصغيرة ====== */
-@media (max-width: 768px) {
-    .page-header {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-    .btn {
-        font-size: 0.85rem;
-        padding: 8px 12px;
-    }
-    .table th, .table td {
-        font-size: 0.8rem;
-        padding: 8px;
-    }
-}
+    .table-container { background-color: #fff; padding: 30px; border-radius: 16px; max-width: 1400px; margin: 40px auto; }
+    .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .header-title { font-size: 1.8rem; color: #4f46e5; margin: 0; }
+    .actions-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn { padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border: none; }
+    .btn-primary { background-color: #4f46e5; color: #fff; }
+    .btn-secondary { background-color: #f3f4f6; color: #4b5563; }
+    .btn-success { background-color: #107c41; color: #fff; }
+    .search-form { margin-bottom: 20px; }
+    .search-input { width: 100%; max-width: 400px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
+    .data-table { width: 100%; border-collapse: collapse; text-align: right; }
+    .data-table th, .data-table td { padding: 12px 15px; border-bottom: 1px solid #e5e7eb; }
+    .data-table th { background-color: #f9fafb; }
+    .sortable-link { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px; }
+    .sortable-link:hover { color: #4f46e5; }
+    .pagination-links { margin-top: 25px; }
 </style>
 @endsection
 
@@ -173,8 +49,8 @@ body {
         <tbody>
             @foreach($investments as $investment)
             <tr>
-                <td>{{ $investment->investor->name ?? 'غير محدد' }}</td> <!-- إضافة نص افتراضي إذا كان فارغًا -->
-                <td>{{ $investment->project->name ?? 'غير محدد' }}</td> <!-- إضافة نص افتراضي وتأكيد العلاقة -->
+                <td>{{ $investment->investor->name ?? 'غير محدد' }}</td>
+                <td>{{ $investment->project->name ?? 'غير محدد' }}</td>
                 <td>{{ number_format($investment->amount, 2) }}</td>
                 <td>{{ $investment->payment_method }}</td>
                 <td>{{ $investment->cash_receiver ?? '-' }}</td>
@@ -220,22 +96,17 @@ body {
 $(document).ready(function() {
     $('#investmentsTable').DataTable({
         dom: 'Bfrtip',
-        buttons: [
-            'excelHtml5',
-            'print'
-        ],
+        buttons: ['excelHtml5', 'print'],
         language: {
-            search: "بحث:",
-            paginate: {
-                previous: "السابق",
-                next: "التالي"
-            },
-            info: "إظهار _START_ إلى _END_ من أصل _TOTAL_ استثمار",
+            search: "🔍 بحث:",
+            paginate: { previous: "السابق", next: "التالي" },
+            info: "عرض _START_ إلى _END_ من أصل _TOTAL_ استثمار",
             infoEmpty: "لا توجد بيانات متاحة",
-            zeroRecords: "لا توجد نتائج مطابقة"
+            zeroRecords: "لا توجد نتائج مطابقة",
+            lengthMenu: "عرض _MENU_ صفوف"
         },
-        responsive: true, // إضافة responsive للجدول
-        pageLength: 10 // عدد الصفوف الافتراضي
+        responsive: true,
+        pageLength: 10
     });
 });
 </script>
