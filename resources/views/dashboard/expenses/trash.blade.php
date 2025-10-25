@@ -86,19 +86,15 @@
 @section('content')
 <main class="main-content">
     <div class="table-container">
-        <!-- رأس الصفحة -->
         <div class="container-header">
             <h2 class="container-title"><i class="fas fa-trash-alt"></i> سلة المحذوفات (المصروفات)</h2>
 
-            {{-- ========================================================== --}}
-            {{--  1. تم تصحيح اسم المسار هنا                            --}}
-            {{-- ========================================================== --}}
+        
             <a href="{{ route('dashboard.expenses.index') }}" class="btn-back">
                 <i class="fas fa-arrow-right"></i> العودة للمصروفات
             </a>
         </div>
 
-        <!-- رسالة النجاح (إذا وجدت) -->
         @if(session('success'))
             <div class="alert-success">
                 {{ session('success') }}
@@ -125,9 +121,7 @@
                         <td>{{ $expense->deleted_at->format('Y-m-d') }}</td>
                         <td class="actions-cell">
 
-                            {{-- ========================================================== --}}
-                            {{--  2. تم تصحيح اسم مسار الاستعادة هنا                      --}}
-                            {{-- ========================================================== --}}
+                         
                             <form action="{{ route('dashboard.expenses.trash.restore', $expense->id) }}" method="POST" style="margin: 0;">
                                 @csrf
                                 @method('PUT')
@@ -136,10 +130,6 @@
                                     <span>استعادة</span>
                                 </button>
                             </form>
-
-                            {{-- ========================================================== --}}
-                            {{--  3. تم تصحيح اسم مسار الحذف النهائي هنا                  --}}
-                            {{-- ========================================================== --}}
                             <form action="{{ route('dashboard.expenses.trash.forceDelete', $expense->id) }}" method="POST" onsubmit="return confirm('تحذير! سيتم حذف هذا العنصر نهائياً ولا يمكن استعادته. هل أنت متأكد؟');" style="margin: 0;">
                                 @csrf
                                 @method('DELETE')
@@ -151,7 +141,6 @@
                         </td>
                     </tr>
                 @empty
-                    {{-- رسالة في حالة كانت سلة المحذوفات فارغة --}}
                     <tr class="empty-row">
                         <td colspan="5">
                             <i class="fas fa-box-open" style="font-size: 1.5rem; margin-bottom: 10px;"></i>

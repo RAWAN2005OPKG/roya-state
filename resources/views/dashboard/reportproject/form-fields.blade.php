@@ -1,6 +1,5 @@
 
 <style>
-/* تنسيق بسيط وواضح للنموذج */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600&display=swap');
 
 body {
@@ -77,9 +76,8 @@ body {
   box-shadow: 0 0 4px rgba(0,137,123,0.3);
 }
 
-/* حجم الخط العام */
 h3, label, input, textarea {
-  line-height: 1.6;
+  line-height: 3;
 }
 
 </style>

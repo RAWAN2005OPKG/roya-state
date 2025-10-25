@@ -102,7 +102,6 @@
     <div class="form-container">
         <h2>إضافة استثمار جديد</h2>
 
-        {{-- عرض الأخطاء --}}
         @if ($errors->any())
             <div class="form-errors">
                 <ul>

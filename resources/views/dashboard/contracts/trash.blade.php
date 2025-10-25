@@ -2,7 +2,6 @@
 @section('title', 'سلة محذوفات العقود')
 
 @section('styles')
-    {{-- يمكنك استخدام نفس أنماط صفحة العرض الرئيسية --}}
     <style>
         body { background: #f8f9fa; color: #333; font-family: 'Cairo', sans-serif; direction: rtl; }
         .main-content { width: 100%; max-width: 1600px; margin: 40px auto; padding: 0 20px; }

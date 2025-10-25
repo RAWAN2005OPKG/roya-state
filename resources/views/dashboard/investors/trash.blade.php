@@ -19,7 +19,6 @@
 @section('content')
 <main class="main-content">
     <div class="table-container">
-        <!-- رأس الصفحة -->
         <div class="container-header">
             <h2 class="container-title"><i class="fas fa-trash-alt"></i> سلة محذوفات المستثمرين</h2>
             <a href="{{ route('dashboard.investors.index') }}" class="btn-back">
@@ -31,7 +30,6 @@
             <div style="padding: 15px; background-color: #d1fae5; color: #065f46; border-radius: 8px; margin-bottom: 20px;">{{ session('success') }}</div>
         @endif
 
-        <!-- جدول البيانات -->
         <table class="data-table">
             <thead>
                 <tr>
@@ -46,14 +44,12 @@
                         <td>{{ $investor->name }}</td>
                         <td>{{ $investor->deleted_at->format('Y-m-d H:i') }}</td>
                         <td class="actions-cell">
-                            <!-- نموذج الاستعادة -->
                             <form action="{{ route('dashboard.investors.trash.restore', $investor->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="action-btn btn-restore">استعادة</button>
                             </form>
 
-                            <!-- نموذج الحذف النهائي -->
                             <form action="{{ route('dashboard.investors.trash.forceDelete', $investor->id) }}" method="POST" onsubmit="return confirm('تحذير! سيتم حذف هذا العنصر نهائياً. هل أنت متأكد؟');">
                                 @csrf
                                 @method('DELETE')

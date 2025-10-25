@@ -15,12 +15,10 @@
                 @csrf
                 <div class="form-group mb-4">
                     <label>الشهر المستحق عنه الراتب *</label>
-                    {{-- نعرض الشهر الحالي كقيمة افتراضية --}}
                     <input type="month" name="salary_month" class="form-control" value="{{ old('salary_month', date('Y-m')) }}" required>
                 </div>
                 <div class="form-group mb-4">
                     <label>المبلغ المدفوع ({{ $employee->currency }}) *</label>
-                    {{-- نعرض الراتب الأساسي كقيمة افتراضية --}}
                     <input type="number" name="amount" class="form-control" value="{{ old('amount', $employee->salary) }}" step="0.01" required>
                 </div>
                 <div class="form-group mb-4">

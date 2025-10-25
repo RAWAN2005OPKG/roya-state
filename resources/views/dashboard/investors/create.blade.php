@@ -19,7 +19,6 @@
     <div class="form-container">
         <h2 style="font-size: 1.8rem; color: #4f46e5; margin-bottom: 25px;">إضافة مستثمر جديد</h2>
 
-        {{-- لعرض أخطاء التحقق (Validation) --}}
         @if ($errors->any())
             <div class="form-errors">
                 <ul>

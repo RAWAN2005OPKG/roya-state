@@ -2,7 +2,6 @@
 @section('title', 'تعديل الاستثمار')
 
 @section('styles')
-{{-- (أنماط CSS تبقى كما هي بدون تغيير) --}}
 <style>
     select option {
         color: #000 !important;
@@ -83,7 +82,6 @@
     .hidden {
         display: none !important;
     }
-    /* أنماط إضافية من الكود الأصلي */
     .form-section {
         grid-column: 1 / -1;
         border: 1px solid #e5e7eb;

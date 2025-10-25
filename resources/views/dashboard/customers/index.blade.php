@@ -4,24 +4,23 @@
 @section('styles')
     <style>
  :root {
-        --primary-color: #4f46e5; /* لون أساسي (أزرق بنفسجي) */
-        --primary-hover: #3730a3; /* لون أساسي عند التحويم */
-        --secondary-color: #06b6d4; /* لون ثانوي (أزرق سماوي) */
-        --white-bg: #ffffff; /* خلفية بيضاء */
-        --light-bg: #f8fafc; /* خلفية فاتحة */
-        --card-bg: #ffffff; /* خلفية البطاقات */
-        --text-color: #1f2937; /* لون النص الأساسي (رمادي داكن) */
-        --text-muted: #6b7280; /* لون النص الثانوي/الخافت */
-        --border-color: #e5e7eb; /* لون الحدود */
-        --success-color: #10b981; /* لون النجاح (أخضر) */
-        --danger-color: #ef4444; /* لون الخطر (أحمر) */
-        --warning-color: #f59e0b; /* لون التحذير (برتقالي) */
-        --info-color: #3b82f6; /* لون المعلومات (أزرق) */
+        --primary-color: #4f46e5; 
+        --primary-hover: #3730a3; 
+        --secondary-color: #06b6d4; 
+        --white-bg: #ffffff; 
+        --light-bg: #f8fafc; 
+        --card-bg: #ffffff; 
+        --text-color: #1f2937;
+        --text-muted: #6b7280; 
+        --border-color: #e5e7eb; 
+        --success-color: #10b981; 
+        --danger-color: #ef4444; 
+        --warning-color: #f59e0b; 
+        --info-color: #3b82f6;
         --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
-    /* إعادة تعيين الأنماط الأساسية */
     * {
         margin: 0;
         padding: 0;
@@ -29,7 +28,6 @@
         font-family: 'Cairo', 'Arial', sans-serif;
     }
 
-    /* أنماط الخلفية العامة */
     body {
         background-color: var(--light-bg);
         color: var(--text-color);
@@ -49,7 +47,6 @@
         overflow-y: auto;
     }
 
-    /* حاوية النموذج */
     .form-container {
         background-color: var(--white-bg);
         padding: 30px;
@@ -60,7 +57,6 @@
         border: 1px solid var(--border-color);
     }
 
-    /* رأس النموذج */
     .form-header {
         display: flex;
         justify-content: space-between;
@@ -93,7 +89,6 @@
         margin: 0;
     }
 
-    /* أقسام النموذج */
     .form-section {
         margin-bottom: 35px;
     }
@@ -117,7 +112,6 @@
         color: var(--primary-color);
     }
 
-    /* شبكة النموذج */
     .form-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -144,8 +138,6 @@
         color: var(--danger-color);
         margin-right: 5px;
     }
-
-    /* أنماط حقول الإدخال */
     input, select, textarea {
         width: 100%;
         padding: 12px 15px;
@@ -174,7 +166,6 @@
         border-style: dashed;
     }
 
-    /* حقل الإدخال مع العملة */
     .input-with-currency {
         position: relative;
     }
@@ -192,7 +183,6 @@
         padding-left: 70px;
     }
 
-    /* الأقسام الديناميكية والمخفية */
     .dynamic-section, .hidden-section {
         display: none;
         background-color: var(--light-bg);
@@ -203,7 +193,6 @@
         border: 1px solid var(--border-color);
     }
 
-    /* مجموعات قوائم التحقق */
     .checklist-group {
         display: flex;
         flex-wrap: wrap;
@@ -228,7 +217,6 @@
         font-weight: normal;
     }
 
-    /* منطقة تحميل الملفات */
     .file-upload-area {
         border: 2px dashed var(--border-color);
         border-radius: 8px;
@@ -261,7 +249,6 @@
         color: var(--text-muted);
     }
 
-    /* معاينة الوسائط */
     .media-preview {
         position: relative;
         max-width: 100%;
@@ -298,7 +285,6 @@
         transform: scale(1.1);
     }
 
-    /* أزرار الإجراءات */
     .form-actions {
         display: flex;
         justify-content: flex-end;
@@ -369,7 +355,6 @@
         color: var(--primary-color);
     }
 
-    /* أنماط SweetAlert2 */
     .swal2-popup {
         background: var(--white-bg) !important;
         color: var(--text-color) !important;
@@ -394,7 +379,6 @@
         color: #ffffff !important;
     }
 
-    /* أنماط المودال */
     .modal {
         display: none;
         position: fixed;
@@ -453,7 +437,6 @@
         color: var(--primary-color);
     }
 
-    /* أنماط لوحة التحكم الرئيسية */
     .main-content {
         width: 100%;
         max-width: 1600px;

@@ -2,7 +2,6 @@
 @section('title', 'تفاصيل الموظف: ' . $employee->name)
 
 @section('styles')
-    {{-- أنماط لتحسين العرض --}}
     <style>
         .details-card {
             background-color: #fff;
@@ -100,7 +99,6 @@
                         <tbody>
                             @forelse ($employee->salaryPayments()->orderBy('salary_month', 'desc')->get() as $payment)
                                 <tr>
-                                    {{-- استخدام Carbon لتحويل '2024-10' إلى 'أكتوبر 2024' --}}
                                     <td>{{ \Carbon\Carbon::parse($payment->salary_month . '-01')->translatedFormat('F Y') }}</td>
                                     <td>{{ number_format($payment->amount, 2) }} {{ $employee->currency }}</td>
                                     <td>{{ $payment->payment_date->format('d-m-Y') }}</td>

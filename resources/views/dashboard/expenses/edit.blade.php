@@ -35,7 +35,6 @@
 
 @section('content')
 <main class="main-content">
-    <!-- رأس الصفحة -->
     <div class="page-header">
         <h1><i class="fas fa-edit"></i> تعديل المصروف</h1>
     </div>
@@ -150,7 +149,6 @@
                 <textarea id="expenseNotes" name="notes" rows="3" placeholder="أي ملاحظات إضافية...">{{ old('notes', $expense->notes) }}</textarea>
             </div>
 
-            {{-- 3. تغيير نص زر الإرسال --}}
             <button type="submit" class="btn-submit"><i class="fas fa-sync-alt"></i> تحديث المصروف</button>
         </form>
     </div>

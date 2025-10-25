@@ -3,7 +3,6 @@
 
 @section('styles')
 <style>
-    /* أنماط عامة لتحسين الشكل */
     .table-container { background-color: #fff; padding: 30px; border-radius: 16px; max-width: 1400px; margin: 40px auto; }
     .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
     .header-title { font-size: 1.8rem; color: #4f46e5; margin: 0; }
@@ -34,7 +33,7 @@
             width: 100%;
         }
         .no-print {
-            display: none; /* إخفاء الأعمدة والأزرار التي لا نريدها في الطباعة */
+            display: none; 
         }
     }
 </style>
@@ -42,17 +41,14 @@
 
 @section('content')
 <main class="main-content">
-    {{-- يمكنك إبقاء نموذج الإضافة هنا أو نقله لصفحة create.blade.php --}}
 
-    <div class="table-container" id="expenses-table-area"> {{-- إضافة ID لمنطقة الطباعة --}}
-        <!-- 1. رأس الصفحة وأزرار التحكم -->
-        <div class="header-controls no-print"> {{-- إضافة كلاس لعدم الطباعة --}}
+    <div class="table-container" id="expenses-table-area"> 
+        <div class="header-controls no-print"> 
             <h2 class="header-title">المصروفات المسجلة</h2>
             <div class="actions-group">
-                {{-- <a href="..." class="btn btn-primary">إضافة مصروف</a> --}}
+                 <a href="{{ route('dashboard.expenses.edit') }}"  class="btn btn-primary">إضافة مصروف</a> 
                 <a href="{{ route('dashboard.expenses.trash.index') }}" class="btn btn-secondary">سلة المحذوفات</a>
                 <a href="{{ route('dashboard.expenses.export.excel') }}" class="btn btn-success">تصدير Excel</a>
-                {{-- زر الطباعة الجديد --}}
                 <button onclick="printTable()" class="btn btn-info">
                     <i class="fas fa-print"></i> طباعة
                 </button>
@@ -60,7 +56,7 @@
         </div>
 
         <!-- 2. نموذج البحث -->
-        <div class="search-form no-print"> {{-- إضافة كلاس لعدم الطباعة --}}
+        <div class="search-form no-print"> 
             <form action="{{ route('dashboard.expenses.index') }}" method="GET">
                 <input type="text" name="search" class="search-input" placeholder="ابحث باسم المستفيد, ملاحظات..." value="{{ $search }}">
                 <button type="submit" class="btn btn-primary">بحث</button>

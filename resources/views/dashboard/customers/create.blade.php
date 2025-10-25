@@ -2,7 +2,6 @@
 @section('title', 'إضافة عميل جديد')
 
 @section('styles')
-    {{-- يمكنك استخدام نفس أنماط صفحة العقود --}}
     <style>
         .form-section { background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef; }
         .form-section-title { font-size: 1.3rem; color: #4f46e5; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #4f46e5; }
