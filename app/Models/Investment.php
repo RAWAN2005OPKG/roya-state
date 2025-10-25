@@ -20,13 +20,17 @@ class Investment extends Model
         'status',
     ];
 
-    // العلاقة مع المستثمر
+    protected $casts = [
+        'investment_date' => 'date:Y-m-d',
+        'amount' => 'float',
+        'share_percentage' => 'float',
+    ];
+
     public function investor()
     {
         return $this->belongsTo(Investor::class);
     }
 
-    // العلاقة مع المشروع
     public function project()
     {
         return $this->belongsTo(Project::class);
