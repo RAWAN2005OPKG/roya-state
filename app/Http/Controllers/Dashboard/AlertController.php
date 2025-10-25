@@ -27,7 +27,6 @@ class AlertController extends Controller
 
     public function create()
     {
-        // يمكنك إنشاء واجهة لإضافة تنبيه يدوي إذا أردت
         return view('dashboard.alerts.create');
     }
 
@@ -40,7 +39,7 @@ class AlertController extends Controller
             'priority' => 'required|in:high,medium,low',
             'due_date' => 'nullable|date',
         ]);
-        $validated['status'] = 'active'; // الحالة الافتراضية
+        $validated['status'] = 'active'; 
 
         Alert::create($validated);
         return redirect()->route('dashboard.alerts.index')->with('success', 'تم إنشاء التنبيه بنجاح.');

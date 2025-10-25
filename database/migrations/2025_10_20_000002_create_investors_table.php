@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            $table->softDeletes(); // عشان يدعم الحذف الناعم
+            $table->softDeletes(); 
         });
     }
 

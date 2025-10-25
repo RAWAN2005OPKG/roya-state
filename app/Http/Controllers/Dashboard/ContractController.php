@@ -16,12 +16,11 @@ public function index(Request $request)
 {
     $query = Contract::query();
 
-    // 1. تعريف المتغيرات في البداية (هذا هو الحل)
     $search = $request->input('search');
-    $sortBy = $request->input('sort_by', 'signing_date'); // قيمة افتراضية
-    $sortOrder = $request->input('sort_order', 'desc');   // قيمة افتراضية
+    $sortBy = $request->input('sort_by', 'signing_date'); 
+    $sortOrder = $request->input('sort_order', 'desc');   
 
-    // البحث
+    
     if ($search) {
         $query->where(function($q) use ($search) {
             $q->where('client_name', 'LIKE', "%{$search}%")
@@ -143,7 +142,7 @@ public function index(Request $request)
         if ($request->has('payment_methods')) {
             $validated['payment_method'] = implode(',', $request->payment_methods);
         } else {
-            $validated['payment_method'] = null; // إذا لم يتم تحديد أي طريقة
+            $validated['payment_method'] = null; 
         }
 
         $contract->update($validated);

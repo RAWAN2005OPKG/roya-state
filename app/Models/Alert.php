@@ -12,11 +12,11 @@ class Alert extends Model
     protected $fillable = [
         'title',
         'message',
-        'type', // cheque_due, contract_expiry, payment_due, general
-        'priority', // high, medium, low
-        'status', // active, dismissed, resolved
-        'related_id', // ID of related record (cheque, contract, etc.)
-        'related_type', // Type of related record
+        'type', 
+        'priority', 
+        'status', 
+        'related_id', 
+        'related_type', 
         'due_date',
         'created_by',
         'assigned_to',
@@ -28,19 +28,16 @@ class Alert extends Model
         'updated_at' => 'datetime',
     ];
 
-    // علاقة مع المستخدم الذي أنشأ التنبيه
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    // علاقة مع المستخدم المكلف بالتنبيه
     public function assignee()
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    // دالة للحصول على لون التنبيه حسب الأولوية
     public function getPriorityColorAttribute()
     {
         return match($this->priority) {
@@ -51,7 +48,6 @@ class Alert extends Model
         };
     }
 
-    // دالة للحصول على أيقونة التنبيه حسب النوع
     public function getTypeIconAttribute()
     {
         return match($this->type) {
@@ -63,7 +59,6 @@ class Alert extends Model
         };
     }
 
-    // دالة للحصول على النوع بالعربية
     public function getTypeNameAttribute()
     {
         return match($this->type) {
@@ -75,7 +70,6 @@ class Alert extends Model
         };
     }
 
-    // دالة للحصول على الأولوية بالعربية
     public function getPriorityNameAttribute()
     {
         return match($this->priority) {
@@ -86,7 +80,6 @@ class Alert extends Model
         };
     }
 
-    // دالة للحصول على الحالة بالعربية
     public function getStatusNameAttribute()
     {
         return match($this->status) {

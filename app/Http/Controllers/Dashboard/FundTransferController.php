@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\FundsTransfer; // سننشئ هذا الموديل في الخطوة التالية
+use App\Models\FundsTransfer; 
 
 class FundsTransferController extends Controller
 {

@@ -14,7 +14,7 @@ class BankTransaction extends Model
         'client_name',
         'client_phone',
         'payer_id_number',
-        'type', // deposit, withdrawal, transfer, personal_withdrawal
+        'type', 
         'amount',
         'currency',
         'project_name',

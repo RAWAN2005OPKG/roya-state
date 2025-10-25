@@ -60,6 +60,7 @@
             <label>حالة الاستثمار</label>
             <select name="status">
                 <option value="active" @selected(old('status', $investment->status ?? '') == 'active')>نشط</option>
+                <option value="complete" @selected(old('status', $investment->status ?? '') == 'complete')>مكتمل</option>
                 <option value="draft" @selected(old('status', $investment->status ?? '') == 'draft')>مسودة</option>
             </select>
         </div>

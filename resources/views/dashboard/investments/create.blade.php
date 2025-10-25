@@ -115,77 +115,8 @@
 
         <form action="{{ route('dashboard.investments.store') }}" method="POST">
             @csrf
+                @include('dashboard.investments.form')
 
-            <div class="form-section">
-                <h3 class="section-title">بيانات الاستثمار</h3>
-
-                <div class="form-grid">
-                    {{-- المستثمر --}}
-                    <div class="form-group">
-                        <label>المستثمر</label>
-                        <select name="investor_id" required>
-                            <option value="">اختر المستثمر</option>
-                            @foreach($investors as $investor)
-                                <option value="{{ $investor->id }}">{{ $investor->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- المشروع --}}
-                    <div class="form-group">
-                        <label>المشروع</label>
-                        <select name="project_id" required>
-                            <option value="">اختر المشروع</option>
-                            @foreach($projects as $project)
-                                <option value="{{ $project->id }}">{{ $project->project_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- التاريخ --}}
-                    <div class="form-group">
-                        <label>تاريخ الاستثمار</label>
-                        <input type="date" name="investment_date" required>
-                    </div>
-
-                    {{-- نوع الاستثمار --}}
-                    <div class="form-group">
-                        <label>نوع الاستثمار</label>
-                        <input type="text" name="investment_type" placeholder="نقدي، شراكة...">
-                    </div>
-
-                    {{-- العملة --}}
-                    <div class="form-group">
-                        <label>العملة</label>
-                        <select name="currency">
-                            <option value="usd">دولار</option>
-                            <option value="ils">شيكل</option>
-                            <option value="jod">دينار</option>
-                        </select>
-                    </div>
-
-                    {{-- المبلغ --}}
-                    <div class="form-group">
-                        <label>المبلغ</label>
-                        <input type="number" step="0.01" name="amount" required>
-                    </div>
-
-                    {{-- نسبة الحصة --}}
-                    <div class="form-group">
-                        <label>نسبة الحصة (%)</label>
-                        <input type="number" step="0.01" name="share_percentage">
-                    </div>
-
-                    {{-- الحالة --}}
-                    <div class="form-group">
-                        <label>حالة الاستثمار</label>
-                        <select name="status">
-                            <option value="active">نشط</option>
-                            <option value="draft">مسودة</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
 
             <button type="submit" class="btn-submit">إضافة الاستثمار</button>
         </form>

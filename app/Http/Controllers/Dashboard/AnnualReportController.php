@@ -13,12 +13,10 @@ class AnnualReportController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. تحديد السنوات
         $selectedYear = (int) ($request->query('year', now()->year));
         $previousYear = $selectedYear - 1;
         $years = [$selectedYear, $previousYear];
 
-        // 2. جلب الإيرادات الشهرية باستخدام Eloquent Model
         $monthlyRevenue = ClientPayment::query()
             ->whereIn(DB::raw('YEAR(date)'), $years)
             ->select(
@@ -29,7 +27,6 @@ class AnnualReportController extends Controller
             ->groupBy('year', 'month')
             ->get();
 
-        // 3. جلب المصروفات الشهرية باستخدام Eloquent Model
         $monthlyExpenses = Expense::query()
             ->whereIn(DB::raw('YEAR(date)'), $years)
             ->select(
@@ -40,7 +37,6 @@ class AnnualReportController extends Controller
             ->groupBy('year', 'month')
             ->get();
 
-        // 4. دمج البيانات في هيكل واحد سهل الاستخدام
         $reportData = [];
         for ($m = 1; $m <= 12; $m++) {
             # صافي ربح السنة الحالية

@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
 {
-    use HasFactory, SoftDeletes; // ✅ تأكد من وجود SoftDeletes هنا
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $guarded = []; // استخدام guarded أسهل إذا كانت كل الحقول قابلة للتعبئة
+    protected $guarded = []; 
 
     /**
      * The attributes that should be cast.

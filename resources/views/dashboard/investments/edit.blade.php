@@ -101,7 +101,6 @@
 @section('content')
 <main class="main-content">
     <div class="form-container">
-        {{-- ✅ تصحيح: عرض اسم المشروع بشكل صحيح --}}
         <h2 style="font-size: 1.8rem; color: #4f46e5; margin-bottom: 25px;">
             تعديل استثمار في مشروع: {{ $investment->project->name ?? 'غير محدد' }}
         </h2>
@@ -119,7 +118,7 @@
         <form action="{{ route('dashboard.investments.update', $investment->id) }}" method="POST">
              @csrf
                 @method('PUT')
-                @include('dashboard.projects.form')
+                @include('dashboard.investments.form')
                 <div class="form-actions mt-4">
 
             <button type="submit" class="btn-submit">تحديث الاستثمار</button>

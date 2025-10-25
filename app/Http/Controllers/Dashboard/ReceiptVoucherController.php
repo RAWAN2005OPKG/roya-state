@@ -39,7 +39,6 @@ class ReceiptVoucherController extends Controller
 
 
 
-        // إنشاء وحفظ سند القبض
         ReceiptVoucher::create($validator->validated());
 
 

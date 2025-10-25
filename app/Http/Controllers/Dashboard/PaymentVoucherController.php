@@ -17,18 +17,16 @@ class PaymentVoucherController extends Controller
      */
     public function store(Request $request)
     {
-        // قواعد التحقق من صحة البيانات المدخلة من النموذج
         $validator = Validator::make($request->all(), [
             'transaction_date' => ['required', 'date'],
             'contact_id' => ['required', 'integer'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'currency' => ['required', 'string', 'max:10'],
             'payment_method' => ['required', 'in:cash,bank_transaction,check'],
-            'purpose_description' => ['required', 'string'], // سبب الصرف إلزامي
+            'purpose_description' => ['required', 'string'], 
             'project_id' => ['nullable', 'integer'],
-            'receiver_name' => ['required', 'string', 'max:255'], // اسم المسلّم (الصارف)
+            'receiver_name' => ['required', 'string', 'max:255'], 
 
-            // الحقول الديناميكية (اختيارية)
             'cash_receiver' => ['nullable', 'string', 'max:255'],
             'cash_receiver_job' => ['nullable', 'string', 'max:255'],
             'sender_bank' => ['nullable', 'string', 'max:255'],

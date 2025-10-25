@@ -31,16 +31,14 @@ public function create()
         $validated = $request->validate([
             'investor_id' => 'required|exists:investors,id',
             'project_id' => 'required|exists:projects,id',
+            'investment_date' => 'nullable|date',
+            'investment_type' => 'nullable|string|max:255',
+            'currency' => 'required|in:usd,ils,jod',
             'amount' => 'required|numeric|min:1',
-            'status' => 'required',
-            'payment_methods' => 'required|array',
-            'cash_receiver' => 'nullable|string|max:255',
-            'sender_bank' => 'nullable|string|max:255',
-            'receiver_bank' => 'nullable|string|max:255',
-            'date' => 'required|date',
+            'share_percentage' => 'nullable|numeric|min:0|max:100',
+            'status' => 'required|in:active,draft',
         ]);
 
-        $validated['payment_method'] = implode(',', $request->payment_methods);
         Investment::create($validated);
 
         return redirect()->route('dashboard.investments.index')->with('success', 'تمت إضافة الاستثمار بنجاح');
@@ -53,21 +51,19 @@ public function create()
         return view('dashboard.investments.edit', compact('investment', 'project', 'investors'));
     }
 
-    public function update(Request $request, Investment $investment)
+      public function update(Request $request, Investment $investment)
     {
         $validated = $request->validate([
             'investor_id' => 'required|exists:investors,id',
             'project_id' => 'required|exists:projects,id',
+            'investment_date' => 'nullable|date',
+            'investment_type' => 'nullable|string|max:255',
+            'currency' => 'required|in:usd,ils,jod',
             'amount' => 'required|numeric|min:1',
-            'status' => 'required',
-            'payment_methods' => 'required|array',
-            'cash_receiver' => 'nullable|string|max:255',
-            'sender_bank' => 'nullable|string|max:255',
-            'receiver_bank' => 'nullable|string|max:255',
-            'date' => 'required|date',
+            'share_percentage' => 'nullable|numeric|min:0|max:100',
+            'status' => 'required|in:active,draft',
         ]);
 
-        $validated['payment_method'] = implode(',', $request->payment_methods);
         $investment->update($validated);
 
         return redirect()->route('dashboard.investments.index')->with('success', 'تم تحديث بيانات الاستثمار بنجاح');

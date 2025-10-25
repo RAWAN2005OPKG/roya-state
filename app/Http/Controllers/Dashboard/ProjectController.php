@@ -121,13 +121,11 @@ class ProjectController extends Controller
         return back()->with('success', 'تم حذف المشروع نهائيًا.');
     }
 
-    //  تصدير المشاريع إلى Excel
     public function exportExcel()
     {
         return Excel::download(new ProjectsExport, 'projects.xlsx');
     }
 
-    //  دالة التحقق من صحة البيانات (Validation)
     private function validateProject(Request $request)
     {
         return $request->validate([
