@@ -6,7 +6,7 @@
         {{-- تاريخ الإنشاء --}}
         <div class="form-group">
             <label>تاريخ الانشاء</label>
-            <input type="start_date" name="start_date"
+            <input type="date" name="start_date"
                    value="{{ old('start_date', $project->due_date ?? '') }}"
                    @if(!empty($readonly)) readonly @endif>
         </div>
@@ -82,7 +82,7 @@
 
          <div class="form-group">
             <label>تاريخ الانتهاء</label>
-            <input type="end_date" name="end_date"
+            <input type="date" name="end_date"
                    value="{{ old('end_date', $project->end_date ?? '') }}"
                    @if(!empty($readonly)) readonly @endif>
         </div>

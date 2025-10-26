@@ -10,6 +10,11 @@ class Expense extends Model
 {
     use HasFactory, SoftDeletes;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'date',
         'payee',
@@ -39,10 +44,21 @@ class Expense extends Model
         'notes',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'date' => 'date',
-        'amount' => 'decimal:2',
         'check_due_date' => 'date',
         'check_receive_date' => 'date',
+        'amount' => 'decimal:2',
     ];
+
+     public function project()
+ {
+         return $this->belongsTo(Project::class);
+     }
 }
+

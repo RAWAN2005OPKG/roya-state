@@ -42,7 +42,17 @@
                 <div class="form-section">
                     <h4 class="form-section-title">2. تفاصيل الاتفاقية</h4>
                     <div class="row">
-                        <div class="col-md-6 form-group mb-3"><label>المشروع</label><input type="text" name="project" class="form-control" value="{{ old('project') }}"></div>
+<div class="col-md-6 form-group mb-3">
+    <label>المشروع *</label>
+    <select name="project_id" class="form-control" required>
+        <option value="">-- اختر المشروع --</option>
+        @foreach($projects as $project)
+            <option value="{{ $project->id }}" @selected(old('project_id') == $project->id)>
+                {{ $project->project_name }}
+            </option>
+        @endforeach
+    </select>
+</div>
                         <div class="col-md-6 form-group mb-3"><label>الوحدة/الشقة *</label><input type="text" name="unit" class="form-control" value="{{ old('unit') }}" required></div>
                         <div class="col-md-4 form-group mb-3"><label>قيمة الاتفاقية *</label><input type="number" name="agreement_amount" class="form-control" value="{{ old('agreement_amount') }}" step="0.01" required></div>
                         <div class="col-md-4 form-group mb-3">

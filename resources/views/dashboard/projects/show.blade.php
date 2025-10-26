@@ -20,7 +20,6 @@
                 <div class="col-md-4"><strong>تاريخ الإنشاء:</strong> {{ $project->due_date?->format('Y-m-d') ?? '-' }}</div>
             </div>
             <div class="row mb-3">
-                <div class="col-md-4"><strong>المالك:</strong> {{ $project->owner_name ?? '-' }}</div>
                 <div class="col-md-4"><strong>العملة:</strong> {{ strtoupper($project->currency ?? 'USD') }}</div>
                 <div class="col-md-4"><strong>سعر الشقة:</strong> {{ number_format($project->apartment_price ?? 0, 2) }}</div>
             </div>
@@ -92,7 +91,56 @@
             @endif
         </div>
     </div>
+<div class="card card-custom mt-4">
+    <div class="card-body">
+        <h4 class="mb-3"><i class="fas fa-users"></i> عملاء هذا المشروع</h4>
+
+        @if($project->customers->count() > 0)
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>اسم العميل</th>
+                            <th>رقم الجوال</th>
+                            <th>الوحدة/الشقة</th>
+                            <th>قيمة الاتفاقية</th>
+                            <th>تاريخ الاستحقاق</th>
+                            <th>تحكم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($project->customers as $customer)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $customer->name }}</td>
+                                <td>{{ $customer->phone ?? '-' }}</td>
+                                <td>{{ $customer->unit }}</td>
+                                <td>{{ number_format($customer->agreement_amount, 2) }} {{ $customer->currency }}</td>
+                                <td>{{ $customer->due_date?->format('Y-m-d') ?? '-' }}</td>
+                                <td>
+                                    {{-- يمكنك إضافة أزرار لعرض تفاصيل العميل أو تعديله --}}
+                                    <a href="{{ route('dashboard.customers.show', $customer->id) }}" class="btn btn-sm btn-outline-primary">عرض</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4" class="text-start">إجمالي قيمة الاتفاقيات</th>
+                            {{-- ملاحظة: هذا الإجمالي بسيط وقد تحتاج إلى منطق أكثر تعقيدًا إذا كانت العملات مختلفة --}}
+                            <th colspan="3">{{ number_format($project->customers->sum('agreement_amount'), 2) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        @else
+            <p class="text-muted text-center">لا يوجد عملاء مسجلون في هذا المشروع بعد.</p>
+        @endif
+    </div>
+</div>
 </main>
+
 @endsection
 
 @section('styles')

@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-// استدعاء المتحكمات المستخدمة
+use App\Http\Controllers\Dashboard\ProjectController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Dashboard; // استيراد مساحة الاسم لتبسيط الكود
+use App\Http\Controllers\Dashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,15 +76,14 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController::class);
 
     // 6. العملاء (Customers)
-    Route::get('/customers/export/excel', [ App\Http\Controllers\Dashboard\CustomerController::class, 'exportExcel'])->name('customers.export.excel');
-    Route::prefix('customers/trash')->name('customers.trash.')->controller( App\Http\Controllers\Dashboard\CustomerController::class)->group(function () {
+     Route::get('/customers/export/excel', [App\Http\Controllers\Dashboard\CustomerController::class, 'exportExcel'])->name('customers.export.excel');
+    Route::prefix('customers/trash')->name('customers.trash.')->controller(App\Http\Controllers\Dashboard\CustomerController::class)->group(function () {
         Route::get('/', 'trash')->name('index');
-        Route::put('/{id}/restore', 'restore')->name('restore');
+        Route::post('/{id}/restore', 'restore')->name('restore');
         Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
     });
-    Route::resource('customers',  App\Http\Controllers\Dashboard\CustomerController::class)->except(['show']);
-
-    // 7. الموظفون (Employees)
+    Route::resource('customers', App\Http\Controllers\Dashboard\CustomerController::class);
+   // 7. الموظفون (Employees)
     Route::get('/employees/export/excel', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'exportExcel'])->name('employees.export.excel');
     Route::get('/employees/{employee}/pay', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'showPayForm'])->name('employees.pay.form');
     Route::post('/employees/pay', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'storePayment'])->name('employees.pay.store');

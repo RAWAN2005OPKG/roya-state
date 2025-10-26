@@ -12,8 +12,8 @@
     .btn-secondary { background-color: #f3f4f6; color: #4b5563; }
     .btn-success { background-color: #107c41; color: #fff; }
     .btn-info { background-color: #3b82f6; color: #fff; } /* زر الطباعة */
-    .search-form { margin-bottom: 20px; }
-    .search-input { width: 100%; max-width: 400px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
+    .search-form { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+    .search-input { flex-grow: 1; max-width: 400px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
     .data-table { width: 100%; border-collapse: collapse; text-align: right; }
     .data-table th, .data-table td { padding: 12px 15px; border-bottom: 1px solid #e5e7eb; }
     .data-table th { background-color: #f9fafb; }
@@ -21,10 +21,10 @@
 
     @media print {
         body * {
-            visibility: hidden; 
+            visibility: hidden;
         }
         .printable-area, .printable-area * {
-            visibility: visible; 
+            visibility: visible;
         }
         .printable-area {
             position: absolute;
@@ -33,7 +33,7 @@
             width: 100%;
         }
         .no-print {
-            display: none; 
+            display: none;
         }
     }
 </style>
@@ -42,11 +42,12 @@
 @section('content')
 <main class="main-content">
 
-    <div class="table-container" id="expenses-table-area"> 
-        <div class="header-controls no-print"> 
+    <div class="table-container" id="expenses-table-area">
+        <div class="header-controls no-print">
             <h2 class="header-title">المصروفات المسجلة</h2>
             <div class="actions-group">
-                 <a href="{{ route('dashboard.expenses.edit') }}"  class="btn btn-primary">إضافة مصروف</a> 
+                 {{-- تم تصحيح الرابط ليتوافق مع وظيفة create --}}
+                 <a href="{{ route('dashboard.expenses.create') }}"  class="btn btn-primary">إضافة مصروف</a>
                 <a href="{{ route('dashboard.expenses.trash.index') }}" class="btn btn-secondary">سلة المحذوفات</a>
                 <a href="{{ route('dashboard.expenses.export.excel') }}" class="btn btn-success">تصدير Excel</a>
                 <button onclick="printTable()" class="btn btn-info">
@@ -56,7 +57,7 @@
         </div>
 
         <!-- 2. نموذج البحث -->
-        <div class="search-form no-print"> 
+        <div class="search-form no-print">
             <form action="{{ route('dashboard.expenses.index') }}" method="GET">
                 <input type="text" name="search" class="search-input" placeholder="ابحث باسم المستفيد, ملاحظات..." value="{{ $search }}">
                 <button type="submit" class="btn btn-primary">بحث</button>
@@ -104,7 +105,7 @@
             </table>
         </div>
 
-        <div class="pagination-links no-print"> 
+        <div class="pagination-links no-print">
             {{ $expenses->appends(request()->query())->links() }}
         </div>
     </div>
@@ -132,3 +133,4 @@
     }
 </script>
 @endsection
+

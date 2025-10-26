@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Project;
-use App\Models\Investment;
-use App\Models\Investor;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProjectsExport;
@@ -16,7 +14,8 @@ class ProjectController extends Controller
     //  عرض جميع المشاريع
     public function index(Request $request)
     {
-        $query = Project::with('investments.investor');
+        // ** تعديل بسيط: إضافة علاقة العملاء للبحث **
+        $query = Project::with(['investments.investor', 'customers']);
         $search = $request->input('search');
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
@@ -25,6 +24,10 @@ class ProjectController extends Controller
             $query->where('project_name', 'LIKE', "%{$search}%")
                   ->orWhere('project_title', 'LIKE', "%{$search}%")
                   ->orWhereHas('investments.investor', function ($q) use ($search) {
+                      $q->where('name', 'LIKE', "%{$search}%");
+                  })
+                  // ** الإضافة الجديدة: البحث في أسماء العملاء المرتبطين **
+                  ->orWhereHas('customers', function ($q) use ($search) {
                       $q->where('name', 'LIKE', "%{$search}%");
                   });
         }
@@ -58,10 +61,15 @@ class ProjectController extends Controller
     //  عرض تفاصيل المشروع
     public function show(Project $project)
     {
-        $project->load('investments.investor');
-        $totalInvested = $project->totalInvested();
+        // ** التعديل الأهم **
+        // نقوم بتحميل العلاقات (الاستثمارات والمستثمرين، والعملاء) بكفاءة
+        $project->load(['investments.investor', 'customers']);
 
-        return view('dashboard.projects.show', compact('project', 'totalInvested'));
+        // لم نعد بحاجة إلى استدعاء totalInvested هنا لأننا سنستخدمه في الـ Blade مباشرة
+        // $totalInvested = $project->totalInvested();
+
+        // نرسل كائن المشروع فقط، وهو يحتوي على كل شيء
+        return view('dashboard.projects.show', compact('project'));
     }
 
     //  تعديل مشروع

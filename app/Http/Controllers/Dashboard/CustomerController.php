@@ -5,23 +5,30 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Customer;
+use App\Models\Project;
 use App\Exports\CustomersExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
-public function index(Request $request)
+    public function index(Request $request)
     {
-        $query = Customer::query();
+
+        $query = Customer::with('project');
+
         $search = $request->input('search');
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
 
         if ($search) {
-            $query->where('name', 'LIKE', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
                   ->orWhere('phone', 'LIKE', "%{$search}%")
-                  ->orWhere('project', 'LIKE', "%{$search}%");
+                  ->orWhereHas('project', function($projectQuery) use ($search) {
+                      $projectQuery->where('project_name', 'LIKE', "%{$search}%");
+                  });
+            });
         }
 
         $customers = $query->orderBy($sortBy, $sortOrder)->paginate(15);
@@ -37,31 +44,23 @@ public function index(Request $request)
 
     public function create()
     {
-        return view('dashboard.customers.create');
+        $projects = Project::all();
+        return view('dashboard.customers.create', compact('projects'));
     }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'due_date' => ['nullable', 'date'],
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'project' => ['nullable', 'string', 'max:255'],
+            'project_id' => ['required', 'integer', 'exists:projects,id'],
             'unit' => ['required', 'string', 'max:255'],
             'agreement_amount' => ['required', 'numeric', 'min:0'],
-            'payment_method' => ['required', 'string', 'max:50'],
             'currency' => ['required', 'string', 'max:10'],
-            'paid_to' => ['nullable', 'string', 'max:100'],
-            'paid_to_other' => ['nullable', 'string', 'max:100'],
-            'bank_name' => ['nullable', 'string', 'max:100'],
-            'other_bank_name' => ['nullable', 'string', 'max:100'],
-            'other_bank_branch' => ['nullable', 'string', 'max:100'],
-            'check_number' => ['nullable', 'string', 'max:100'],
-            'check_bank' => ['nullable', 'string', 'max:100'],
-            'check_due_date' => ['nullable', 'date'],
-            'check_receipt_date' => ['nullable', 'date'],
+            'payment_method' => ['required', 'string', 'max:50'],
+            'due_date' => ['nullable', 'date'],
             'contract_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
         ]);
-
 
         if ($request->hasFile('contract_file')) {
             $validated['contract_file'] = $request->file('contract_file')->store('customer_contracts', 'public');
@@ -73,18 +72,27 @@ public function index(Request $request)
 
     public function show(Customer $customer)
     {
+        $customer->load('project');
         return view('dashboard.customers.show', compact('customer'));
     }
 
     public function edit(Customer $customer)
     {
-        return view('dashboard.customers.edit', compact('customer'));
+        $projects = Project::all();
+        return view('dashboard.customers.edit', compact('customer', 'projects'));
     }
 
     public function update(Request $request, Customer $customer)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'project_id' => ['required', 'integer', 'exists:projects,id'],
+            'unit' => ['required', 'string', 'max:255'],
+            'agreement_amount' => ['required', 'numeric', 'min:0'],
+            'currency' => ['required', 'string', 'max:10'],
+            'payment_method' => ['required', 'string', 'max:50'],
+            'due_date' => ['nullable', 'date'],
             'contract_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
         ]);
 
@@ -98,6 +106,7 @@ public function index(Request $request)
         $customer->update($validated);
         return redirect()->route('dashboard.customers.index')->with('success', 'تم تحديث العميل بنجاح.');
     }
+
 
     public function destroy(Customer $customer)
     {

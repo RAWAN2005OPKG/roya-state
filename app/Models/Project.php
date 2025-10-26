@@ -30,5 +30,12 @@ public function totalInvested()
 {
     return $this->investments()->sum('amount'); // حقل 'amount' هو مبلغ الاستثمار
 }
-
+ public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
+      public function totalInvested()
+    {
+        return $this->investments()->sum('amount');
+    }
 }
