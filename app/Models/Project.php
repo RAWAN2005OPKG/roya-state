@@ -23,19 +23,19 @@ class Project extends Model
         'budget' => 'decimal:2',
     ];
 
-    
+
     public function contracts()
     {
         return $this->hasMany(Contract::class);
     }
 
-   
+
     public function expenses()
     {
         return $this->hasMany(Expense::class);
     }
 
- 
+
     public function getCustomersAttribute()
     {
         $this->loadMissing('contracts.contractable');
@@ -45,7 +45,7 @@ class Project extends Model
             ->unique('id');
     }
 
-    
+
     public function getInvestorsAttribute()
     {
         $this->loadMissing('contracts.contractable');
@@ -54,12 +54,13 @@ class Project extends Model
             ->map->contractable
             ->unique('id');
     }
-    
-    
-    public function getTotalInvestmentsValueAttribute()
-    {
-        return $this->contracts()
-            ->where('contractable_type', Investor::class)
-            ->sum('investment_amount');
-    }
+
+
+   public function getTotalInvestmentsValueAttribute()
+{
+    return $this->contracts()
+        ->where('contractable_type', Investor::class)
+        ->sum('investment_amount');
+}
+
 }

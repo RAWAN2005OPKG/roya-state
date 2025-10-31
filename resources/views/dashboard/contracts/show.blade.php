@@ -1,64 +1,104 @@
-@extends('layouts.container')
-@section('title', 'تفاصيل العقد: ' . $contract->contract_id)
+@extends('layouts.app')
 
-@section('styles')
-<style>
-    .main-content { max-width: 900px; margin: 2rem auto; }
-    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-    .card-header { padding: 1.5rem; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; }
-    .card-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
-    .card-body { padding: 1.5rem; }
-    .detail-group { margin-bottom: 2rem; }
-    .detail-group h5 { color: #4f46e5; font-size: 1.1rem; margin-bottom: 1rem; padding-bottom: 5px; border-bottom: 2px solid #4f46e5; display: inline-block; }
-    .detail-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #f1f1f1; }
-    .detail-item strong { color: #555; }
-    .detail-item span { color: #777; }
-</style>
-@endsection
+@section('title', 'تفاصيل العقد رقم: ' . $contract->id)
 
 @section('content')
-<main class="main-content">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">تفاصيل العقد: {{ $contract->contract_id }}</h2>
-            <a href="{{ route('dashboard.contracts.index') }}" class="btn btn-secondary">العودة للقائمة</a>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>تفاصيل العقد رقم: {{ $contract->id }}</h1>
+            <p class="lead">العميل: {{ $contract->client_name ?? 'غير محدد' }}</p>
+        </div>
+    </div>
+
+    {{-- رسائل الأخطاء والنجاح --}}
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
+    {{-- ملخص المبالغ المالية --}}
+    <div class="row mb-5">
+        @php
+            // حساب المبلغ المتبقي بناءً على البيانات المحدثة في قاعدة البيانات
+            $remaining = $contract->investment_amount - $contract->total_paid;
+        @endphp
+
+        {{-- 1. إجمالي قيمة العقد (الجزء الذي أرسله المستخدم) --}}
+        <div class="col-md-4 mb-3">
+            <div class="p-3 border rounded bg-light">
+                <h5 class="text-secondary">إجمالي قيمة العقد</h5>
+                <h3 class="text-dark">{{ format_number($contract->investment_amount) }} {{ $contract->currency }}</h3>
+            </div>
+        </div>
+
+        {{-- 2. إجمالي المبلغ المدفوع --}}
+        <div class="col-md-4 mb-3">
+            <div class="p-3 border rounded bg-success-light">
+                <h5 class="text-success">إجمالي المبلغ المدفوع</h5>
+                <h3 class="text-success">{{ format_number($contract->total_paid) }} {{ $contract->currency }}</h3>
+            </div>
+        </div>
+
+        {{-- 3. المبلغ المتبقي --}}
+        <div class="col-md-4 mb-3">
+            <div class="p-3 border rounded @if($remaining > 0) bg-warning-light @else bg-info-light @endif">
+                <h5 class="text-warning">المبلغ المتبقي</h5>
+                <h3 class="text-warning">{{ format_number($remaining) }} {{ $contract->currency }}</h3>
+            </div>
+        </div>
+    </div>
+
+    {{-- جدول الدفعات --}}
+    <div class="card shadow mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="m-0 font-weight-bold text-primary">الدفعات المسجلة</h4>
+            <a href="{{ route('dashboard.contracts.payments.create', $contract->id) }}" class="btn btn-primary btn-sm">
+                إضافة دفعة جديدة
+            </a>
         </div>
         <div class="card-body">
-            <!-- قسم صاحب العقد -->
-            <div class="detail-group">
-                <h5>صاحب العقد</h5>
-                <div class="detail-item"><strong>الاسم:</strong> <span>{{ $contract->contractable->name ?? 'غير محدد' }}</span></div>
-                <div class="detail-item"><strong>نوع العقد:</strong>
-                    <span>
-                        @if($contract->contractable_type == \App\Models\Customer::class) عقد عميل
-                        @elseif($contract->contractable_type == \App\Models\Investor::class) عقد استثمار
-                        @else عقد مقاول @endif
-                    </span>
+            @if ($contract->payments->isEmpty())
+                <p class="text-center">لم يتم تسجيل أي دفعات لهذا العقد بعد.</p>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="paymentsTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>تاريخ الدفعة</th>
+                                <th>المبلغ</th>
+                                <th>طريقة الدفع</th>
+                                <th>الخزنة</th>
+                                <th>الوصف</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($contract->payments as $payment)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $payment->payment_date }}</td>
+                                    <td>{{ format_number($payment->amount) }} {{ $payment->currency }}</td>
+                                    <td>{{ $payment->payment_method }}</td>
+                                    <td>{{ $payment->fund->name ?? 'N/A' }}</td>
+                                    <td>{{ $payment->description }}</td>
+                                    <td>
+                                        <form action="{{ route('dashboard.contracts.payments.destroy', [$contract->id, $payment->id]) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذه الدفعة؟ سيتم تعديل المبلغ المدفوع في العقد.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">حذف</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-
-            <!-- قسم تفاصيل العقد -->
-            <div class="detail-group">
-                <h5>تفاصيل العقد</h5>
-                <div class="detail-item"><strong>المشروع المرتبط:</strong> <span>{{ $contract->project->project_name ?? 'لا يوجد' }}</span></div>
-                <div class="detail-item"><strong>تاريخ التوقيع:</strong> <span>{{ $contract->signing_date->format('d-m-Y') }}</span></div>
-                <div class="detail-item"><strong>قيمة العقد:</strong> <span>{{ number_format($contract->investment_amount, 2) }} {{ $contract->currency }}</span></div>
-                <div class="detail-item"><strong>الحالة:</strong> <span>{{ $contract->status }}</span></div>
-            </div>
-
-            <!-- قسم الشروط والمرفقات -->
-            @if($contract->terms || $contract->attachment)
-            <div class="detail-group">
-                <h5>الشروط والمرفقات</h5>
-                @if($contract->terms)
-                    <div class="detail-item"><strong>شروط العقد:</strong> <span>{{ $contract->terms }}</span></div>
-                @endif
-                @if($contract->attachment)
-                    <div class="detail-item"><strong>الملف المرفق:</strong> <span><a href="{{ Storage::url($contract->attachment) }}" target="_blank">عرض الملف</a></span></div>
-                @endif
-            </div>
             @endif
         </div>
     </div>
-</main>
+</div>
 @endsection

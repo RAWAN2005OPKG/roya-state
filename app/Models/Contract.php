@@ -31,4 +31,18 @@ class Contract extends Model
     {
         return $this->belongsTo(Project::class);
     }
+    public function payments()
+{
+    return $this->hasMany(Payment::class);
+}
+public function getTotalPaidAttribute()
+{
+    return $this->payments()->sum('amount');
+}
+
+
+public function getRemainingAmountAttribute()
+{
+    return $this->investment_amount - $this->total_paid;
+}
 }

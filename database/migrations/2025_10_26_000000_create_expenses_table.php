@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('project_id')->nullable()->constrained('projects')->onDelete('set null');
+
             $table->date('date');
             $table->string('payee');
             $table->string('phone', 50)->nullable();

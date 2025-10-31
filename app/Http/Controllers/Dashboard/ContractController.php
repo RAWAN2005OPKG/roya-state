@@ -3,178 +3,320 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Contract;
 use App\Models\Customer;
 use App\Models\Investor;
 use App\Models\Subcontractor;
 use App\Models\Project;
-use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Support\Facades\Storage;
 
 class ContractController extends Controller
 {
     /**
-     * عرض قائمة بكل العقود.
+     * عرض قائمة بالعقود.
+     * (يتضمن البحث والتصفية والترقيم)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
      */
     public function index(Request $request)
     {
-        $query = Contract::with(['contractable', 'project']);
         $search = $request->input('search');
-        $sortBy = $request->input('sort_by', 'signing_date');
-        $sortOrder = $request->input('sort_order', 'desc');
+
+        $contractsQuery = Contract::with(['contractable', 'project'])
+            ->latest();
 
         if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('contract_id', 'LIKE', "%{$search}%")
-                  ->orWhereHasMorph('contractable', [Customer::class, Investor::class, Subcontractor::class], function ($query) use ($search) {
-                      $query->where('name', 'LIKE', "%{$search}%");
-                  })
-                  ->orWhereHas('project', function ($query) use ($search) {
-                      $query->where('project_name', 'LIKE', "%{$search}%");
-                  });
-            });
+            $contractsQuery->where('contract_id', 'like', '%' . $search . '%')
+                           ->orWhereHasMorph('contractable', [Customer::class, Investor::class, Subcontractor::class], function ($query, $type) use ($search) {
+                               // هذا الجزء يتطلب حلاً أكثر تعقيدًا في Laravel أو قاعدة بيانات تدعم البحث في JSON/محتوى الـ contractable
+                               // لتبسيط المثال، سنركز على البحث في حقل الاسم (يفترض وجود حقل 'name' في جميع النماذج)
+                               $query->where('name', 'like', '%' . $search . '%');
+                           })
+                           ->orWhereHas('project', function ($query) use ($search) {
+                               $query->where('project_name', 'like', '%' . $search . '%');
+                           });
         }
 
-        $contracts = $query->orderBy($sortBy, $sortOrder)->paginate(15);
+        $contracts = $contractsQuery->paginate(10); // يمكن تغيير عدد العناصر في الصفحة
+
+        // حساب الإحصائيات (KPIs)
         $totalContracts = Contract::count();
-        $totalValue = Contract::sum('investment_amount');
+        // يفترض أن العملة الرئيسية هي ILS لحساب الإجمالي
+        // هذا يتطلب تحويل العملات في تطبيق حقيقي، لكن سنفترض ILS مؤقتاً
+        $totalValue = Contract::where('currency', 'ILS')->sum('investment_amount');
 
-        return view('dashboard.contracts.index', compact('contracts', 'totalContracts', 'totalValue', 'search', 'sortBy', 'sortOrder'));
+        return view('dashboard.contracts.index', compact('contracts', 'totalContracts', 'totalValue', 'search'));
     }
 
     /**
-     * عرض صفحة إضافة عقد جديد.
+     * عرض نموذج إنشاء عقد جديد.
+     *
+     * @return \Illuminate\View\View
      */
-    public function create(Request $request)
+    public function create()
     {
-        $customers = Customer::orderBy('name')->get();
-        $investors = Investor::orderBy('name')->get();
-        $subcontractors = Subcontractor::orderBy('name')->get();
-        $projects = Project::orderBy('project_name')->get();
+        $projects = Project::all();
+        $customers = Customer::all();
+        $investors = Investor::all();
+        $subcontractors = Subcontractor::all();
 
-        // لجعل النموذج يختار النوع وصاحب العقد تلقائيًا إذا جئنا من صفحة أخرى
-        $prefilledType = $request->query('type');
-        $prefilledId = $request->query('id');
-
-        return view('dashboard.contracts.create', compact('customers', 'investors', 'subcontractors', 'projects', 'prefilledType', 'prefilledId'));
+        return view('dashboard.contracts.create', compact('projects', 'customers', 'investors', 'subcontractors'));
     }
 
     /**
-     * تخزين العقد الجديد في قاعدة البيانات.
+     * تخزين عقد جديد في قاعدة البيانات.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
-        return $this->handleContract($request);
+        $validatedData = $request->validate([
+            'contract_type' => 'required|in:customer,investor,subcontractor',
+            'contractable_id' => 'required|integer',
+            'contract_id' => 'required|string|max:255|unique:contracts,contract_id',
+            'signing_date' => 'required|date',
+            'investment_amount' => 'required|numeric|min:0',
+            'currency' => 'required|string|in:ILS,USD,JOD',
+            'project_id' => 'nullable|exists:projects,id',
+            'status' => 'required|in:active,draft,completed,cancelled',
+            'terms' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // حقول العميل
+            'customer_unit_number' => 'nullable|string|max:255',
+            'customer_delivery_date' => 'nullable|date',
+            // حقول المستثمر
+            'investor_profit_percentage' => 'nullable|numeric|min:0|max:100',
+            'investor_duration' => 'nullable|integer|min:1',
+            // حقول المقاول
+            'subcontractor_scope' => 'nullable|string',
+        ]);
+
+        $contractableType = $this->getContractableType($validatedData['contract_type']);
+
+        // تجميع التفاصيل الخاصة بالنوع
+        $details = $this->extractDetails($validatedData);
+
+        try {
+            DB::beginTransaction();
+
+            $contract = new Contract($validatedData);
+            $contract->contractable_type = $contractableType;
+            $contract->contractable_id = $validatedData['contractable_id'];
+            $contract->details = $details; // حفظ التفاصيل كـ JSON
+
+            if ($request->hasFile('attachment')) {
+                $contract->attachment = $request->file('attachment')->store('contracts', 'public');
+            }
+
+            $contract->save();
+
+            DB::commit();
+            return redirect()->route('dashboard.contracts.index')->with('success', 'تم إنشاء العقد بنجاح.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'حدث خطأ أثناء حفظ العقد: ' . $e->getMessage());
+        }
     }
 
     /**
-     * عرض صفحة تفاصيل العقد.
+     * عرض تفاصيل عقد محدد.
+     *
+     * @param  \App\Models\Contract  $contract
+     * @return \Illuminate\View\View
      */
     public function show(Contract $contract)
     {
-        $contract->load(['contractable', 'project']);
-        $details = json_decode($contract->details, true); // تحويل JSON إلى مصفوفة
-        return view('dashboard.contracts.show', compact('contract', 'details'));
+        // يتم تحميل العلاقات الضرورية مسبقاً
+        $contract->load(['contractable', 'project', 'payments.fund']);
+
+        // حساب القيم المالية (يفترض وجود هذه الدوال في نموذج Contract أو كـ Accessors)
+        // $contract->total_paid;
+        // $contract->remaining_amount;
+
+        return view('dashboard.contracts.show', compact('contract'));
     }
 
     /**
-     * عرض صفحة تعديل العقد.
+     * عرض نموذج تعديل عقد محدد.
+     *
+     * @param  \App\Models\Contract  $contract
+     * @return \Illuminate\View\View
      */
     public function edit(Contract $contract)
     {
-        $customers = Customer::orderBy('name')->get();
-        $investors = Investor::orderBy('name')->get();
-        $subcontractors = Subcontractor::orderBy('name')->get();
-        $projects = Project::orderBy('project_name')->get();
+        $projects = Project::all();
+        $customers = Customer::all();
+        $investors = Investor::all();
+        $subcontractors = Subcontractor::all();
+        $details = $contract->details ?? []; // استخراج التفاصيل المحفوظة
 
-        $details = json_decode($contract->details, true);
-
-        return view('dashboard.contracts.edit', compact('contract', 'customers', 'investors', 'subcontractors', 'projects', 'details'));
+        return view('dashboard.contracts.edit', compact('contract', 'projects', 'customers', 'investors', 'subcontractors', 'details'));
     }
 
     /**
-     * تحديث العقد في قاعدة البيانات.
+     * تحديث عقد محدد في قاعدة البيانات.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Contract  $contract
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Contract $contract)
     {
-        return $this->handleContract($request, $contract);
+        $validatedData = $request->validate([
+            'contract_type' => 'required|in:customer,investor,subcontractor',
+            'contractable_id' => 'required|integer',
+            'contract_id' => 'required|string|max:255|unique:contracts,contract_id,' . $contract->id,
+            'signing_date' => 'required|date',
+            'investment_amount' => 'required|numeric|min:0',
+            'currency' => 'required|string|in:ILS,USD,JOD',
+            'project_id' => 'nullable|exists:projects,id',
+            'status' => 'required|in:active,draft,completed,cancelled',
+            'terms' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // حقول العميل
+            'customer_unit_number' => 'nullable|string|max:255',
+            'customer_delivery_date' => 'nullable|date',
+            // حقول المستثمر
+            'investor_profit_percentage' => 'nullable|numeric|min:0|max:100',
+            'investor_duration' => 'nullable|integer|min:1',
+            // حقول المقاول
+            'subcontractor_scope' => 'nullable|string',
+        ]);
+
+        $contractableType = $this->getContractableType($validatedData['contract_type']);
+        $details = $this->extractDetails($validatedData);
+
+        try {
+            DB::beginTransaction();
+
+            $contract->fill($validatedData);
+            $contract->contractable_type = $contractableType;
+            $contract->contractable_id = $validatedData['contractable_id'];
+            $contract->details = $details;
+
+            if ($request->hasFile('attachment')) {
+                // حذف الملف القديم إذا كان موجوداً
+                if ($contract->attachment) {
+                    Storage::disk('public')->delete($contract->attachment);
+                }
+                $contract->attachment = $request->file('attachment')->store('contracts', 'public');
+            }
+
+            $contract->save();
+
+            DB::commit();
+            return redirect()->route('dashboard.contracts.show', $contract->id)->with('success', 'تم تحديث العقد بنجاح.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'حدث خطأ أثناء تحديث العقد: ' . $e->getMessage());
+        }
     }
 
     /**
-     * نقل العقد إلى سلة المحذوفات.
+     * حذف عقد محدد (Soft Delete).
+     *
+     * @param  \App\Models\Contract  $contract
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Contract $contract)
     {
         $contract->delete();
-        return redirect()->route('dashboard.contracts.index')->with('success', 'تم نقل العقد إلى سلة المحذوفات.');
+        return redirect()->route('dashboard.contracts.index')->with('success', 'تم نقل العقد إلى سلة المحذوفات بنجاح.');
     }
 
     /**
-     * دالة مركزية لمعالجة إنشاء وتحديث العقود.
+     * عرض سلة محذوفات العقود.
+     *
+     * @return \Illuminate\View\View
      */
-    private function handleContract(Request $request, Contract $contract = null)
+    public function trash()
     {
-        $isUpdate = $contract !== null;
+        // عرض العقود المحذوفة فقط
+        $contracts = Contract::onlyTrashed()->paginate(10);
 
-        // --- 1. التحقق من الحقول المشتركة ---
-        $validated = $request->validate([
-            'contract_type' => ['required', 'in:customer,investor,subcontractor'],
-            'contractable_id' => ['required', 'integer'],
-            'project_id' => ['nullable', 'exists:projects,id'],
-            'contract_id' => ['required', 'string', 'max:255', $isUpdate ? Rule::unique('contracts')->ignore($contract->id) : 'unique:contracts,contract_id'],
-            'signing_date' => ['required', 'date'],
-            'status' => ['required', 'string'],
-            'investment_amount' => ['required', 'numeric', 'min:0'],
-            'currency' => ['required', 'string'],
-            'terms' => ['nullable', 'string'],
-            'attachment' => ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
-        ]);
+        // ملاحظة: الـ client_name في View سلة المحذوفات غير موجود في نموذج Contract
+        // يجب إضافة Accessor أو تعديل الاستعلام لجلب الاسم.
+        // في هذا المثال، سنفترض أننا أضفنا Accessor مؤقتًا في نموذج Contract
 
-        // --- 2. التحقق من الحقول الديناميكية ---
-        $details = [];
-        if ($validated['contract_type'] === 'customer') {
-            $details = $request->validate(['customer_unit_number' => ['nullable', 'string'], 'customer_delivery_date' => ['nullable', 'date']]);
-        } elseif ($validated['contract_type'] === 'investor') {
-            $details = $request->validate(['investor_profit_percentage' => ['nullable', 'numeric'], 'investor_duration' => ['nullable', 'integer']]);
-        } elseif ($validated['contract_type'] === 'subcontractor') {
-            $details = $request->validate(['subcontractor_scope' => ['nullable', 'string']]);
+        return view('dashboard.contracts.trash', compact('contracts'));
+    }
+
+    /**
+     * استعادة عقد محذوف.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function restore($id)
+    {
+        $contract = Contract::withTrashed()->findOrFail($id);
+        $contract->restore();
+        return redirect()->route('dashboard.contracts.trash')->with('success', 'تم استعادة العقد بنجاح.');
+    }
+
+    /**
+     * حذف عقد نهائياً من قاعدة البيانات.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function forceDelete($id)
+    {
+        $contract = Contract::withTrashed()->findOrFail($id);
+        // حذف الملف المرفق من التخزين
+        if ($contract->attachment) {
+             Storage::disk('public')->delete($contract->attachment);
         }
+        $contract->forceDelete();
+        return redirect()->route('dashboard.contracts.trash')->with('success', 'تم حذف العقد نهائياً بنجاح.');
+    }
 
-        // --- 3. تحديد نوع المودل ---
-        $contractable_type = match ($validated['contract_type']) {
+
+    // =========================================================================
+    // دوال مساعدة خاصة بالـ Polymorphic Relation والتفاصيل الإضافية
+    // =========================================================================
+
+    /**
+     * تحديد اسم النموذج المرتبط بناءً على نوع العقد.
+     *
+     * @param string $type
+     * @return string
+     */
+    protected function getContractableType(string $type): string
+    {
+        return match ($type) {
             'customer' => Customer::class,
             'investor' => Investor::class,
             'subcontractor' => Subcontractor::class,
+            default => throw new \InvalidArgumentException("Invalid contract type: $type"),
         };
+    }
 
-        DB::beginTransaction();
-        try {
-            $contractData = $validated;
-            $contractData['contractable_type'] = $contractable_type;
-            $contractData['details'] = json_encode($details);
+    /**
+     * استخراج التفاصيل الخاصة بالنوع لحفظها كـ JSON.
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function extractDetails(array $data): array
+    {
+        $details = [];
+        $type = $data['contract_type'];
 
-            if ($request->hasFile('attachment')) {
-                if ($isUpdate && $contract->attachment) {
-                    Storage::disk('public')->delete($contract->attachment);
-                }
-                $contractData['attachment'] = $request->file('attachment')->store('contracts', 'public');
-            }
-
-            if ($isUpdate) {
-                $contract->update($contractData);
-            } else {
-                $contract = Contract::create($contractData);
-            }
-
-            DB::commit();
-            $message = $isUpdate ? 'تم تحديث العقد بنجاح.' : 'تم إنشاء العقد بنجاح.';
-            return redirect()->route('dashboard.contracts.index')->with('success', $message);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'حدث خطأ: ' . $e->getMessage())->withInput();
+        if ($type === 'customer') {
+            $details['customer_unit_number'] = $data['customer_unit_number'] ?? null;
+            $details['customer_delivery_date'] = $data['customer_delivery_date'] ?? null;
+        } elseif ($type === 'investor') {
+            $details['investor_profit_percentage'] = $data['investor_profit_percentage'] ?? null;
+            $details['investor_duration'] = $data['investor_duration'] ?? null;
+        } elseif ($type === 'subcontractor') {
+            $details['subcontractor_scope'] = $data['subcontractor_scope'] ?? null;
         }
+
+        return $details;
     }
 }

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('customers', function (Blueprint $table) {
@@ -19,14 +16,14 @@ return new class extends Migration
             $table->string('email')->nullable()->unique();
             $table->string('address')->nullable();
 
+            $table->decimal('agreement_amount', 15, 2)->nullable();
+            $table->string('currency', 10)->default('ILS');
+
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('customers');

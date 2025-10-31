@@ -92,9 +92,8 @@
                             <td>{{ $contract->signing_date->format('Y-m-d') }}</td>
                             <td>{{ $contract->status }}</td>
                             <td class="action-buttons">
-                                {{-- يمكنك تفعيل هذه الأزرار بعد إنشاء صفحاتها --}}
-                                {{-- <a href="{{ route('dashboard.contracts.show', $contract->id) }}" title="عرض"><i class="fas fa-eye"></i></a> --}}
-                                {{-- <a href="{{ route('dashboard.contracts.edit', $contract->id) }}" title="تعديل"><i class="fas fa-edit"></i></a> --}}
+                                <a href="{{ route('dashboard.contracts.show', $contract->id) }}" title="عرض"><i class="fas fa-eye"></i></a>
+                               <a href="{{ route('dashboard.contracts.edit', $contract->id) }}" title="تعديل"><i class="fas fa-edit"></i></a>
                             </td>
                         </tr>
                     @empty

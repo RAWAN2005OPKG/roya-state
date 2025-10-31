@@ -10,27 +10,24 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * الحقول التي يمكن تعبئتها بشكل جماعي.
-     *
-     * @var array<int, string>
-     */
+
     protected $fillable = [
         'name',
         'phone',
         'email',
         'address',
+        'agreement_amount',
+        'currency',
     ];
 
 
+    protected $casts = [
+        'agreement_amount' => 'decimal:2', //  لضمان التعامل معه كرقم عشري
+    ];
 
-public function contracts()
-{
-    return $this->morphMany(Contract::class, 'contractable');
-}
-    public function project()
+
+    public function contracts()
     {
-
-        return $this->belongsTo(Project::class);
+        return $this->morphMany(Contract::class, 'contractable');
     }
 }

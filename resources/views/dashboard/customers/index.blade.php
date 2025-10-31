@@ -4,18 +4,18 @@
 @section('styles')
     <style>
  :root {
-        --primary-color: #4f46e5; 
-        --primary-hover: #3730a3; 
-        --secondary-color: #06b6d4; 
-        --white-bg: #ffffff; 
-        --light-bg: #f8fafc; 
-        --card-bg: #ffffff; 
+        --primary-color: #4f46e5;
+        --primary-hover: #3730a3;
+        --secondary-color: #06b6d4;
+        --white-bg: #ffffff;
+        --light-bg: #f8fafc;
+        --card-bg: #ffffff;
         --text-color: #1f2937;
-        --text-muted: #6b7280; 
-        --border-color: #e5e7eb; 
-        --success-color: #10b981; 
-        --danger-color: #ef4444; 
-        --warning-color: #f59e0b; 
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
         --info-color: #3b82f6;
         --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -679,7 +679,6 @@
         .header-actions { display: flex; gap: 10px; }
     </style>
 @endsection
-
 @section('content')
 <main class="main-content">
     <div class="page-header">
@@ -688,15 +687,12 @@
 
     <div class="kpi-grid">
         <div class="kpi-card"><div class="label">إجمالي العملاء</div><div class="value">{{ $totalClients }}</div></div>
-        <div class="kpi-card"><div class="label">إجمالي الاتفاقيات</div><div class="value">{{ number_format($totalAgreements, 2) }}</div></div>
-
+        <div class="kpi-card"><div class="label">إجمالي قيمة الاتفاقيات</div><div class="value">{{ number_format($totalAgreements, 2) }}</div></div>
     </div>
 
     <div class="card card-custom">
         <div class="card-header">
-            <div class="card-title">
-                <h3 class="card-label">قائمة العملاء</h3>
-            </div>
+            <div class="card-title"><h3 class="card-label">قائمة العملاء</h3></div>
             <div class="card-toolbar">
                 <a href="{{ route('dashboard.customers.create') }}" class="btn btn-primary font-weight-bolder"><i class="fas fa-plus"></i> إضافة عميل</a>
                 <a href="{{ route('dashboard.customers.trash.index') }}" class="btn btn-danger font-weight-bolder ml-2"><i class="fas fa-trash"></i> سلة المحذوفات</a>
@@ -705,7 +701,7 @@
         <div class="card-body">
             <div class="table-controls">
                 <form action="{{ route('dashboard.customers.index') }}" method="GET" class="search-form">
-                    <input type="text" name="search" class="form-control" placeholder="ابحث عن عميل..." value="{{ $search }}">
+                    <input type="text" name="search" class="form-control" placeholder="ابحث بالاسم أو الهاتف..." value="{{ $search ?? '' }}">
                     <button type="submit" class="btn btn-light-primary">بحث</button>
                 </form>
                 <div class="header-actions">
@@ -722,21 +718,29 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th><a href="{{ route('dashboard.customers.index', ['sort_by' => 'name', 'sort_order' => $sortOrder == 'asc' ? 'desc' : 'asc']) }}">الاسم</a></th>
-                            <th><a href="{{ route('dashboard.customers.index', ['sort_by' => 'project', 'sort_order' => $sortOrder == 'asc' ? 'desc' : 'asc']) }}">المشروع/الوحدة</a></th>
-                            <th><a href="{{ route('dashboard.customers.index', ['sort_by' => 'agreement_amount', 'sort_order' => $sortOrder == 'asc' ? 'desc' : 'asc']) }}">قيمة الاتفاقية</a></th>
-                            <th>طريقة الدفع</th>
+                            <th><a href="{{ route('dashboard.customers.index', ['sort_by' => 'name', 'sort_order' => ($sortOrder ?? 'desc') == 'asc' ? 'desc' : 'asc']) }}">الاسم</a></th>
+                            <th><a href="{{ route('dashboard.customers.index', ['sort_by' => 'agreement_amount', 'sort_order' => ($sortOrder ?? 'desc') == 'asc' ? 'desc' : 'asc']) }}">قيمة الاتفاقية</a></th>
+                            <th>عدد العقود</th>
                             <th>تحكم</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($customers as $customer)
                             <tr>
-                                <td><strong>{{ $customer->name }}</strong>
-<small>{{ $customer->phone }}</small></td>
-                                <td>{{ $customer->project }} / {{ $customer->unit }}</td>
-                                <td>{{ number_format($customer->agreement_amount, 2) }} {{ $customer->currency }}</td>
-                                <td>{{ $customer->payment_method }}</td>
+                                <td>
+                                    <div class="customer-name">
+                                        <strong>{{ $customer->name }}</strong>
+                                        <small>{{ $customer->phone ?? 'لا يوجد هاتف' }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if($customer->agreement_amount)
+                                        {{ number_format($customer->agreement_amount, 2) }} {{ $customer->currency }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>{{ $customer->contracts_count }}</td>
                                 <td nowrap="nowrap">
                                     <a href="{{ route('dashboard.customers.show', $customer->id) }}" class="btn btn-sm btn-clean btn-icon" title="عرض"><i class="fas fa-eye"></i></a>
                                     <a href="{{ route('dashboard.customers.edit', $customer->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل"><i class="fas fa-edit"></i></a>
@@ -748,7 +752,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="text-center">لا توجد بيانات لعرضها.</td></tr>
+                            <tr><td colspan="4" class="text-center">لا توجد بيانات لعرضها.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -778,7 +782,7 @@
             if (result.isConfirmed) {
                 document.getElementById('delete-form-' + id).submit();
             }
-        })
+        });
     }
 </script>
 @endsection

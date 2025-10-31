@@ -65,15 +65,19 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
 
     Route::resource('reportproject', App\Http\Controllers\Dashboard\ReportProjectController::class);
 
-    // 5. العقود (Contracts)
-    Route::get('/contracts/export/excel', [ App\Http\Controllers\Dashboard\ContractController::class, 'exportExcel'])->name('contracts.export.excel');
-    Route::get('/contracts/export/pdf/{id}', [ App\Http\Controllers\Dashboard\ContractController::class, 'exportPdf'])->name('contracts.export.pdf');
-    Route::prefix('contracts/trash')->name('contracts.trash.')->controller( App\Http\Controllers\Dashboard\ContractController::class)->group(function () {
-        Route::get('/', 'trash')->name('index');
-        Route::put('/{id}/restore', 'restore')->name('restore');
-        Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
-    });
-    Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController::class);
+   // 5. العقود (Contracts)
+Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::class);
+Route::get('contracts/trash', [App\Http\Controllers\Dashboard\ContractController::class, 'trash'])->name('contracts.trash');
+Route::post('contracts/restore/{id}', [App\Http\Controllers\Dashboard\ContractController::class, 'restore'])->name('contracts.restore');
+Route::delete('contracts/forceDelete/{id}', [App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('contracts.forceDelete');
+
+// --- مسارات الدفعات ---
+Route::prefix('contracts/{contract}')->as('contracts.')->group(function () {
+    Route::get('payments/create', [App\Http\Controllers\Dashboard\PaymentController::class, 'create'])->name('payments.create');
+
+    Route::post('payments', [App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('payments.store');
+    Route::delete('payments/{payment}', [App\Http\Controllers\Dashboard\PaymentController::class, 'destroy'])->name('payments.destroy');
+});
 
     // 6. العملاء (Customers)
      Route::get('/customers/export/excel', [App\Http\Controllers\Dashboard\CustomerController::class, 'exportExcel'])->name('customers.export.excel');

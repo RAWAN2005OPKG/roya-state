@@ -16,6 +16,7 @@ class Expense extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'project_id',
         'date',
         'payee',
         'phone',
@@ -60,6 +61,6 @@ class Expense extends Model
  {
          return $this->belongsTo(Project::class);
      }
-     
+
 }
 
