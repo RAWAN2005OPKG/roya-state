@@ -11,33 +11,23 @@ class Customer extends Model
     use HasFactory, SoftDeletes;
 
     /**
-     * The attributes that are mass assignable.
+     * الحقول التي يمكن تعبئتها بشكل جماعي.
      *
      * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'phone',
-        'project_id',
-        'unit',
-        'agreement_amount',
-        'currency',
-        'payment_method',
-        'due_date',
-        'contract_file',
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'agreement_amount' => 'decimal:2',
-        'due_date' => 'date',
+        'email',
+        'address',
     ];
 
 
+
+public function contracts()
+{
+    return $this->morphMany(Contract::class, 'contractable');
+}
     public function project()
     {
 

@@ -2,7 +2,6 @@
 @section('title', 'لوحة التحكم الرئيسية')
 
 @section('styles')
-{{-- يمكنك إضافة أي تنسيقات CSS خاصة بهذه الصفحة هنا إذا احتجت --}}
 <style>
         :root { --dark-bg-1:rgb(255, 255, 255); --dark-bg-2:rgb(205, 216, 238); --text-color:rgb(0, 0, 0); --border-color: #e9dddd; --primary:rgb(5, 56, 122); --success: #2ecc71; --danger: #e74c3c;}
         body { background-color: var(--dark-bg-1 ); color: var(--text-color); font-family: 'Cairo', sans-serif; padding: 15px; margin: 0; }

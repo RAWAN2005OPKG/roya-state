@@ -45,7 +45,6 @@
                 <div class="form-group"><label for="client_phone">رقم الجوال</label><input type="text" id="client_phone" name="client_phone"></div>
                 <div class="form-group"><label for="beneficiary_name">المستلم</label><select id="beneficiary_name" name="beneficiary" required><option value="خالد">خالد</option><option value="محمد">محمد</option></select></div>
                 <div class="form-group"><label for="cash_operator_role">وظيفته</label><input type="text" id="cash_operator_role" name="operator_role" placeholder="مثال: مدير مالي"></div>
-                <div class="form-group"><label for="cash_operator">القائم بالعملية</label><input type="text" id="cash_operator" name="operator" placeholder="اسم الموظف/المدير" required></div>
                 <div class="form-group"><label for="cheque_currency">العملة</label><select id="cheque_currency" name="currency" required><option value="شيكل">شيكل</option><option value="دولار">دولار</option><option value="دينار">دينار</option></select></div>
                 <div class="form-group"><label for="cheque_amount">المبلغ</label><input type="number" id="cheque_amount" name="amount" step="0.01" required></div>
                 <div class="form-group full-width"><label for="cash_details">تفاصيل</label><input type="text" id="cash_details" name="details"></div>

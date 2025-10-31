@@ -84,7 +84,7 @@ h3, label, input, textarea {
 
 <div class="container">
 
-    <!-- المعلومات الأساسية -->
+    <!-- المعلومات الأساسية رقم الحوض و رقم الارض-->
     <div class="form-section">
         <div class="section-header"><i class="fas fa-info-circle"></i><h3>المعلومات الأساسية</h3></div>
         <div class="form-grid">
@@ -92,7 +92,7 @@ h3, label, input, textarea {
             <div class="form-group"><label>رقم الأرض</label><input type="text" name="land_number"></div>
             <div class="form-group"><label>موقع المشروع</label><input type="text" name="project_location"></div>
             <div class="form-group"><label>نوع العمل</label><input type="text" name="project_type"></div>
-            <div class="form-group"><label>تفاصيل الشقة</label><textarea name="apartment_details"></textarea></div>
+            <div class="form-group"><label> عدد الشقق المقترحة </label><textarea name="apartment_details"></textarea></div>
             <div class="form-group"><label>تكلفة الأرض</label><input type="number" name="land_cost"></div>
             <div class="form-group"><label>المهندسين</label><input type="text" name="engineers"></div>
         </div>
@@ -102,12 +102,12 @@ h3, label, input, textarea {
     <div class="form-section">
         <div class="section-header"><i class="fas fa-building"></i><h3>البلدية - الأقسام</h3></div>
         <div class="form-grid">
-            <div class="form-group"><label>الكهرباء</label><input type="text" name="electricity"></div>
-            <div class="form-group"><label>العقد</label><input type="text" name="contract"></div>
-            <div class="form-group"><label>الطرق</label><input type="text" name="roads"></div>
-            <div class="form-group"><label>التحسين</label><input type="text" name="improvement"></div>
-            <div class="form-group"><label>البيئة</label><input type="text" name="environment"></div>
-            <div class="form-group"><label>جوهان</label><input type="text" name="johan"></div>
+            <div class="form-group"><label>الكهرباء</label><input type="number" name="electricity"></div>
+            <div class="form-group"><label>العقد</label><input type="number" name="contract"></div>
+            <div class="form-group"><label>الطرق</label><input type="number" name="roads"></div>
+            <div class="form-group"><label>التحسين</label><input type="number" name="improvement"></div>
+            <div class="form-group"><label>البيئة</label><input type="number" name="environment"></div>
+            <div class="form-group"><label>جيحون</label><input type="number" name="johan"></div>
         </div>
     </div>
 

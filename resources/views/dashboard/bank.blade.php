@@ -45,8 +45,6 @@
                 <div class="form-group"><label for="payer_id_number">رقم الهوية</label><input type="text" id="payer_id_number" name="payer_id_number"></div>
                 <div class="form-group"><label for="bank_type">نوع الحركة</label><select id="bank_type" name="type" required><option value="deposit">إيداع</option><option value="withdrawal">سحب نقدي</option><option value="transfer">حوالة بنكية</option><option value="personal_withdrawal">مسحوبات شخصية</option></select></div>
                 <div class="form-group"><label for="bank_amount">المبلغ</label><input type="number" id="bank_amount" name="amount" step="0.01" required></div>
-                <div class="form-group"><label for="bank_operator_role">وظيفته</label><input type="text" id="bank_operator_role" name="operator_role" placeholder="مثال: مدير مالي"></div>
-                <div class="form-group"><label for="bank_operator">القائم بالعملية</label><input type="text" id="bank_operator" name="operator" placeholder="اسم الموظف/المدير" required></div>
                 <div class="form-group"><label for="bank_currency">العملة</label><select id="bank_currency" name="currency" required><option value="شيكل">شيكل</option><option value="دولار">دولار</option><option value="دينار">دينار</option></select></div>
                 <div class="form-group"><label for="bank_project_name">اسم المشروع</label><input type="text" id="bank_project_name" name="project_name" placeholder="اسم المشروع المرتبط بالحركة"></div>
                 <div class="form-group"><label for="bank_source">مصدر المبلغ</label><input type="text" id="bank_source" name="source" placeholder="مثال: العميل س، حوالة واردة"></div>

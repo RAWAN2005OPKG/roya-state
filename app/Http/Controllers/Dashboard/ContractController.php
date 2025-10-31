@@ -5,183 +5,176 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Contract;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ContractsExport;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Customer;
+use App\Models\Investor;
+use App\Models\Subcontractor;
+use App\Models\Project;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class ContractController extends Controller
 {
-
-public function index(Request $request)
-{
-    $query = Contract::query();
-
-    $search = $request->input('search');
-    $sortBy = $request->input('sort_by', 'signing_date'); 
-    $sortOrder = $request->input('sort_order', 'desc');   
-
-    
-    if ($search) {
-        $query->where(function($q) use ($search) {
-            $q->where('client_name', 'LIKE', "%{$search}%")
-              ->orWhere('contract_id', 'LIKE', "%{$search}%")
-              ->orWhere('client_phone', 'LIKE', "%{$search}%");
-        });
-    }
-
-    $query->orderBy($sortBy, $sortOrder);
-
-    $contracts = $query->paginate(15);
-
-    $allContracts = Contract::all();
-    $totalContracts = $allContracts->count();
-    $totalValue = $allContracts->sum('investment_amount');
-    $totalPaid = 0;
-    $totalRemaining = $totalValue - $totalPaid;
-
-    return view('dashboard.contracts.index', compact(
-        'contracts', 'totalContracts', 'totalValue', 'totalPaid', 'totalRemaining',
-        'search', 'sortBy', 'sortOrder' ,
-    ));
-}
-    public function create()
+    /**
+     * عرض قائمة بكل العقود.
+     */
+    public function index(Request $request)
     {
-        return view('dashboard.contracts.create');
+        $query = Contract::with(['contractable', 'project']);
+        $search = $request->input('search');
+        $sortBy = $request->input('sort_by', 'signing_date');
+        $sortOrder = $request->input('sort_order', 'desc');
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('contract_id', 'LIKE', "%{$search}%")
+                  ->orWhereHasMorph('contractable', [Customer::class, Investor::class, Subcontractor::class], function ($query) use ($search) {
+                      $query->where('name', 'LIKE', "%{$search}%");
+                  })
+                  ->orWhereHas('project', function ($query) use ($search) {
+                      $query->where('project_name', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        $contracts = $query->orderBy($sortBy, $sortOrder)->paginate(15);
+        $totalContracts = Contract::count();
+        $totalValue = Contract::sum('investment_amount');
+
+        return view('dashboard.contracts.index', compact('contracts', 'totalContracts', 'totalValue', 'search', 'sortBy', 'sortOrder'));
     }
 
+    /**
+     * عرض صفحة إضافة عقد جديد.
+     */
+    public function create(Request $request)
+    {
+        $customers = Customer::orderBy('name')->get();
+        $investors = Investor::orderBy('name')->get();
+        $subcontractors = Subcontractor::orderBy('name')->get();
+        $projects = Project::orderBy('project_name')->get();
 
+        // لجعل النموذج يختار النوع وصاحب العقد تلقائيًا إذا جئنا من صفحة أخرى
+        $prefilledType = $request->query('type');
+        $prefilledId = $request->query('id');
+
+        return view('dashboard.contracts.create', compact('customers', 'investors', 'subcontractors', 'projects', 'prefilledType', 'prefilledId'));
+    }
+
+    /**
+     * تخزين العقد الجديد في قاعدة البيانات.
+     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'contract_id' => ['required', 'string', 'max:255', 'unique:contracts,contract_id'],
-            'signing_date' => ['required', 'date'],
-            'status' => ['nullable', 'in:active,draft'],
-            'client_name' => ['required', 'string', 'max:255'],
-            'client_email' => ['required', 'email', 'max:255'],
-            'client_phone' => ['required', 'string', 'max:50'],
-            'client_alt_phone' => ['nullable', 'string', 'max:50'],
-            'client_id_number' => ['required', 'string', 'max:100'],
-            'property_type' => ['nullable', 'string', 'max:255'],
-            'property_location' => ['nullable', 'string', 'max:255'],
-            'investment_amount' => ['required', 'numeric', 'min:0'],
-            'duration_months' => ['required', 'integer', 'min:1'],
-            'payment_method' => ['required', 'in:cash,bank_transaction,check'],
-            'apartment_price' => ['nullable', 'numeric', 'min:0'],
-            'first_payment_date' => ['nullable', 'date'],
-            'down_payment_initial' => ['nullable', 'numeric', 'min:0'],
-            'down_payment_other' => ['nullable', 'numeric', 'min:0'],
-            'profit_percentage' => ['nullable', 'numeric', 'min:0'],
-            'remaining_amount' => ['nullable', 'numeric', 'min:0'],
-            'cash_amount' => ['nullable', 'numeric', 'min:0', 'required_if:payment_method,cash'],
-            'cash_receipt_number' => ['nullable', 'string', 'max:255'],
-            'bank_name' => ['nullable', 'string', 'max:255', 'required_if:payment_method,bank_transaction'],
-            'account_number' => ['nullable', 'string', 'max:255', 'required_if:payment_method,bank_transaction'],
-            'transaction_id' => ['nullable', 'string', 'max:255'],
-            'transfer_date' => ['nullable', 'date'],
-            'check_number' => ['nullable', 'string', 'max:255', 'required_if:payment_method,check'],
-            'check_amount' => ['nullable', 'numeric', 'min:0', 'required_if:payment_method,check'],
-            'check_holder' => ['nullable', 'string', 'max:255'],
-            'check_bank' => ['nullable', 'string', 'max:255'],
-            'check_bank_branch' => ['nullable', 'string', 'max:255'],
-            'check_due_date' => ['nullable', 'date'],
-            'check_receipt_date' => ['nullable', 'date'],
-        ]);
-        if ($request->has('payment_methods')) {
-            $validated['payment_method'] = implode(',', $request->payment_methods);
-        }
+        return $this->handleContract($request);
+    }
 
-        Contract::create($validated);
-        return redirect()->route('dashboard.contracts.index')->with('success', 'تم إنشاء العقد بنجاح!');
-    }
- public function show(Contract $contract)
+    /**
+     * عرض صفحة تفاصيل العقد.
+     */
+    public function show(Contract $contract)
     {
-        return view('dashboard.contracts.show', compact('contract'));
+        $contract->load(['contractable', 'project']);
+        $details = json_decode($contract->details, true); // تحويل JSON إلى مصفوفة
+        return view('dashboard.contracts.show', compact('contract', 'details'));
     }
+
+    /**
+     * عرض صفحة تعديل العقد.
+     */
     public function edit(Contract $contract)
     {
-        return view('dashboard.contracts.edit', compact('contract'));
+        $customers = Customer::orderBy('name')->get();
+        $investors = Investor::orderBy('name')->get();
+        $subcontractors = Subcontractor::orderBy('name')->get();
+        $projects = Project::orderBy('project_name')->get();
+
+        $details = json_decode($contract->details, true);
+
+        return view('dashboard.contracts.edit', compact('contract', 'customers', 'investors', 'subcontractors', 'projects', 'details'));
     }
 
+    /**
+     * تحديث العقد في قاعدة البيانات.
+     */
     public function update(Request $request, Contract $contract)
     {
-        $validated = $request->validate([
-             'contract_id' => ['required', 'string', 'max:255', 'unique:contracts,contract_id'],
-            'signing_date' => ['required', 'date'],
-            'status' => ['nullable', 'in:active,draft'],
-            'client_name' => ['required', 'string', 'max:255'],
-            'client_email' => ['required', 'email', 'max:255'],
-            'client_phone' => ['required', 'string', 'max:50'],
-            'client_alt_phone' => ['nullable', 'string', 'max:50'],
-            'client_id_number' => ['required', 'string', 'max:100'],
-            'property_type' => ['nullable', 'string', 'max:255'],
-            'property_location' => ['nullable', 'string', 'max:255'],
-            'investment_amount' => ['required', 'numeric', 'min:0'],
-            'duration_months' => ['required', 'integer', 'min:1'],
-            'payment_method' => ['required', 'in:cash,bank_transaction,check'],
-            'apartment_price' => ['nullable', 'numeric', 'min:0'],
-            'first_payment_date' => ['nullable', 'date'],
-            'down_payment_initial' => ['nullable', 'numeric', 'min:0'],
-            'down_payment_other' => ['nullable', 'numeric', 'min:0'],
-            'profit_percentage' => ['nullable', 'numeric', 'min:0'],
-            'remaining_amount' => ['nullable', 'numeric', 'min:0'],
-            'cash_amount' => ['nullable', 'numeric', 'min:0', 'required_if:payment_method,cash'],
-            'cash_receipt_number' => ['nullable', 'string', 'max:255'],
-            'bank_name' => ['nullable', 'string', 'max:255', 'required_if:payment_method,bank_transaction'],
-            'account_number' => ['nullable', 'string', 'max:255', 'required_if:payment_method,bank_transaction'],
-            'transaction_id' => ['nullable', 'string', 'max:255'],
-            'transfer_date' => ['nullable', 'date'],
-            'check_number' => ['nullable', 'string', 'max:255', 'required_if:payment_method,check'],
-            'check_amount' => ['nullable', 'numeric', 'min:0', 'required_if:payment_method,check'],
-            'check_holder' => ['nullable', 'string', 'max:255'],
-            'check_bank' => ['nullable', 'string', 'max:255'],
-            'check_bank_branch' => ['nullable', 'string', 'max:255'],
-            'check_due_date' => ['nullable', 'date'],
-            'check_receipt_date' => ['nullable', 'date'],
-        ]);
-
-        if ($request->has('payment_methods')) {
-            $validated['payment_method'] = implode(',', $request->payment_methods);
-        } else {
-            $validated['payment_method'] = null; 
-        }
-
-        $contract->update($validated);
-        return redirect()->route('dashboard.contracts.index')->with('success', 'تم تحديث العقد بنجاح!');
+        return $this->handleContract($request, $contract);
     }
 
+    /**
+     * نقل العقد إلى سلة المحذوفات.
+     */
     public function destroy(Contract $contract)
     {
         $contract->delete();
-        return back()->with('success', 'تم نقل العقد إلى سلة المحذوفات.');
+        return redirect()->route('dashboard.contracts.index')->with('success', 'تم نقل العقد إلى سلة المحذوفات.');
     }
 
-    public function trash()
+    /**
+     * دالة مركزية لمعالجة إنشاء وتحديث العقود.
+     */
+    private function handleContract(Request $request, Contract $contract = null)
     {
-        $trashedContracts = Contract::onlyTrashed()->latest('deleted_at')->paginate(15);
-        return view('dashboard.contracts.trash', ['contracts' => $trashedContracts]);
-    }
+        $isUpdate = $contract !== null;
 
-    public function restore($id)
-    {
-        Contract::withTrashed()->findOrFail($id)->restore();
-        return back()->with('success', 'تم استعادة العقد بنجاح.');
-    }
+        // --- 1. التحقق من الحقول المشتركة ---
+        $validated = $request->validate([
+            'contract_type' => ['required', 'in:customer,investor,subcontractor'],
+            'contractable_id' => ['required', 'integer'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'contract_id' => ['required', 'string', 'max:255', $isUpdate ? Rule::unique('contracts')->ignore($contract->id) : 'unique:contracts,contract_id'],
+            'signing_date' => ['required', 'date'],
+            'status' => ['required', 'string'],
+            'investment_amount' => ['required', 'numeric', 'min:0'],
+            'currency' => ['required', 'string'],
+            'terms' => ['nullable', 'string'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
+        ]);
 
-    public function forceDelete($id)
-    {
-        Contract::withTrashed()->findOrFail($id)->forceDelete();
-        return back()->with('success', 'تم حذف العقد نهائياً.');
-    }
+        // --- 2. التحقق من الحقول الديناميكية ---
+        $details = [];
+        if ($validated['contract_type'] === 'customer') {
+            $details = $request->validate(['customer_unit_number' => ['nullable', 'string'], 'customer_delivery_date' => ['nullable', 'date']]);
+        } elseif ($validated['contract_type'] === 'investor') {
+            $details = $request->validate(['investor_profit_percentage' => ['nullable', 'numeric'], 'investor_duration' => ['nullable', 'integer']]);
+        } elseif ($validated['contract_type'] === 'subcontractor') {
+            $details = $request->validate(['subcontractor_scope' => ['nullable', 'string']]);
+        }
 
-    public function exportExcel()
-    {
-        return Excel::download(new ContractsExport, 'contracts.xlsx');
-    }
+        // --- 3. تحديد نوع المودل ---
+        $contractable_type = match ($validated['contract_type']) {
+            'customer' => Customer::class,
+            'investor' => Investor::class,
+            'subcontractor' => Subcontractor::class,
+        };
 
-    public function exportPdf()
-    {
-        $contracts = Contract::all();
-        $pdf = Pdf::loadView('dashboard.contracts.pdf', compact('contracts'));
-        return $pdf->download('contracts-report.pdf');
+        DB::beginTransaction();
+        try {
+            $contractData = $validated;
+            $contractData['contractable_type'] = $contractable_type;
+            $contractData['details'] = json_encode($details);
+
+            if ($request->hasFile('attachment')) {
+                if ($isUpdate && $contract->attachment) {
+                    Storage::disk('public')->delete($contract->attachment);
+                }
+                $contractData['attachment'] = $request->file('attachment')->store('contracts', 'public');
+            }
+
+            if ($isUpdate) {
+                $contract->update($contractData);
+            } else {
+                $contract = Contract::create($contractData);
+            }
+
+            DB::commit();
+            $message = $isUpdate ? 'تم تحديث العقد بنجاح.' : 'تم إنشاء العقد بنجاح.';
+            return redirect()->route('dashboard.contracts.index')->with('success', $message);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'حدث خطأ: ' . $e->getMessage())->withInput();
+        }
     }
 }

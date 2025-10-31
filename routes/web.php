@@ -22,7 +22,7 @@ Auth::routes();
 
 
 Route::view('/', 'dashboard.login')->name('login.page');
-Route::get('/home', [ HomeController::class, 'index'])->name('home');
+Route::get('/home', [ App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
@@ -110,6 +110,16 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->except(['show']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->except(['show']);
     Route::resource('alerts', App\Http\Controllers\Dashboard\AlertController::class);
+
+     // 9. المقاولون والموردون (Subcontractors)
+    Route::get('/subcontractors/export/excel', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'exportExcel'])->name('subcontractors.export.excel');
+
+    Route::prefix('subcontractors/trash')->name('subcontractors.trash.')->controller(App\Http\Controllers\Dashboard\SubcontractorController::class)->group(function () {
+        Route::get('/', 'trash')->name('index');
+        Route::put('/{id}/restore', 'restore')->name('restore');
+        Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
+    });
+    Route::resource('subcontractors', App\Http\Controllers\Dashboard\SubcontractorController::class);
 
     Route::get('/treasury', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('treasury');
     Route::get('/general-ledger', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('general-ledger.index');

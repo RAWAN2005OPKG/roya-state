@@ -1,170 +1,79 @@
 @extends('layouts.container')
-@section('title', 'عرض المشروع')
-
-@section('content')
-<main class="main-content">
-    <div class="page-header">
-        <h1><i class="fas fa-project-diagram"></i> {{ $project->project_name }}</h1>
-        <div class="header-actions">
-            <a href="{{ route('dashboard.projects.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> العودة للمشاريع</a>
-            <a href="{{ route('dashboard.projects.edit', $project->id) }}" class="btn btn-primary"><i class="fas fa-edit"></i> تعديل المشروع</a>
-        </div>
-    </div>
-
-    <div class="card card-custom mb-4">
-        <div class="card-body">
-            <h4 class="mb-3">معلومات المشروع الأساسية</h4>
-            <div class="row mb-3">
-                <div class="col-md-4"><strong>اسم المشروع:</strong> {{ $project->project_name }}</div>
-                <div class="col-md-4"><strong>عنوان المشروع:</strong> {{ $project->project_title }}</div>
-                <div class="col-md-4"><strong>تاريخ الإنشاء:</strong> {{ $project->due_date?->format('Y-m-d') ?? '-' }}</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-4"><strong>العملة:</strong> {{ strtoupper($project->currency ?? 'USD') }}</div>
-                <div class="col-md-4"><strong>سعر الشقة:</strong> {{ number_format($project->apartment_price ?? 0, 2) }}</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-4"><strong>الدفعة الأولى:</strong> {{ number_format($project->down_payment ?? 0, 2) }}</div>
-                <div class="col-md-4"><strong>حالة المشروع:</strong>
-                    <span class="badge {{ $project->project_status == 'ready_finished' ? 'bg-success' : 'bg-secondary' }}">
-                        {{ $project->project_status ?? '-' }}
-                    </span>
-                </div>
-                <div class="col-md-4"><strong>الميزانية:</strong> {{ number_format($project->budget ?? 0, 2) }}</div>
-            </div>
-
-            @if($project->project_media)
-                <div class="row mb-3">
-                    <div class="col-12">
-                        @if(pathinfo($project->project_media, PATHINFO_EXTENSION) == 'mp4')
-                            <video src="{{ asset('storage/'.$project->project_media) }}" controls class="w-100"></video>
-                        @else
-                            <img src="{{ asset('storage/'.$project->project_media) }}" alt="صورة المشروع" class="img-fluid">
-                        @endif
-                    </div>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    {{-- استثمارات المشروع --}}
-    <div class="card card-custom">
-        <div class="card-body">
-            <h4 class="mb-3">الاستثمارات</h4>
-            @if($project->investments->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle text-center">
-                        <thead class="table-light">
-                            <tr>
-                                <th>المستثمر</th>
-                                <th>المبلغ المستثمر</th>
-                                <th>طريقة الدفع</th>
-                                <th>تاريخ الاستثمار</th>
-                                <th>الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($project->investments as $investment)
-                                <tr>
-                                    <td>{{ $investment->investor->name ?? '-' }}</td>
-                                    <td>{{ number_format($investment->amount ?? 0, 2) }}</td>
-                                    <td>{{ $investment->payment_method ?? '-' }}</td>
-                                    <td>{{ $investment->date?->format('Y-m-d') ?? '-' }}</td>
-                                    <td>
-                                        <span class="badge {{ $investment->status == 'active' ? 'bg-success' : ($investment->status == 'completed' ? 'bg-primary' : 'bg-secondary') }}">
-                                            {{ $investment->status == 'active' ? 'نشط' : ($investment->status == 'completed' ? 'مكتمل' : 'ملغي') }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th colspan="1">إجمالي الاستثمار</th>
-                                <th colspan="4">{{ number_format($project->totalInvested() ?? 0, 2) }}</th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            @else
-                <p class="text-muted">لا توجد استثمارات في هذا المشروع بعد.</p>
-            @endif
-        </div>
-    </div>
-<div class="card card-custom mt-4">
-    <div class="card-body">
-        <h4 class="mb-3"><i class="fas fa-users"></i> عملاء هذا المشروع</h4>
-
-        @if($project->customers->count() > 0)
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>#</th>
-                            <th>اسم العميل</th>
-                            <th>رقم الجوال</th>
-                            <th>الوحدة/الشقة</th>
-                            <th>قيمة الاتفاقية</th>
-                            <th>تاريخ الاستحقاق</th>
-                            <th>تحكم</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($project->customers as $customer)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $customer->name }}</td>
-                                <td>{{ $customer->phone ?? '-' }}</td>
-                                <td>{{ $customer->unit }}</td>
-                                <td>{{ number_format($customer->agreement_amount, 2) }} {{ $customer->currency }}</td>
-                                <td>{{ $customer->due_date?->format('Y-m-d') ?? '-' }}</td>
-                                <td>
-                                    {{-- يمكنك إضافة أزرار لعرض تفاصيل العميل أو تعديله --}}
-                                    <a href="{{ route('dashboard.customers.show', $customer->id) }}" class="btn btn-sm btn-outline-primary">عرض</a>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="4" class="text-start">إجمالي قيمة الاتفاقيات</th>
-                            {{-- ملاحظة: هذا الإجمالي بسيط وقد تحتاج إلى منطق أكثر تعقيدًا إذا كانت العملات مختلفة --}}
-                            <th colspan="3">{{ number_format($project->customers->sum('agreement_amount'), 2) }}</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        @else
-            <p class="text-muted text-center">لا يوجد عملاء مسجلون في هذا المشروع بعد.</p>
-        @endif
-    </div>
-</div>
-</main>
-
-@endsection
+@section('title', 'عرض المشروع: ' . $project->project_name)
 
 @section('styles')
 <style>
-.main-content {
-    padding: 20px;
-    background-color: #f8f9fa;
-}
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.card-custom {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
-}
-.badge {
-    font-size: 0.9rem;
-    padding: 5px 10px;
-}
+    .details-card { background-color: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .details-header { border-bottom: 1px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+    .section-title { font-size: 1.5rem; color: #4f46e5; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #4f46e5; display: inline-block; }
+    .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .detail-item { background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #4f46e5; }
+    .detail-item strong { display: block; color: #6b7280; margin-bottom: 5px; font-size: 0.9rem; }
+    .detail-item span { color: #1f2937; font-size: 1.1rem; font-weight: 600; }
 </style>
+@endsection
+
+@section('content')
+<main class="main-content" style="padding-top: 40px;">
+    <div class="details-card" style="max-width: 1400px; margin: auto;">
+        <div class="details-header">
+            <h2><i class="fas fa-project-diagram text-primary"></i> تفاصيل المشروع: {{ $project->project_name }}</h2>
+            <div>
+                <a href="{{ route('dashboard.projects.edit', $project->id) }}" class="btn btn-primary"><i class="fas fa-edit"></i> تعديل</a>
+                <a href="{{ route('dashboard.projects.index') }}" class="btn btn-secondary">العودة للقائمة</a>
+            </div>
+        </div>
+
+        <!-- قسم معلومات المشروع الأساسية -->
+        <h3 class="section-title">المعلومات الأساسية</h3>
+        <div class="details-grid">
+            <div class="detail-item"><strong>اسم المشروع:</strong> <span>{{ $project->project_name }}</span></div>
+            <div class="detail-item"><strong>العنوان:</strong> <span>{{ $project->project_title ?? '-' }}</span></div>
+            <div class="detail-item"><strong>تاريخ البدء:</strong> <span>{{ $project->start_date ? $project->start_date->format('Y-m-d') : '-' }}</span></div>
+            <div class="detail-item"><strong>تاريخ الانتهاء:</strong> <span>{{ $project->end_date ? $project->end_date->format('Y-m-d') : '-' }}</span></div>
+            <div class="detail-item"><strong>الميزانية:</strong> <span>{{ number_format($project->budget, 2) }} {{ $project->currency }}</span></div>
+            <div class="detail-item"><strong>الحالة:</strong> <span>{{ $project->project_status ?? '-' }}</span></div>
+        </div>
+
+        <!-- قسم العملاء -->
+        <h3 class="section-title mt-5">العملاء ({{ $project->customers->count() }})</h3>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead><tr><th>اسم العميل</th><th>الهاتف</th><th>تحكم</th></tr></thead>
+                <tbody>
+                    @forelse($project->customers as $customer)
+                        <tr>
+                            <td>{{ $customer->name }}</td>
+                            <td>{{ $customer->phone ?? '-' }}</td>
+                            <td><a href="{{ route('dashboard.customers.show', $customer->id) }}" title="عرض"><i class="fas fa-eye"></i></a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3" class="text-center">لا يوجد عملاء مرتبطون بهذا المشروع.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- قسم المستثمرين -->
+        <h3 class="section-title mt-5">المستثمرون ({{ $project->investors->count() }})</h3>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                 <thead><tr><th>اسم المستثمر</th><th>الهاتف</th><th>إجمالي الاستثمار</th><th>تحكم</th></tr></thead>
+                <tbody>
+                    @forelse($project->investors as $investor)
+                        <tr>
+                            <td>{{ $investor->name }}</td>
+                            <td>{{ $investor->phone ?? '-' }}</td>
+                            {{-- يمكنك هنا حساب إجمالي استثمارات هذا المستثمر في هذا المشروع تحديدًا --}}
+                            <td>...</td> 
+                            <td><a href="{{-- route('dashboard.investors.show', $investor->id) --}}" title="عرض"><i class="fas fa-eye"></i></a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="text-center">لا يوجد مستثمرون مرتبطون بهذا المشروع.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
 @endsection

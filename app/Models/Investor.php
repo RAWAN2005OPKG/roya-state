@@ -23,4 +23,8 @@ class Investor extends Model
     {
         return $this->hasMany(Investment::class);
     }
+    public function contracts()
+{
+    return $this->morphMany(Contract::class, 'contractable');
+}
 }

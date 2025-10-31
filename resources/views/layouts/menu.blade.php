@@ -161,6 +161,12 @@
                             <span class="menu-text">العملاء</span>
                         </a>
                     </li>
+                     <li class="menu-item" aria-haspopup="true">
+                        <a href="{{ route('dashboard.subcontractors.index') }}" class="menu-link">
+                            <span class="svg-icon menu-icon"><i class="fas fa-hard-hat"></i></span> {{-- يمكنك تغيير الأيقونة --}}
+                            <span class="menu-text">المقاولون والموردون</span>
+                        </a>
+                    </li>
                     <li class="menu-item" aria-haspopup="true">
                         <a href="{{url('dashboard.employees') }}" class="menu-link">
                             <span class="svg-icon menu-icon"></span>

@@ -6,39 +6,47 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Project extends Model
+class ReportProject extends Model
 {
     use HasFactory, SoftDeletes;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * The table associated with the model.
+     * اسم الجدول في قاعدة البيانات.
      */
-    protected $guarded = []; 
+    protected $table = 'report_projects';
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
+     * The attributes that are mass assignable.
+     * الحقول التي نسمح بتعبئتها من خلال النماذج.
      */
-    public function investments()
-{
-    return $this->hasMany(Investment::class);
-}
-
-    protected $casts = [
-        'start_date' => 'date',
-        'check_due_date' => 'date',
-        'check_receive_date' => 'date',
-        'apartment_price' => 'decimal:2',
-        'down_payment' => 'decimal:2',
-        'land_cost' => 'decimal:2',
-        'excavation_cost' => 'decimal:2',
-        'engineers_cost' => 'decimal:2',
-        'licensing_cost' => 'decimal:2',
-        'materials_cost' => 'decimal:2',
-        'finishing_cost' => 'decimal:2',
-        'total_budget' => 'decimal:2',
+    protected $fillable = [
+        'name',
+        'project_title',
+        'owner_name',
+        'owner_phone',
+        'owner_id',
+        'project_status',
+        'start_date',
+        'total_budget',
+        'currency',
+        'description',
+        'project_media',
     ];
+
+    /**
+     * The attributes that should be cast to native types.
+     * هذا يضمن أن الحقول ستعامل دائمًا بأنواع البيانات الصحيحة.
+     */
+    protected $casts = [
+        'total_budget' => 'decimal:2',
+        'start_date' => 'date',
+    ];
+
+
+      public function payments()
+      {
+         return $this->hasMany(Payment::class);
+      }
+
 }

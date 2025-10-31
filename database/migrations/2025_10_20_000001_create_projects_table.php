@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('projects', function (Blueprint $table) {
@@ -13,7 +14,7 @@ return new class extends Migration {
             $table->string('project_title')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->string('currency')->nullable();
+            $table->string('currency', 10)->default('ILS');
             $table->decimal('apartment_price', 15, 2)->nullable();
             $table->decimal('down_payment', 15, 2)->nullable();
             $table->decimal('budget', 15, 2)->nullable();
@@ -23,7 +24,6 @@ return new class extends Migration {
             $table->softDeletes();
         });
     }
-
 
     public function down(): void
     {

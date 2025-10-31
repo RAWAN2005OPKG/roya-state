@@ -51,10 +51,17 @@
 
             <!-- الحقول الأساسية -->
             <div class="form-group"><label for="expenseDate">تاريخ الدفع</label><input type="date" id="expenseDate" name="date" required value="{{ old('date') }}"></div>
+            <div class="form-group"><label for="receiptName">اسم الوصل</label><input type="text" id="receiptName" name="receipt_name" placeholder="اسم الوصل/الفاتورة" value="{{ old('receipt_name') }}"></div>
+            <div class="form-group"><label for="receiptValueShekel">قيمة الوصل (شيكل)</label><input type="number" id="receiptValueShekel" name="receipt_value_shekel" min="0" step="0.01" placeholder="0.00" value="{{ old('receipt_value_shekel') }}"></div>
+            <div class="form-group"><label for="costValueDollar">قيمة التكلفة (دولار $)</label><input type="number" id="costValueDollar" name="cost_value_dollar" min="0" step="0.01" placeholder="0.00" value="{{ old('cost_value_dollar') }}"></div>
+
             <div class="form-group"><label for="expensePayee">اسم المستفيد</label><input type="text" id="expensePayee" name="payee" placeholder="اسم الشخص أو الشركة" required value="{{ old('payee') }}"></div>
             <div class="form-group"><label for="expensePhone">رقم الجوال</label><input type="tel" id="expensePhone" name="phone" placeholder="0599123456" value="{{ old('phone') }}"></div>
             <div class="form-group"><label for="expenseJob">العمل/المهنة</label><input type="text" id="expenseJob" name="job" placeholder="مثال: مقاول، مهندس" value="{{ old('job') }}"></div>
             <div class="form-group"><label for="expenseIdNumber">رقم الهوية</label><input type="text" id="expenseIdNumber" name="id_number" placeholder="رقم الهوية الشخصية" value="{{ old('id_number') }}"></div>
+
+            <div class="form-group"><label for="walidShare">وليد الخالص ابو حمزه (1/5)</label><input type="number" id="walidShare" name="walid_share_amount" min="0" step="0.01" placeholder="0.00" value="{{ old('walid_share_amount') }}"></div>
+            <div class="form-group"><label for="mohammadKhalidShare">محمد وخالد (1/6)</label><input type="number" id="mohammadKhalidShare" name="mohammad_khalid_share_amount" min="0" step="0.01" placeholder="0.00" value="{{ old('mohammad_khalid_share_amount') }}"></div>
 
 <div class="form-group">
     <label for="expenseProject">المشروع</label>
@@ -68,7 +75,16 @@
     </select>
 </div>
 
-            <div class="form-group"><label for="expenseAmount">المبلغ</label><input type="number" id="expenseAmount" name="amount" min="0" step="0.01" placeholder="0.00" required value="{{ old('amount') }}"></div>
+            <div class="form-group"><label for="expenseAmount">المبلغ (الأساسي)</label><input type="number" id="expenseAmount" name="amount" min="0" step="0.01" placeholder="0.00" required value="{{ old('amount') }}"></div>
+            <div class="form-group"><label for="walidPaidDollar">المدفوع من وليد (دولار $)</label><input type="number" id="walidPaidDollar" name="walid_paid_dollar" min="0" step="0.01" placeholder="0.00" value="{{ old('walid_paid_dollar') }}"></div>
+            <div class="form-group"><label for="mohammadKhalidPaidDollar">المدفوع من محمد وخالد (دولار $)</label><input type="number" id="mohammadKhalidPaidDollar" name="mohammad_khalid_paid_dollar" min="0" step="0.01" placeholder="0.00" value="{{ old('mohammad_khalid_paid_dollar') }}"></div>
+            <div class="form-group"><label for="walidPaidShekel">المدفوع من وليد (شيكل)</label><input type="number" id="walidPaidShekel" name="walid_paid_shekel" min="0" step="0.01" placeholder="0.00" value="{{ old('walid_paid_shekel') }}"></div>
+            <div class="form-group"><label for="mohammadKhalidPaidShekel">المدفوع من محمد وخالد (شيكل)</label><input type="number" id="mohammadKhalidPaidShekel" name="mohammad_khalid_paid_shekel" min="0" step="0.01" placeholder="0.00" value="{{ old('mohammad_khalid_paid_shekel') }}"></div>
+            <div class="form-group"><label for="remainingAmount">المتبقي (شيكل)</label><input type="number" id="remainingAmount" name="remaining_amount" step="0.01" placeholder="0.00" value="{{ old('remaining_amount') }}"></div>
+            <div class="form-group"><label for="remainingAmountDollar">المتبقي ($)</label><input type="number" id="remainingAmountDollar" name="remaining_amount_dollar" step="0.01" placeholder="0.00" value="{{ old('remaining_amount_dollar') }}"></div>
+            <div class="form-group"><label for="differenceInPayments">الفرق بين الدفعات</label><input type="number" id="differenceInPayments" name="difference_in_payments" step="0.01" placeholder="0.00" value="{{ old('difference_in_payments') }}"></div>
+            <div class="form-group"><label for="totalPaidAmount">مجموع المبالغ المدفوعة</label><input type="number" id="totalPaidAmount" name="total_paid_amount" min="0" step="0.01" placeholder="0.00" value="{{ old('total_paid_amount') }}"></div>
+
             <div class="form-group">
                 <label for="currency">العملة</label>
                 <select id="currency" name="currency" required>
@@ -148,6 +164,12 @@
                 </div>
             </div>
 
+            <!-- تفاصيل -->
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="expenseDetails">تفاصيل</label>
+                <textarea id="expenseDetails" name="details" rows="3" placeholder="تفاصيل المصروف...">{{ old('details') }}</textarea>
+            </div>
+
             <!-- ملاحظات -->
             <div class="form-group" style="grid-column: 1 / -1;">
                 <label for="expenseNotes">ملاحظات</label>
@@ -212,4 +234,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
-

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller{
-    
+
     public function showLoginForm()
     {
         return view('dashboard.home');
@@ -36,4 +36,5 @@ class AuthController extends Controller{
         $request->session()->regenerateToken();
         return redirect()->route('login');
     }
+
 }

@@ -43,5 +43,8 @@ class Employee extends Model
       {
           return $this->hasMany(SalaryPayment::class);
      }
-
+public function contracts()
+{
+    return $this->morphMany(Contract::class, 'contractable');
+}
 }
