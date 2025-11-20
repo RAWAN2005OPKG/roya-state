@@ -5,7 +5,7 @@
 <style>
     .form-section { background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef; }
     .form-section-title { font-size: 1.3rem; color: #4f46e5; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #4f46e5; }
-    .hidden-section { display: none; } /* لإخفاء الأقسام */
+    .hidden-section { display: none; }
 </style>
 @endsection
 
@@ -20,8 +20,6 @@
 
             <form action="{{ route('dashboard.contracts.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-
-                <!-- ==================== القسم 1: تحديد صاحب العقد (يبقى كما هو) ==================== -->
                 <div class="form-section">
                     <h4 class="form-section-title">1. تحديد صاحب العقد</h4>
                     <div class="row">
@@ -36,13 +34,11 @@
                         </div>
                         <div class="col-md-6 form-group mb-3">
                             <div id="contractable_selector">
-                                <!-- سيتم ملء هذا الجزء عبر JavaScript -->
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ==================== القسم 2: تفاصيل العقد المشتركة ==================== -->
                 <div class="form-section">
                     <h4 class="form-section-title">2. تفاصيل العقد الأساسية</h4>
                     <div class="row">
@@ -71,7 +67,6 @@
                     </div>
                 </div>
 
-                <!-- ==================== القسم 3: حقول خاصة بعقد العميل (مخفي افتراضيًا) ==================== -->
                 <div id="customer-fields" class="form-section hidden-section">
                     <h4 class="form-section-title">3. تفاصيل عقد البيع</h4>
                     <div class="row">
@@ -80,7 +75,6 @@
                     </div>
                 </div>
 
-                <!-- ==================== القسم 4: حقول خاصة بعقد المستثمر (مخفي افتراضيًا) ==================== -->
                 <div id="investor-fields" class="form-section hidden-section">
                     <h4 class="form-section-title">4. تفاصيل عقد الاستثمار</h4>
                     <div class="row">
@@ -89,7 +83,6 @@
                     </div>
                 </div>
 
-                <!-- ==================== القسم 5: حقول خاصة بعقد المقاول (مخفي افتراضيًا) ==================== -->
                 <div id="subcontractor-fields" class="form-section hidden-section">
                     <h4 class="form-section-title">5. تفاصيل عقد المقاولة</h4>
                     <div class="row">
@@ -97,7 +90,6 @@
                     </div>
                 </div>
 
-                <!-- ==================== القسم 6: الشروط والمرفقات (مشترك) ==================== -->
                 <div class="form-section">
                     <h4 class="form-section-title">6. الشروط والمرفقات</h4>
                     <div class="row">
@@ -118,8 +110,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const contractTypeSelect = document.getElementById('contract_type');
     const contractableSelectorDiv = document.getElementById('contractable_selector');
-
-    // الأقسام الديناميكية
     const customerFields = document.getElementById('customer-fields');
     const investorFields = document.getElementById('investor-fields');
     const subcontractorFields = document.getElementById('subcontractor-fields');
@@ -156,17 +146,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateForm() {
         const selectedType = contractTypeSelect.value;
-
-        // تحديث قائمة الاختيار (العميل/المستثمر/المقاول)
         contractableSelectorDiv.innerHTML = templates[selectedType] || '';
-
-        // إخفاء وإظهار الأقسام الخاصة
         customerFields.style.display = selectedType === 'customer' ? 'block' : 'none';
         investorFields.style.display = selectedType === 'investor' ? 'block' : 'none';
         subcontractorFields.style.display = selectedType === 'subcontractor' ? 'block' : 'none';
     }
-
-    // التشغيل عند تحميل الصفحة وعند تغيير نوع العقد
     updateForm();
     contractTypeSelect.addEventListener('change', updateForm);
 });

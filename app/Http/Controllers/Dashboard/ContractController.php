@@ -11,6 +11,7 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log; 
 
 class ContractController extends Controller
 {
@@ -31,8 +32,6 @@ class ContractController extends Controller
         if ($search) {
             $contractsQuery->where('contract_id', 'like', '%' . $search . '%')
                            ->orWhereHasMorph('contractable', [Customer::class, Investor::class, Subcontractor::class], function ($query, $type) use ($search) {
-                               // هذا الجزء يتطلب حلاً أكثر تعقيدًا في Laravel أو قاعدة بيانات تدعم البحث في JSON/محتوى الـ contractable
-                               // لتبسيط المثال، سنركز على البحث في حقل الاسم (يفترض وجود حقل 'name' في جميع النماذج)
                                $query->where('name', 'like', '%' . $search . '%');
                            })
                            ->orWhereHas('project', function ($query) use ($search) {
@@ -40,12 +39,7 @@ class ContractController extends Controller
                            });
         }
 
-        $contracts = $contractsQuery->paginate(10); // يمكن تغيير عدد العناصر في الصفحة
-
-        // حساب الإحصائيات (KPIs)
-        $totalContracts = Contract::count();
-        // يفترض أن العملة الرئيسية هي ILS لحساب الإجمالي
-        // هذا يتطلب تحويل العملات في تطبيق حقيقي، لكن سنفترض ILS مؤقتاً
+        $contracts = $contractsQuery->paginate(10);        $totalContracts = Contract::count();
         $totalValue = Contract::where('currency', 'ILS')->sum('investment_amount');
 
         return view('dashboard.contracts.index', compact('contracts', 'totalContracts', 'totalValue', 'search'));
@@ -72,8 +66,9 @@ class ContractController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+     public function store(Request $request)
     {
+        // 1. التحقق من صحة البيانات (Validation)
         $validatedData = $request->validate([
             'contract_type' => 'required|in:customer,investor,subcontractor',
             'contractable_id' => 'required|integer',
@@ -95,19 +90,20 @@ class ContractController extends Controller
             'subcontractor_scope' => 'nullable|string',
         ]);
 
+        // 2. معالجة البيانات المساعدة
         $contractableType = $this->getContractableType($validatedData['contract_type']);
-
-        // تجميع التفاصيل الخاصة بالنوع
         $details = $this->extractDetails($validatedData);
 
         try {
             DB::beginTransaction();
 
+            // 3. إنشاء وحفظ العقد
             $contract = new Contract($validatedData);
             $contract->contractable_type = $contractableType;
             $contract->contractable_id = $validatedData['contractable_id'];
-            $contract->details = $details; // حفظ التفاصيل كـ JSON
+            $contract->details = $details; 
 
+            // 4. معالجة المرفقات
             if ($request->hasFile('attachment')) {
                 $contract->attachment = $request->file('attachment')->store('contracts', 'public');
             }
@@ -115,10 +111,19 @@ class ContractController extends Controller
             $contract->save();
 
             DB::commit();
+
             return redirect()->route('dashboard.contracts.index')->with('success', 'تم إنشاء العقد بنجاح.');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'حدث خطأ أثناء حفظ العقد: ' . $e->getMessage());
+
+            Log::error("Contract Store Error: " . $e->getMessage(), [
+                'request_data' => $request->all(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return back()->withInput()->with('error', 'حدث خطأ غير متوقع أثناء حفظ العقد. يرجى مراجعة سجلات النظام.');
         }
     }
 

@@ -118,12 +118,6 @@
                             <span class="menu-text">المستثمرون</span>
                         </a>
                     </li>
-                    <li class="menu-item" aria-haspopup="true">
-                     <a href="{{ url('dashboard.investments.index') }}" class="menu-link">
-                   <span class="svg-icon menu-icon"></span>
-                   <span class="menu-text">الاستثمارات</span>
-                    </a>
-                        </li>
 
                     <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
                         <a href="javascript:;" class="menu-link menu-toggle">
@@ -167,6 +161,63 @@
                             <span class="menu-text">المقاولون والموردون</span>
                         </a>
                     </li>
+<!-- بداية قائمة المنتجات والمخزون -->
+<li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+    <a href="javascript:;" class="menu-link menu-toggle">
+        <span class="svg-icon menu-icon">
+            <i class="fas fa-boxes"></i>
+        </span>
+        <span class="menu-text">المنتجات والمخزون</span>
+        <i class="menu-arrow"></i>
+    </a>
+    <div class="menu-submenu">
+        <i class="menu-arrow"></i>
+        <ul class="menu-subnav">
+
+            {{-- 1. قائمة المنتجات --}}
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.products.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">قائمة المنتجات</span>
+                </a>
+            </li>
+
+            {{-- 2. المستودعات --}}
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.warehouses.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">المستودعات</span>
+                </a>
+            </li>
+
+            {{-- 3. قوائم الأسعار --}}
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.pricelists.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">قوائم الأسعار</span>
+                </a>
+            </li>
+
+            {{-- 4. إدارة الجرد --}}
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.stocktakes.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">إدارة الجرد</span>
+                </a>
+            </li>
+
+            {{-- 5. الأذون المخزنية --}}
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.transfers.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">الأذون المخزنية</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</li>
+
                     <li class="menu-item" aria-haspopup="true">
                         <a href="{{url('dashboard.employees') }}" class="menu-link">
                             <span class="svg-icon menu-icon"></span>

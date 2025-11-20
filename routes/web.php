@@ -65,18 +65,23 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
 
     Route::resource('reportproject', App\Http\Controllers\Dashboard\ReportProjectController::class);
 
-   // 5. العقود (Contracts)
-Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::class);
-Route::get('contracts/trash', [App\Http\Controllers\Dashboard\ContractController::class, 'trash'])->name('contracts.trash');
-Route::post('contracts/restore/{id}', [App\Http\Controllers\Dashboard\ContractController::class, 'restore'])->name('contracts.restore');
-Route::delete('contracts/forceDelete/{id}', [App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('contracts.forceDelete');
+    // 6. العقود (Contracts)
+Route::name('contracts.')->group(function () {
+    Route::get('contracts/trash', [ App\Http\Controllers\Dashboard\ContractController::class, 'trash'])->name('trash.index');
+    Route::post('contracts/restore/{id}', [ App\Http\Controllers\Dashboard\ContractController::class, 'restore'])->name('trash.restore'); // استخدمت POST بدلاً من PUT لأنها أكثر شيوعاً للاستعادة
+    Route::delete('contracts/forceDelete/{id}', [ App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('trash.forceDelete');
 
-// --- مسارات الدفعات ---
+   Route::get('contracts/export/excel', [ App\Http\Controllers\Dashboard\ContractController::class, 'exportExcel'])->name('export.excel');
+});
+
+Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController::class);
+
+
+// 7. الدفعات (Payments)
 Route::prefix('contracts/{contract}')->as('contracts.')->group(function () {
-    Route::get('payments/create', [App\Http\Controllers\Dashboard\PaymentController::class, 'create'])->name('payments.create');
-
-    Route::post('payments', [App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('payments.store');
-    Route::delete('payments/{payment}', [App\Http\Controllers\Dashboard\PaymentController::class, 'destroy'])->name('payments.destroy');
+    Route::get('payments/create', [ App\Http\Controllers\Dashboard\PaymentController::class, 'create'])->name('payments.create');
+    Route::post('payments', [ App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('payments.store');
+    Route::delete('payments/{payment}', [ App\Http\Controllers\Dashboard\PaymentController::class, 'destroy'])->name('payments.destroy');
 });
 
     // 6. العملاء (Customers)
@@ -124,6 +129,62 @@ Route::prefix('contracts/{contract}')->as('contracts.')->group(function () {
         Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
     });
     Route::resource('subcontractors', App\Http\Controllers\Dashboard\SubcontractorController::class);
+
+//  المشتريات (Purchases)
+Route::prefix('purchases')->as('purchases.')->group(function () {
+
+    // فواتير المشتريات (Purchase Invoices)
+    Route::get('invoices/trash', [App\Http\Controllers\Dashboard\PurchaseInvoiceController::class, 'trash'])->name('invoices.trash');
+    Route::post('invoices/restore/{id}', [App\Http\Controllers\Dashboard\PurchaseInvoiceController::class, 'restore'])->name('invoices.restore');
+    Route::delete('invoices/forceDelete/{id}', [App\Http\Controllers\Dashboard\PurchaseInvoiceController::class, 'forceDelete'])->name('invoices.forceDelete');
+    Route::resource('invoices', App\Http\Controllers\Dashboard\PurchaseInvoiceController::class);
+
+});
+//  الموردون (Suppliers)
+Route::prefix('suppliers')->as('suppliers.')->group(function () {
+    // مسارات سلة المحذوفات
+    Route::get('trash', [App\Http\Controllers\Dashboard\SupplierController::class, 'trash'])->name('trash');
+    Route::post('restore/{id}', [App\Http\Controllers\Dashboard\SupplierController::class, 'restore'])->name('restore');
+    Route::delete('forceDelete/{id}', [App\Http\Controllers\Dashboard\SupplierController::class, 'forceDelete'])->name('forceDelete');
+
+    // مسارات CRUD الأساسية
+    Route::resource('/', App\Http\Controllers\Dashboard\SupplierController::class)->parameters(['' => 'supplier']);
+});
+   Route::prefix('products/trash')->name('products.trash.')->controller(App\Http\Controllers\Dashboard\ProductController::class)->group(function () {
+        Route::get('/', 'trash')->name('index');
+        Route::post('/{id}/restore', 'restore')->name('restore');
+        Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
+    });
+    Route::resource('products',App\Http\Controllers\Dashboard\ProductController::class);
+
+    Route::prefix('warehouses/trash')->name('warehouses.trash.')->controller(App\Http\Controllers\Dashboard\WarehouseController::class)->group(function () {
+    Route::get('/', 'trash')->name('index');
+    Route::post('/{id}/restore', 'restore')->name('restore');
+    Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
+});
+Route::resource('warehouses', App\Http\Controllers\Dashboard\WarehouseController::class)->except(['show', 'create', 'edit']);
+
+// الأذون المخزنية
+Route::prefix('transfers/trash')->name('transfers.trash.')->controller(App\Http\Controllers\Dashboard\StockTransferController::class)->group(function () {
+    Route::get('/', 'trash')->name('index');
+    Route::post('/{id}/restore', 'restore')->name('restore');
+    Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
+});
+Route::resource('transfers', App\Http\Controllers\Dashboard\StockTransferController::class);
+// قوائم الأسعار
+Route::prefix('pricelists/trash')->name('pricelists.trash.')->controller(App\Http\Controllers\Dashboard\PriceListController::class)->group(function () {
+    Route::get('/', 'trash')->name('index');
+    Route::post('/{id}/restore', 'restore')->name('restore');
+    Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
+});
+Route::resource('pricelists', App\Http\Controllers\Dashboard\PriceListController::class);
+// إدارة الجرد
+Route::prefix('stocktakes/trash')->name('stocktakes.trash.')->controller(App\Http\Controllers\Dashboard\StocktakeController::class)->group(function () {
+    Route::get('/', 'trash')->name('index');
+    Route::post('/{id}/restore', 'restore')->name('restore');
+    Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
+});
+Route::resource('stocktakes', App\Http\Controllers\Dashboard\StocktakeController::class);
 
     Route::get('/treasury', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('treasury');
     Route::get('/general-ledger', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('general-ledger.index');

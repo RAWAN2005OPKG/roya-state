@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Contract;
 use App\Models\Payment;
-use App\Models\Fund;
+use App\Models\Fund; // تم التأكد من استيراد النموذج
 use Illuminate\Support\Facades\DB;
 use Exception;
-use Illuminate\Support\Facades\Log; // تم إضافة هذا السطر
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -20,7 +20,10 @@ class PaymentController extends Controller
     {
         // حساب المبلغ المتبقي وتمريره للعرض
         $remaining = $contract->investment_amount - $contract->total_paid;
+
+        // التأكد من أن استدعاء Fund::orderBy('name')->get() يتم بعد استيراد النموذج
         $funds = Fund::orderBy('name')->get();
+
         return view('dashboard.payments.create', compact('contract', 'funds', 'remaining'));
     }
 

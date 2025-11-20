@@ -2,6 +2,7 @@
 @section('title', 'تعديل العقد: ' . $contract->contract_id)
 
 @section('styles')
+{{-- الأنماط تبقى كما هي --}}
 <style>
     .form-section { background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef; }
     .form-section-title { font-size: 1.3rem; color: #4f46e5; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #4f46e5; }
@@ -18,10 +19,12 @@
                 <div class="alert alert-danger"><ul>@foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach</ul></div>
             @endif
 
+            {{-- ✅ تم التعديل هنا --}}
             <form action="{{ route('dashboard.contracts.update', $contract->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
+                {{-- باقي النموذج يبقى كما هو بدون تغيير --}}
                 @php
                     $contract_type = '';
                     if ($contract->contractable_type == \App\Models\Customer::class) $contract_type = 'customer';
@@ -29,7 +32,6 @@
                     elseif ($contract->contractable_type == \App\Models\Subcontractor::class) $contract_type = 'subcontractor';
                 @endphp
 
-                <!-- القسم 1: تحديد صاحب العقد -->
                 <div class="form-section">
                     <h4 class="form-section-title">1. تحديد صاحب العقد</h4>
                     <div class="row">
@@ -47,7 +49,6 @@
                     </div>
                 </div>
 
-                <!-- القسم 2: تفاصيل العقد الأساسية -->
                 <div class="form-section">
                     <h4 class="form-section-title">2. تفاصيل العقد الأساسية</h4>
                     <div class="row">
@@ -70,7 +71,6 @@
                     </div>
                 </div>
 
-                <!-- قسم حقول عقد العميل -->
                 <div id="customer-fields" class="form-section hidden-section">
                     <h4 class="form-section-title">3. تفاصيل عقد البيع</h4>
                     <div class="row">
@@ -79,7 +79,6 @@
                     </div>
                 </div>
 
-                <!-- قسم حقول عقد المستثمر -->
                 <div id="investor-fields" class="form-section hidden-section">
                     <h4 class="form-section-title">4. تفاصيل عقد الاستثمار</h4>
                     <div class="row">
@@ -88,7 +87,6 @@
                     </div>
                 </div>
 
-                <!-- قسم حقول عقد المقاول -->
                 <div id="subcontractor-fields" class="form-section hidden-section">
                     <h4 class="form-section-title">5. تفاصيل عقد المقاولة</h4>
                     <div class="row">
@@ -96,7 +94,6 @@
                     </div>
                 </div>
 
-                <!-- القسم الأخير: الشروط والمرفقات -->
                 <div class="form-section">
                     <h4 class="form-section-title">6. الشروط والمرفقات</h4>
                     <div class="row">

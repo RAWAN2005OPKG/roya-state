@@ -43,6 +43,8 @@
         <h1><i class="fas fa-file-signature"></i> إدارة العقود</h1>
         <div class="header-actions">
             <a href="{{ route('dashboard.contracts.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة عقد جديد</a>
+<a href="{{ route('dashboard.contracts.trash.index') }}" class="btn btn-danger"><i class="fas fa-trash"></i> سلة المحذوفات</a>
+       
         </div>
     </div>
 
@@ -93,7 +95,12 @@
                             <td>{{ $contract->status }}</td>
                             <td class="action-buttons">
                                 <a href="{{ route('dashboard.contracts.show', $contract->id) }}" title="عرض"><i class="fas fa-eye"></i></a>
-                               <a href="{{ route('dashboard.contracts.edit', $contract->id) }}" title="تعديل"><i class="fas fa-edit"></i></a>
+                                <a href="{{ route('dashboard.contracts.edit', $contract->id) }}" title="تعديل"><i class="fas fa-edit"></i></a>
+                                <form action="{{ route('dashboard.contracts.destroy', $contract->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟ سيتم نقل العقد إلى سلة المحذوفات.')" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" title="حذف"><i class="fas fa-trash"></i></button>
+                                </form>
                             </td>
                         </tr>
                     @empty
