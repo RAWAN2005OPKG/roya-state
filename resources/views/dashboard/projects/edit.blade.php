@@ -1,6 +1,5 @@
 @extends('layouts.container')
 @section('title', 'تعديل المشروع: ' . $project->name)
-@section('styles')
    @section('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');

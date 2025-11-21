@@ -1,8 +1,12 @@
 @extends('layouts.container')
 @section('title', 'المستودعات')
+  @section('styles')
+    <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+@endsection
 
 @section('content')
 <main class="main-content">
+    {{-- 1. ترويسة الصفحة --}}
     <div class="page-header">
         <h1><i class="fas fa-warehouse"></i> المستودعات</h1>
         <div class="header-actions">
@@ -11,18 +15,21 @@
         </div>
     </div>
 
+    {{-- 2. بطاقات الإحصائيات (KPIs) --}}
     <div class="kpi-grid">
         <div class="kpi-card"><div class="label">إجمالي المستودعات</div><div class="value">{{ $totalCount }}</div></div>
         <div class="kpi-card"><div class="label">المستودعات النشطة</div><div class="value">{{ $activeCount }}</div></div>
         <div class="kpi-card"><div class="label">المستودعات غير النشطة</div><div class="value">{{ $inactiveCount }}</div></div>
     </div>
 
+    {{-- رسالة النجاح --}}
     @if(session('success'))
         <div class="alert alert-success" role="alert">{{ session('success') }}</div>
     @endif
 
+    {{-- 3. حاوية الجدول --}}
     <div class="table-container">
-        {{-- إضافة فورم البحث --}}
+        {{-- فورم البحث --}}
         <div class="table-controls">
             <form action="{{ route('dashboard.warehouses.index') }}" method="GET" class="search-form">
                 <input type="text" name="search" placeholder="ابحث بالاسم أو الموقع..." value="{{ request('search') }}">
@@ -53,11 +60,11 @@
                                 @endif
                             </td>
                             <td class="action-buttons">
-                                <button class="edit-btn" data-id="{{ $warehouse->id }}" data-name="{{ $warehouse->name }}" data-location="{{ $warehouse->location ?? '' }}" data-is_active="{{ $warehouse->is_active }}" title="تعديل"><i class="fas fa-edit"></i></button>
+                                <button class="edit-btn btn-icon" data-id="{{ $warehouse->id }}" data-name="{{ $warehouse->name }}" data-location="{{ $warehouse->location ?? '' }}" data-is_active="{{ $warehouse->is_active }}" title="تعديل"><i class="fas fa-edit"></i></button>
                                 <form action="{{ route('dashboard.warehouses.destroy', $warehouse->id) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد؟ سيتم نقل المستودع إلى سلة المحذوفات.')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="delete-btn" title="حذف"><i class="fas fa-trash-alt"></i></button>
+                                    <button type="submit" class="delete-btn btn-icon" title="حذف"><i class="fas fa-trash-alt"></i></button>
                                 </form>
                             </td>
                         </tr>
@@ -76,8 +83,50 @@
     </div>
 </main>
 
-@include('dashboard.warehouses.partials.modal')
+{{-- ========================================================================= --}}
+{{-- النافذة المنبثقة (Modal) - تم دمجها هنا مباشرة --}}
+{{-- ========================================================================= --}}
+<div id="warehouseModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">إضافة مستودع جديد</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="warehouseForm" action="{{ route('dashboard.warehouses.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="_method" id="formMethod" value="POST">
 
+                <div class="form-group">
+                    <label for="name">اسم المستودع</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="location">الموقع / العنوان (اختياري)</label>
+                    <input type="text" id="location" name="location">
+                </div>
+                <div class="form-group">
+                    <label for="is_active">الحالة</label>
+                    <select id="is_active" name="is_active" required>
+                        <option value="1" selected>نشط</option>
+                        <option value="0">غير نشط</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-btn">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
+
+{{-- ========================================================================= --}}
+{{-- كود الجافاسكريبت - تم دمجه هنا مباشرة --}}
+{{-- ========================================================================= --}}
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -118,7 +167,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ربط الأحداث
-    addBtn.addEventListener('click', openAddModal);
+    if (addBtn) {
+        addBtn.addEventListener('click', openAddModal);
+    }
 
     document.querySelectorAll('.edit-btn').forEach(button => {
         button.addEventListener('click', () => openEditModal(button));
@@ -136,4 +187,3 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
-@endsection

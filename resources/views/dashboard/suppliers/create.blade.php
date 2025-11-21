@@ -1,5 +1,8 @@
 @extends('layouts.container')
 @section('title', 'إضافة مورد جديد')
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+@endsection
 
 @section('content')
 <main class="main-content">
