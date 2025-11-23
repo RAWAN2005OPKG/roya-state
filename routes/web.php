@@ -164,6 +164,23 @@ Route::prefix('suppliers')->as('suppliers.')->group(function () {
 });
 Route::resource('warehouses', App\Http\Controllers\Dashboard\WarehouseController::class)->except(['show', 'create', 'edit']);
 
+Route::resource('quotations', App\Http\Controllers\Dashboard\QuotationController::class);
+Route::resource('sales', App\Http\Controllers\Dashboard\SaleInvoiceController::class);
+Route::resource('sales-returns', App\Http\Controllers\Dashboard\SaleReturnController::class);
+Route::resource('quotations', App\Http\Controllers\Dashboard\QuotationController::class);
+Route::post('quotations/{quotation}/convert', [App\Http\Controllers\Dashboard\QuotationController::class, 'convertToInvoice'])->name('quotations.convert');
+
+Route::resource('sales', App\Http\Controllers\Dashboard\SaleInvoiceController::class);
+Route::get('collections', [App\Http\Controllers\Dashboard\SaleInvoiceController::class, 'collections'])->name('collections');
+
+Route::resource('sales-returns', App\Http\Controllers\Dashboard\SaleReturnController::class);
+Route::prefix('dashboard')->name('dashboard.')->middleware('auth')->group(function () {
+
+    Route::get('collections', [App\Http\Controllers\Dashboard\SaleInvoiceController::class, 'collections'])->name('collections');
+
+    Route::post('sales/{sale}/add-payment', [App\Http\Controllers\Dashboard\SaleInvoiceController::class, 'addPayment'])->name('sales.addPayment');
+
+});
 // الأذون المخزنية
 Route::prefix('transfers/trash')->name('transfers.trash.')->controller(App\Http\Controllers\Dashboard\StockTransferController::class)->group(function () {
     Route::get('/', 'trash')->name('index');

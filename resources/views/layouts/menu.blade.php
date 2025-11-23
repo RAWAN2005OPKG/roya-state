@@ -161,6 +161,60 @@
                             <span class="menu-text">المقاولون والموردون</span>
                         </a>
                     </li>
+                    <!-- بداية قائمة المبيعات -->
+<li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+    <a href="javascript:;" class="menu-link menu-toggle">
+        <span class="svg-icon menu-icon">
+            {{-- يمكنك استخدام أيقونة من Metronic أو FontAwesome --}}
+            <i class="fas fa-chart-line"></i>
+        </span>
+        <span class="menu-text">المبيعات</span>
+        <i class="menu-arrow"></i>
+    </a>
+    <div class="menu-submenu">
+        <i class="menu-arrow"></i>
+        <ul class="menu-subnav">
+
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.sales.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">الفواتير</span>
+                </a>
+            </li>
+
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.quotations.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">عروض الأسعار</span>
+                </a>
+            </li>
+
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.sales.create') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">إضافة فاتورة</span>
+                </a>
+            </li>
+
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.collections') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">التحصيل</span>
+                </a>
+            </li>
+
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.sales-returns.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">مردودات المبيعات</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</li>
+<!-- نهاية قائمة المبيعات -->
+
 <!-- بداية قائمة المنتجات والمخزون -->
 <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
