@@ -90,28 +90,76 @@
         <div class="aside-menu-wrapper flex-column-fluid" id="kt_aside_menu_wrapper">
             <div id="kt_aside_menu" class="aside-menu my-4 scroll ps ps--active-y" data-menu-vertical="1" data-menu-scroll="1" data-menu-dropdown-timeout="500">
                 <ul class="menu-nav">
-                    <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.home') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">الرئيسية</span>
-                        </a>
-                    </li>
-                    <li class="menu-section">
-                        <h4 class="menu-text">الإدارة</h4>
-                        <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
-                    </li>
-                    <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.treasury') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">الخزينة العامة</span>
-                        </a>
-                    </li>
-                    <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.expenses') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">المصاريف</span>
-                        </a>
-                    </li>
+      <li class="menu-item {{ request()->routeIs('dashboard.home') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+     <a href="{{ route('dashboard.home') }}" class="menu-link">
+    <span class="menu-text">لوحة التحكم</span>
+</a>
+
+
+    </li>
+
+    <li class="menu-section">
+        <h4 class="menu-text">الإدارة</h4>
+        <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
+    </li>
+
+    {{-- =================================================== --}}
+    {{-- 2. القائمة المالية --}}
+    {{-- =================================================== --}}
+    <li class="menu-item menu-item-submenu {{ request()->is('dashboard/accounts*') || request()->is('dashboard/journal-entries*') || request()->is('dashboard/expenses*') || request()->is('dashboard/cash-safes*') || request()->is('dashboard/bank-accounts*') || request()->is('dashboard/fund-transfers*') || request()->is('dashboard/project-transfers*') ? 'menu-item-open' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
+        <a href="javascript:;" class="menu-link menu-toggle">
+            <span class="svg-icon menu-icon"><i class="fas fa-wallet"></i></span>
+            <span class="menu-text">الإدارة المالية</span>
+            <i class="menu-arrow"></i>
+        </a>
+        <div class="menu-submenu">
+            <ul class="menu-subnav">
+                <li class="menu-item {{ request()->routeIs('dashboard.accounts.*') ? 'menu-item-active' : '' }}">
+                    <a href="{{ route('dashboard.accounts.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">دليل الحسابات</span>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('dashboard.journal-entries.*') ? 'menu-item-active' : '' }}">
+                    <a href="{{ route('dashboard.journal-entries.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">قيود اليومية</span>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('dashboard.expenses.*') ? 'menu-item-active' : '' }}">
+                    <a href="{{ route('dashboard.expenses.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">المصروفات</span>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('dashboard.cash-safes.*') ? 'menu-item-active' : '' }}">
+                    <a href="{{ route('dashboard.cash-safes.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">الخزينة العامة</span>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('dashboard.bank-accounts.*') ? 'menu-item-active' : '' }}">
+                    <a href="{{ route('dashboard.bank-accounts.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">الحسابات البنكية</span>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('dashboard.fund-transfers.*') ? 'menu-item-active' : '' }}">
+                    <a href="{{ route('dashboard.fund-transfers.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">تحويل الأموال</span>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('dashboard.project-transfers.*') ? 'menu-item-active' : '' }}">
+                    <a href="{{ route('dashboard.project-transfers.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">تحويل المشاريع</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </li>
+
                     <li class="menu-item" aria-haspopup="true">
                         <a href="{{url('dashboard.investors') }}" class="menu-link">
                             <span class="svg-icon menu-icon"></span>
@@ -298,7 +346,24 @@
                             <span class="menu-text">التنبيهات</span>
                         </a>
                     </li>
+
+                    <li class="menu-section">
+                    <h4 class="menu-text">الحساب</h4>
+                    <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
+                </li>
+                <li class="menu-item" aria-haspopup="true">
+                    <a href="{{ route('logout') }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                       class="menu-link">
+                        <span class="svg-icon menu-icon"><i class="fas fa-sign-out-alt"></i></span>
+                        <span class="menu-text">تسجيل الخروج</span>
+                    </a>
+                </li>
                 </ul>
             </div>
         </div>
     </div>
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+    @csrf
+</form>

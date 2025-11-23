@@ -38,7 +38,7 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-      //  'email_verified_at' => 'rayapalinfo@gmail.com',
-        //'password' => 'khalid@20252', // هذا يخلي Laravel يهاش الباسورد أوتوماتيك
+      'email_verified_at' => 'rayapalinfo@gmail.com',
+    'password' => 'khalid@20252',
     ];
 }

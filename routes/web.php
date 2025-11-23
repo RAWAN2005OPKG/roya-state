@@ -21,11 +21,23 @@ use App\Http\Controllers\Dashboard;
 Auth::routes();
 
 
-Route::view('/', 'dashboard.login')->name('login.page');
-Route::get('/home', [ App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
+Route::get('/home', [App\Http\Controllers\Dashboard\DashboardController::class, 'index'])->name('home');
+
+// --- الوحدات المالية ---
+    Route::resource('accounts', App\Http\Controllers\Dashboard\AccountController::class);
+    Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);
+    Route::resource('expenses', App\Http\Controllers\Dashboard\ExpenseController::class);
+    Route::resource('cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->except(['create', 'show', 'edit']);
+    Route::resource('bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->except(['create', 'show', 'edit']);
+
+    // --- وحدات التحويلات ---
+    Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->only(['index', 'store']);
+    Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
+
+
+    Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
+Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);
 
     Route::get('/expenses/export/excel', [ App\Http\Controllers\Dashboard\ExpenseController::class, 'exportExcel'])->name('expenses.export.excel');
     Route::prefix('expenses/trash')->name('expenses.trash.')->controller( App\Http\Controllers\Dashboard\ExpenseController::class)->group(function () {

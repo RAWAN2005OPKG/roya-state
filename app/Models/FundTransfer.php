@@ -1,28 +1,9 @@
 <?php
-
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FundTransfer extends Model
-{
+class FundTransfer extends Model {
     use HasFactory;
-
-    protected $fillable = [
-        'date',
-        'from_account',
-        'to_account',
-        'name',
-        'id_number',
-        'phone',
-        'currency',
-        'amount',
-        'notes',
-    ];
-
-    protected $casts = [
-        'date' => 'date',
-        'amount' => 'decimal:2',
-    ];
+    protected $fillable = ['date', 'amount', 'currency', 'from_type', 'from_id', 'to_type', 'to_id', 'notes'];
 }

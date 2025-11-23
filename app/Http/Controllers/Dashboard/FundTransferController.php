@@ -1,29 +1,51 @@
 <?php
-
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\FundTransfer;
+use App\Models\CashSafe;
+use App\Models\BankAccount; // افترض أن لديك مودل للحسابات البنكية
 use Illuminate\Http\Request;
-use App\Models\FundsTransfer; 
+use Illuminate\Support\Facades\DB;
 
-class FundsTransferController extends Controller
+class FundTransferController extends Controller
 {
+    public function index(Request $request)
+    {
+        $transfers = FundTransfer::latest()->paginate(20);
+        $cashSafes = CashSafe::where('is_active', true)->get();
+        $bankAccounts = BankAccount::where('is_active', true)->get(); // افترض وجود مودل للحسابات البنكية
+
+        return view('dashboard.transfers.funds.index', compact('transfers', 'cashSafes', 'bankAccounts'));
+    }
+
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'date' => ['required', 'date'],
-            'from_account' => ['required', 'string', 'in:cash,cheques,bank'],
-            'to_account' => ['required', 'string', 'in:cash,cheques,bank', 'different:from_account'],
-            'name' => ['required', 'string', 'max:255'],
-            'id_number' => ['nullable', 'string', 'max:100'],
-            'phone' => ['nullable', 'string', 'max:50'],
-            'currency' => ['required', 'string', 'max:10'],
-            'amount' => ['required', 'numeric', 'min:0.01'],
-            'notes' => ['nullable', 'string'],
+        $request->validate([
+            'date' => 'required|date',
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'required|string',
+            'from_account' => 'required|string',
+            'to_account' => 'required|string|different:from_account',
+            'notes' => 'nullable|string',
         ]);
 
-        FundsTransfer::create($validated);
+        list($from_type, $from_id) = explode('-', $request->from_account);
+        list($to_type, $to_id) = explode('-', $request->to_account);
 
-        return redirect()->route('dashboard.treasury')->with('success', 'تم تسجيل عملية التحويل بنجاح!');
+        // يمكنك هنا إضافة منطق للتحقق من الرصيد قبل التحويل
+
+        FundTransfer::create([
+            'date' => $request->date,
+            'amount' => $request->amount,
+            'currency' => $request->currency,
+            'from_type' => $from_type,
+            'from_id' => $from_id,
+            'to_type' => $to_type,
+            'to_id' => $to_id,
+            'notes' => $request->notes,
+        ]);
+
+        return back()->with('success', 'تم تسجيل عملية التحويل بنجاح.');
     }
 }
