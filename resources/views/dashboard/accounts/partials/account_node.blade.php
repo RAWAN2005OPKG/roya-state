@@ -1,20 +1,30 @@
-{{-- هذا الملف مسؤول عن عرض كل حساب وأبنائه بشكل متكرر --}}
 <li>
     <div class="account-item">
-        <span>
-            <strong>{{ $account->name }}</strong> ({{ $account->code }}) - <span class="text-muted">{{ $account->type }}</span>
-        </span>
-        <span class="action-buttons">
+        <div class="account-info">
+            <i class="icon {{ $account->isSubAccount() ? 'fas fa-file-alt' : 'fas fa-folder-open' }}"></i>
+            <div>
+                <span class="name">{{ $account->name }}</span>
+                <span class="code">{{ $account->code }}</span>
+            </div>
+            {{-- إضافة شارة للتمييز --}}
+            @if($account->isSubAccount())
+                <span class="badge badge-sub">فرعي</span>
+            @else
+                <span class="badge badge-main">رئيسي</span>
+            @endif
+        </div>
+        <div class="action-buttons">
             <button type="button" class="btn-icon" data-toggle="modal" data-target="#editAccountModal"
                 data-action="{{ route('dashboard.accounts.update', $account->id) }}"
                 data-name="{{ $account->name }}"
                 data-code="{{ $account->code }}"
                 data-type="{{ $account->type }}"
                 data-parent_id="{{ $account->parent_id }}"
-                data-is_active="{{ $account->is_active }}">
+                data-is_active="{{ $account->is_active ? 1 : 0 }}">
                 <i class="fas fa-edit"></i>
             </button>
-        </span>
+            {{-- يمكن إضافة زر حذف هنا  --}}
+        </div>
     </div>
 
     {{-- إذا كان للحساب أبناء، قم بعرضهم --}}

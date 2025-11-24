@@ -91,11 +91,10 @@
             <div id="kt_aside_menu" class="aside-menu my-4 scroll ps ps--active-y" data-menu-vertical="1" data-menu-scroll="1" data-menu-dropdown-timeout="500">
                 <ul class="menu-nav">
       <li class="menu-item {{ request()->routeIs('dashboard.home') ? 'menu-item-active' : '' }}" aria-haspopup="true">
-     <a href="{{ route('dashboard.home') }}" class="menu-link">
-    <span class="menu-text">لوحة التحكم</span>
-</a>
-
-
+        <a href="{{ route('dashboard.home') }}" class="menu-link">
+            <span class="svg-icon menu-icon"><i class="fas fa-tachometer-alt"></i></span>
+            <span class="menu-text">لوحة التحكم</span>
+        </a>
     </li>
 
     <li class="menu-section">
@@ -346,24 +345,23 @@
                             <span class="menu-text">التنبيهات</span>
                         </a>
                     </li>
+<li class="menu-item" aria-haspopup="true">
+        {{-- عند الضغط على هذا الرابط، سيتم تنفيذ الفورم المخفي لتسجيل الخروج --}}
+        <a href="{{ route('logout') }}"
+           onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();"
+           class="menu-link">
+            <span class="svg-icon menu-icon"><i class="fas fa-sign-out-alt"></i></span>
+            <span class="menu-text">تسجيل الخروج</span>
+        </a>
+    </li>
+</ul>
 
-                    <li class="menu-section">
-                    <h4 class="menu-text">الحساب</h4>
-                    <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
-                </li>
-                <li class="menu-item" aria-haspopup="true">
-                    <a href="{{ route('logout') }}"
-                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                       class="menu-link">
-                        <span class="svg-icon menu-icon"><i class="fas fa-sign-out-alt"></i></span>
-                        <span class="menu-text">تسجيل الخروج</span>
-                    </a>
-                </li>
-                </ul>
+{{-- هذا الفورم المخفي ضروري لعملية تسجيل الخروج --}}
+<form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST" style="display: none;">
+    @csrf
+</form>
             </div>
         </div>
     </div>
 
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-    @csrf
-</form>
+

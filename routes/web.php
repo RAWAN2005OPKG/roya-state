@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Dashboard\ProjectController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Dashboard;
+use App\Http\Controllers\Auth\LoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,9 +21,25 @@ use App\Http\Controllers\Dashboard;
 
 Auth::routes();
 
+// --- مسارات تسجيل الدخول والخروج ---
 
-Route::prefix('dashboard')->name('dashboard.')->group(function () {
-Route::get('/home', [App\Http\Controllers\Dashboard\DashboardController::class, 'index'])->name('home');
+// عند زيارة الرابط الرئيسي للموقع، اعرض صفحة تسجيل الدخول
+Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
+
+// هذا المسار يستقبل بيانات تسجيل الدخول عند الضغط على زر "Login"
+Route::post('/', [LoginController::class, 'login']);
+
+// هذا المسار لتسجيل الخروج
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
+
+// --- مسارات لوحة التحكم (Dashboard) ---
+
+// كل المسارات هنا تتطلب أن يكون المستخدم مسجلاً للدخول
+Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
+
+    // الصفحة الرئيسية للوحة التحكم
+    Route::get('/home', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('home');
 
 // --- الوحدات المالية ---
     Route::resource('accounts', App\Http\Controllers\Dashboard\AccountController::class);

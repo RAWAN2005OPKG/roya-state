@@ -37,8 +37,11 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
-    protected $casts = [
-      'email_verified_at' => 'rayapalinfo@gmail.com',
-    'password' => 'khalid@20252',
+protected $casts = [
+
+    'name' => 'Admin',
+    'email' => 'admin@example.com',
+    'password' => 'password'
+
     ];
 }
