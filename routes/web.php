@@ -39,6 +39,7 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
 
     // الصفحة الرئيسية للوحة التحكم
+    Route::get('/', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('home');
     Route::get('/home', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('home');
 
 // --- الوحدات المالية ---

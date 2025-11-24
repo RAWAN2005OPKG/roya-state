@@ -39,9 +39,7 @@ class User extends Authenticatable
      */
 protected $casts = [
 
-    'name' => 'Admin',
-    'email' => 'admin@example.com',
-    'password' => 'password'
+
 
     ];
 }
