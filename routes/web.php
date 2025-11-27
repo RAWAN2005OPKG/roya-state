@@ -21,21 +21,14 @@ use App\Http\Controllers\Auth\LoginController;
 
 Auth::routes();
 
-// --- مسارات تسجيل الدخول والخروج ---
-
-// عند زيارة الرابط الرئيسي للموقع، اعرض صفحة تسجيل الدخول
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
 
-// هذا المسار يستقبل بيانات تسجيل الدخول عند الضغط على زر "Login"
 Route::post('/', [LoginController::class, 'login']);
 
-// هذا المسار لتسجيل الخروج
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 
-// --- مسارات لوحة التحكم (Dashboard) ---
 
-// كل المسارات هنا تتطلب أن يكون المستخدم مسجلاً للدخول
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
 
     // الصفحة الرئيسية للوحة التحكم
@@ -48,6 +41,35 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     Route::resource('expenses', App\Http\Controllers\Dashboard\ExpenseController::class);
     Route::resource('cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->except(['create', 'show', 'edit']);
     Route::resource('bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->except(['create', 'show', 'edit']);
+    Route::get('/financial-summary', [App\Http\Controllers\Dashboard\FinancialController::class, 'summary'])->name('financial.summary');
+// Cash Safes Routes
+Route::prefix('cash-safes')->name('cash-safes.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Dashboard\CashSafeController::class, 'index'])->name('index');
+    Route::post('/', [App\Http\Controllers\Dashboard\CashSafeController::class, 'store'])->name('store');
+    Route::put('/{cashSafe}', [App\Http\Controllers\Dashboard\CashSafeController::class, 'update'])->name('update');
+    Route::delete('/{cashSafe}', [App\Http\Controllers\Dashboard\CashSafeController::class, 'destroy'])->name('destroy');
+
+    // Trash Routes
+    Route::prefix('trash')->name('trash.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Dashboard\CashSafeController::class, 'trash'])->name('index');
+        Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\CashSafeController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\CashSafeController::class, 'forceDelete'])->name('force-delete');
+    });
+});
+// Bank Accounts Routes
+Route::prefix('bank-accounts')->name('bank-accounts.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Dashboard\BankAccountController::class, 'index'])->name('index');
+    Route::post('/', [App\Http\Controllers\Dashboard\BankAccountController::class, 'store'])->name('store');
+    Route::put('/{bankAccount}', [App\Http\Controllers\Dashboard\BankAccountController::class, 'update'])->name('update');
+    Route::delete('/{bankAccount}', [App\Http\Controllers\Dashboard\BankAccountController::class, 'destroy'])->name('destroy');
+
+    // Trash Routes
+    Route::prefix('trash')->name('trash.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Dashboard\BankAccountController::class, 'trash'])->name('index');
+        Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\BankAccountController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\BankAccountController::class, 'forceDelete'])->name('force-delete');
+    });
+});
 
     // --- وحدات التحويلات ---
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->only(['index', 'store']);

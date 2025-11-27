@@ -105,6 +105,7 @@
     {{-- =================================================== --}}
     {{-- 2. القائمة المالية --}}
     {{-- =================================================== --}}
+
     <li class="menu-item menu-item-submenu {{ request()->is('dashboard/accounts*') || request()->is('dashboard/journal-entries*') || request()->is('dashboard/expenses*') || request()->is('dashboard/cash-safes*') || request()->is('dashboard/bank-accounts*') || request()->is('dashboard/fund-transfers*') || request()->is('dashboard/project-transfers*') ? 'menu-item-open' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
         <a href="javascript:;" class="menu-link menu-toggle">
             <span class="svg-icon menu-icon"><i class="fas fa-wallet"></i></span>
@@ -113,6 +114,12 @@
         </a>
         <div class="menu-submenu">
             <ul class="menu-subnav">
+                <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.financial.summary') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">الملخص المالي</span>
+                </a>
+            </li>
                 <li class="menu-item {{ request()->routeIs('dashboard.accounts.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.accounts.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
