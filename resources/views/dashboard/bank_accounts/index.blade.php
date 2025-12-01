@@ -7,13 +7,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 mb-0 text-gray-800">الحسابات البنكية</h1>
-            <p class="mb-0 text-muted">إدارة الحسابات البنكية وأرصدتها.</p>
+            <p class="mb-0 text-muted">إدارة الحسابات البنكية وأرصدتها في النظام.</p>
         </div>
         <div class="d-flex">
             <a href="{{ route('dashboard.bank-accounts.trash.index') }}" class="btn btn-outline-secondary mr-2">
                 <i class="fas fa-trash-alt fa-sm mr-1"></i> سلة المحذوفات
             </a>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#addAccountModal">
+            <button class="btn btn-primary shadow-sm" data-toggle="modal" data-target="#addAccountModal">
                 <i class="fas fa-plus fa-sm mr-1"></i> إضافة حساب بنكي
             </button>
         </div>
@@ -69,15 +69,15 @@
     </div>
 
     <!-- Main Card: Filters and Table -->
-    <div class="card card-custom shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">قائمة الحسابات</h5>
+    <div class="card shadow-sm">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">قائمة الحسابات</h6>
             <form action="{{ route('dashboard.bank-accounts.index') }}" method="GET" class="form-inline">
-                <div class="input-group">
+                <div class="input-group input-group-sm">
                     <input type="text" name="search" class="form-control" placeholder="ابحث بالاسم أو الرقم..." value="{{ request('search') }}">
                     <div class="input-group-append">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i>
+                            <i class="fas fa-search fa-sm"></i>
                         </button>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover table-striped">
+                <table class="table table-hover table-striped" style="font-size: 0.9rem;">
                     <thead class="thead-light">
                         <tr>
                             <th>اسم البنك</th>
@@ -111,13 +111,13 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-icon btn-light-primary" data-toggle="modal" data-target="#editAccountModal-{{ $account->id }}" title="تعديل">
+                                    <button class="btn btn-sm btn-light-primary btn-icon" data-toggle="modal" data-target="#editAccountModal-{{ $account->id }}" title="تعديل">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <form action="{{ route('dashboard.bank-accounts.destroy', $account->id) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف هذا الحساب؟');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-icon btn-light-danger" title="حذف">
+                                        <button type="submit" class="btn btn-sm btn-light-danger btn-icon" title="حذف">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -128,8 +128,8 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="text-center text-muted py-5">
-                                    <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
-                                    <h4>لا توجد حسابات بنكية للعرض.</h4>
+                                    <i class="fas fa-exclamation-circle fa-3x mb-3 text-gray-400"></i>
+                                    <h4 class="text-gray-600">لا توجد حسابات بنكية للعرض.</h4>
                                     <p>يمكنك البدء بإضافة حساب جديد من الزر أعلاه.</p>
                                 </td>
                             </tr>

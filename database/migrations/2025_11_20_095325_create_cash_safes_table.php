@@ -9,15 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-  public function up(): void
+ public function up(): void
 {
     Schema::create('cash_safes', function (Blueprint $table) {
         $table->id();
         $table->string('name')->unique();
-        $table->decimal('balance', 15, 2)->default(0.00);
+        $table->decimal('initial_balance', 15, 2)->default(0);
+        $table->decimal('balance', 15, 2)->default(0);
         $table->boolean('is_active')->default(true);
-        $table->softDeletes();
         $table->timestamps();
+        $table->softDeletes();
     });
 }
 

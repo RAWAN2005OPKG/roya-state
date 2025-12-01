@@ -39,9 +39,11 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     Route::resource('accounts', App\Http\Controllers\Dashboard\AccountController::class);
     Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);
     Route::resource('expenses', App\Http\Controllers\Dashboard\ExpenseController::class);
-    Route::resource('cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->except(['create', 'show', 'edit']);
-    Route::resource('bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->except(['create', 'show', 'edit']);
+Route::resource('/cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->names('dashboard.cash-safes');
+Route::resource('/bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->names('dashboard.bank-accounts');
     Route::get('/financial-summary', [App\Http\Controllers\Dashboard\FinancialController::class, 'summary'])->name('financial.summary');
+Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('dashboard.financial-accounts.index');
+Route::resource('/checks', App\Http\Controllers\Dashboard\CheckController::class)->names('dashboard.checks');
 // Cash Safes Routes
 Route::prefix('cash-safes')->name('cash-safes.')->group(function () {
     Route::get('/', [App\Http\Controllers\Dashboard\CashSafeController::class, 'index'])->name('index');
@@ -69,6 +71,20 @@ Route::prefix('bank-accounts')->name('bank-accounts.')->group(function () {
         Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\BankAccountController::class, 'restore'])->name('restore');
         Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\BankAccountController::class, 'forceDelete'])->name('force-delete');
     });
+});
+// Fund Transfers Routes
+Route::get('/fund-transfers', [App\Http\Controllers\Dashboard\FundTransferController::class, 'index'])->name('fund-transfers.index');
+Route::post('/fund-transfers', [App\Http\Controllers\Dashboard\FundTransferController::class, 'store'])->name('fund-transfers.store');
+// Financial Accounts (Banks, Safes, Checks) Main Page
+Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
+// Checks Management Routes
+Route::prefix('checks')->name('checks.')->group(function () {
+    Route::get('/create', [App\Http\Controllers\Dashboard\CheckController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Dashboard\CheckController::class, 'store'])->name('store');
+    Route::get('/{check}/edit', [App\Http\Controllers\Dashboard\CheckController::class, 'edit'])->name('edit');
+    Route::put('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'update'])->name('update');
+    Route::delete('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'destroy'])->name('destroy');
+    Route::post('/{check}/update-status', [App\Http\Controllers\Dashboard\CheckController::class, 'updateStatus'])->name('update-status');
 });
 
     // --- وحدات التحويلات ---

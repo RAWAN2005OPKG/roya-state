@@ -114,18 +114,27 @@
         </a>
         <div class="menu-submenu">
             <ul class="menu-subnav">
+                 <li class="menu-item {{ request()->routeIs('dashboard.financial-accounts.index') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+                <a href="{{ route('dashboard.financial-accounts.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">المركز المالي</span>
+                </a>
+            </li>
                 <li class="menu-item" aria-haspopup="true">
                 <a href="{{ route('dashboard.financial.summary') }}" class="menu-link">
                     <i class="menu-bullet menu-bullet-dot"><span></span></i>
                     <span class="menu-text">الملخص المالي</span>
                 </a>
             </li>
+
                 <li class="menu-item {{ request()->routeIs('dashboard.accounts.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.accounts.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">دليل الحسابات</span>
                     </a>
                 </li>
+
+
                 <li class="menu-item {{ request()->routeIs('dashboard.journal-entries.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.journal-entries.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
@@ -150,7 +159,25 @@
                         <span class="menu-text">الحسابات البنكية</span>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->routeIs('dashboard.fund-transfers.*') ? 'menu-item-active' : '' }}">
+ <li class="menu-item {{ request()->routeIs('dashboard.cash-safes.*') ? 'menu-item-active' : '' }}">
+                <a href="{{ route('dashboard.cash-safes.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">إدارة الخزائن</span>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('dashboard.bank-accounts.*') ? 'menu-item-active' : '' }}">
+                <a href="{{ route('dashboard.bank-accounts.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">إدارة البنوك</span>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('dashboard.checks.*') ? 'menu-item-active' : '' }}">
+                <a href="{{ route('dashboard.checks.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">إدارة الشيكات</span>
+                </a>
+            </li>
+  <li class="menu-item {{ request()->routeIs('dashboard.fund-transfers.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.fund-transfers.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">تحويل الأموال</span>
@@ -166,49 +193,7 @@
         </div>
     </li>
 
-                    <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.investors') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">المستثمرون</span>
-                        </a>
-                    </li>
 
-                    <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
-                        <a href="javascript:;" class="menu-link menu-toggle">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">المشاريع</span>
-                            <i class="menu-arrow"></i>
-                        </a>
-                        <div class="menu-submenu">
-                            <ul class="menu-subnav">
-
-                                <li class="menu-item" aria-haspopup="true">
-                                    <a href="{{ url('dashboard.projects') }}" class="menu-link">
-                                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                                        <span class="menu-text">جميع المشاريع</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item" aria-haspopup="true">
-                                    <a href="{{url('dashboard.reportproject.index') }}" class="menu-link">
-                                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                                        <span class="menu-text">تحليل جميع المشاريع</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.client-payments') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">العقود</span>
-                        </a>
-                    </li>
-                    <li class="menu-item" aria-haspopup="true">
-                    <a href="{{url('dashboard.customers') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">العملاء</span>
-                        </a>
-                    </li>
                      <li class="menu-item" aria-haspopup="true">
                         <a href="{{ route('dashboard.subcontractors.index') }}" class="menu-link">
                             <span class="svg-icon menu-icon"><i class="fas fa-hard-hat"></i></span> {{-- يمكنك تغيير الأيقونة --}}
@@ -325,7 +310,49 @@
         </ul>
     </div>
 </li>
+   <li class="menu-item" aria-haspopup="true">
+                        <a href="{{url('dashboard.investors') }}" class="menu-link">
+                            <span class="svg-icon menu-icon"></span>
+                            <span class="menu-text">المستثمرون</span>
+                        </a>
+                    </li>
 
+                    <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+                        <a href="javascript:;" class="menu-link menu-toggle">
+                            <span class="svg-icon menu-icon"></span>
+                            <span class="menu-text">المشاريع</span>
+                            <i class="menu-arrow"></i>
+                        </a>
+                        <div class="menu-submenu">
+                            <ul class="menu-subnav">
+
+                                <li class="menu-item" aria-haspopup="true">
+                                    <a href="{{ url('dashboard.projects') }}" class="menu-link">
+                                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                                        <span class="menu-text">جميع المشاريع</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item" aria-haspopup="true">
+                                    <a href="{{url('dashboard.reportproject.index') }}" class="menu-link">
+                                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                                        <span class="menu-text">تحليل جميع المشاريع</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="menu-item" aria-haspopup="true">
+                        <a href="{{url('dashboard.client-payments') }}" class="menu-link">
+                            <span class="svg-icon menu-icon"></span>
+                            <span class="menu-text">العقود</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" aria-haspopup="true">
+                    <a href="{{url('dashboard.customers') }}" class="menu-link">
+                            <span class="svg-icon menu-icon"></span>
+                            <span class="menu-text">العملاء</span>
+                        </a>
+                    </li>
                     <li class="menu-item" aria-haspopup="true">
                         <a href="{{url('dashboard.employees') }}" class="menu-link">
                             <span class="svg-icon menu-icon"></span>

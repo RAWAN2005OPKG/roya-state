@@ -1,22 +1,30 @@
 <?php
+
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\FundTransfer;
+use App\Models\BankAccount;
 use App\Models\CashSafe;
-use App\Models\BankAccount; // افترض أن لديك مودل للحسابات البنكية
+use App\Models\FundTransfer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class FundTransferController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $transfers = FundTransfer::latest()->paginate(20);
         $cashSafes = CashSafe::where('is_active', true)->get();
-        $bankAccounts = BankAccount::where('is_active', true)->get(); // افترض وجود مودل للحسابات البنكية
+        $bankAccounts = BankAccount::where('is_active', true)->get();
+        $transfers = FundTransfer::latest()->take(15)->get();
 
-        return view('dashboard.transfers.funds.index', compact('transfers', 'cashSafes', 'bankAccounts'));
+        // إضافة أسماء الحسابات بشكل واضح للعرض في الجدول
+        $transfers->each(function ($transfer) {
+            $transfer->fromAccountName = $this->getAccountName($transfer->from_type, $transfer->from_id);
+            $transfer->toAccountName = $this->getAccountName($transfer->to_type, $transfer->to_id);
+        });
+
+        return view('dashboard.fund_transfers.index', compact('cashSafes', 'bankAccounts', 'transfers'));
     }
 
     public function store(Request $request)
@@ -28,24 +36,68 @@ class FundTransferController extends Controller
             'from_account' => 'required|string',
             'to_account' => 'required|string|different:from_account',
             'notes' => 'nullable|string',
+        ], [
+            'to_account.different' => 'لا يمكن التحويل من وإلى نفس الحساب.',
         ]);
 
-        list($from_type, $from_id) = explode('-', $request->from_account);
-        list($to_type, $to_id) = explode('-', $request->to_account);
+        list($fromType, $fromId) = explode('-', $request->from_account);
+        list($toType, $toId) = explode('-', $request->to_account);
+        $amount = (float)$request->amount;
 
-        // يمكنك هنا إضافة منطق للتحقق من الرصيد قبل التحويل
+        DB::beginTransaction();
+        try {
+            // خصم المبلغ من الحساب المصدر
+            $fromAccount = $this->getAccountModel($fromType, $fromId);
+            if ($fromAccount->balance < $amount) {
+                throw new \Exception('الرصيد في الحساب المصدر غير كافٍ لإتمام عملية التحويل.');
+            }
+            $fromAccount->decrement('balance', $amount);
 
-        FundTransfer::create([
-            'date' => $request->date,
-            'amount' => $request->amount,
-            'currency' => $request->currency,
-            'from_type' => $from_type,
-            'from_id' => $from_id,
-            'to_type' => $to_type,
-            'to_id' => $to_id,
-            'notes' => $request->notes,
-        ]);
+            // إضافة المبلغ إلى الحساب الهدف
+            $toAccount = $this->getAccountModel($toType, $toId);
+            $toAccount->increment('balance', $amount);
 
-        return back()->with('success', 'تم تسجيل عملية التحويل بنجاح.');
+            // تسجيل عملية التحويل
+            FundTransfer::create([
+                'date' => $request->date,
+                'amount' => $amount,
+                'currency' => $request->currency,
+                'from_type' => $fromType,
+                'from_id' => $fromId,
+                'to_type' => $toType,
+                'to_id' => $toId,
+                'notes' => $request->notes,
+            ]);
+
+            DB::commit();
+            return redirect()->route('dashboard.fund-transfers.index')->with('success', 'تم التحويل بنجاح.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'حدث خطأ: ' . $e->getMessage()])->withInput();
+        }
+    }
+
+    // دالة مساعدة لجلب المودل الصحيح
+    private function getAccountModel($type, $id)
+    {
+        if ($type === 'cash') {
+            return CashSafe::findOrFail($id);
+        }
+        return BankAccount::findOrFail($id);
+    }
+
+    // دالة مساعدة لجلب اسم الحساب للعرض
+    private function getAccountName($type, $id)
+    {
+        try {
+            $account = $this->getAccountModel($type, $id);
+            if ($type === 'cash') {
+                return 'خزينة: ' . $account->name;
+            }
+            return 'بنك: ' . $account->account_name;
+        } catch (\Exception $e) {
+            return 'حساب محذوف';
+        }
     }
 }

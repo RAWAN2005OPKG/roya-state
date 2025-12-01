@@ -8,78 +8,65 @@ use Illuminate\Http\Request;
 
 class BankAccountController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
     {
-        $query = BankAccount::query();
-
-        if ($search = $request->input('search')) {
-            $query->where('bank_name', 'like', "%{$search}%")
-                  ->orWhere('account_name', 'like', "%{$search}%")
-                  ->orWhere('account_number', 'like', "%{$search}%");
-        }
-
-        $bankAccounts = $query->latest()->paginate(15);
-        $totalAccounts = BankAccount::count();
-        $activeAccounts = BankAccount::where('is_active', true)->count();
-
-        return view('dashboard.bank_accounts.index', compact('bankAccounts', 'totalAccounts', 'activeAccounts'));
+        $bankAccounts = BankAccount::latest()->paginate(10);
+        return view('dashboard.bank_accounts.index', compact('bankAccounts'));
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'bank_name' => 'required|string|max:255',
             'account_name' => 'required|string|max:255',
-            'account_number' => 'required|string|max:255|unique:bank_accounts,account_number',
-            'iban' => 'nullable|string|max:255|unique:bank_accounts,iban',
-            'balance' => 'required|numeric|min:0',
+            'account_number' => 'required|string|unique:bank_accounts,account_number',
+            'initial_balance' => 'required|numeric|min:0',
         ]);
 
-        BankAccount::create($request->all());
+        $validatedData['balance'] = $validatedData['initial_balance']; // الرصيد الحالي يبدأ بالافتتاحي
+
+        BankAccount::create($validatedData);
 
         return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تمت إضافة الحساب البنكي بنجاح.');
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(BankAccount $bankAccount)
+    {
+        return view('dashboard.bank_accounts.edit', compact('bankAccount'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, BankAccount $bankAccount)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'bank_name' => 'required|string|max:255',
             'account_name' => 'required|string|max:255',
-            'account_number' => 'required|string|max:255|unique:bank_accounts,account_number,' . $bankAccount->id,
-            'iban' => 'nullable|string|max:255|unique:bank_accounts,iban,' . $bankAccount->id,
-            'balance' => 'required|numeric|min:0',
+            'account_number' => 'required|string|unique:bank_accounts,account_number,' . $bankAccount->id,
             'is_active' => 'required|boolean',
         ]);
 
-        $bankAccount->update($request->all());
+        $bankAccount->update($validatedData);
 
-        return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم تحديث الحساب البنكي بنجاح.');
+        return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم تعديل الحساب البنكي بنجاح.');
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(BankAccount $bankAccount)
     {
-        if ($bankAccount->balance > 0) {
-            return back()->with('error', 'لا يمكن حذف حساب بنكي يحتوي على رصيد.');
-        }
         $bankAccount->delete();
-        return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم نقل الحساب إلى سلة المحذوفات.');
-    }
-
-    public function trash()
-    {
-        $trashedAccounts = BankAccount::onlyTrashed()->latest()->paginate(15);
-        return view('dashboard.bank_accounts.trash', compact('trashedAccounts'));
-    }
-
-    public function restore($id)
-    {
-        BankAccount::onlyTrashed()->findOrFail($id)->restore();
-        return redirect()->route('dashboard.bank-accounts.trash.index')->with('success', 'تم استعادة الحساب بنجاح.');
-    }
-
-    public function forceDelete($id)
-    {
-        BankAccount::onlyTrashed()->findOrFail($id)->forceDelete();
-        return redirect()->route('dashboard.bank-accounts.trash.index')->with('success', 'تم حذف الحساب نهائياً.');
+        return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم حذف الحساب البنكي بنجاح.');
     }
 }

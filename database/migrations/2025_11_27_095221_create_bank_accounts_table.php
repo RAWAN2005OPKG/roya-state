@@ -9,20 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
+public function up(): void
 {
     Schema::create('bank_accounts', function (Blueprint $table) {
         $table->id();
-        $table->string('bank_name'); // اسم البنك
-        $table->string('account_name'); // اسم صاحب الحساب
-        $table->string('account_number')->unique(); // رقم الحساب
-        $table->string('iban')->nullable()->unique(); // رقم الآيبان
-        $table->decimal('balance', 15, 2)->default(0.00); // الرصيد الحالي
-        $table->boolean('is_active')->default(true); // حالة الحساب
+        $table->string('bank_name');
+        $table->string('account_name');
+        $table->string('account_number')->unique();
+        $table->decimal('initial_balance', 15, 2)->default(0);
+        $table->decimal('balance', 15, 2)->default(0);
+        $table->boolean('is_active')->default(true);
         $table->timestamps();
-        $table->softDeletes(); // لإضافة الحذف المؤقت
+        $table->softDeletes();
     });
 }
+
 
 
     /**

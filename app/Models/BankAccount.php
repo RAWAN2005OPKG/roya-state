@@ -1,25 +1,10 @@
 <?php
-
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class BankAccount extends Model
-{
+class BankAccount extends Model {
     use HasFactory, SoftDeletes;
-
-    protected $fillable = [
-        'bank_name',
-        'account_name',
-        'account_number',
-        'iban',
-        'balance',
-        'is_active',
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
+    protected $fillable = ['bank_name', 'account_name', 'account_number', 'initial_balance', 'balance', 'is_active'];
 }
