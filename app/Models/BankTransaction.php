@@ -10,34 +10,19 @@ class BankTransaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'date',
-        'client_name',
-        'client_phone',
-        'payer_id_number',
-        'type', 
-        'amount',
-        'currency',
-        'project_name',
-        'source',
-        'transfer_details',
-        'transfer_number',
-        'beneficiary_name',
-        'beneficiary_bank_name',
-        'beneficiary_bank_number',
-        'cheque_number',
-        'cheque_owner_name',
-        'payer_bank_name',
-        'payer_bank_number',
-        'operator',
-        'operator_role',
-        'bank_name',
-        'other_bank_name',
-        'details',
-        'notes',
+        'bank_account_id', 'type', 'amount', 'currency', 'date',
+        'client_name', 'client_phone', 'payer_id_number', 'project_name',
+        'source', 'transfer_details', 'transfer_number', 'payer_bank_name',
+        'payer_bank_number', 'beneficiary_bank_name', 'beneficiary_bank_number',
+        'details', 'notes',
     ];
 
     protected $casts = [
         'date' => 'date',
-        'amount' => 'decimal:2',
     ];
+
+    public function bankAccount()
+    {
+        return $this->belongsTo(BankAccount::class);
+    }
 }

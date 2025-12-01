@@ -39,11 +39,27 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     Route::resource('accounts', App\Http\Controllers\Dashboard\AccountController::class);
     Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);
     Route::resource('expenses', App\Http\Controllers\Dashboard\ExpenseController::class);
-Route::resource('/cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->names('dashboard.cash-safes');
-Route::resource('/bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->names('dashboard.bank-accounts');
+    Route::resource('/bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->names('bank-accounts');
     Route::get('/financial-summary', [App\Http\Controllers\Dashboard\FinancialController::class, 'summary'])->name('financial.summary');
-Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('dashboard.financial-accounts.index');
-Route::resource('/checks', App\Http\Controllers\Dashboard\CheckController::class)->names('dashboard.checks');
+
+    // مسار المركز المالي
+    Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
+
+    // مسارات إدارة الخزائن
+    Route::resource('/cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->names('cash-safes');
+
+    // مسارات إدارة الحسابات البنكية (مع الحركات)
+    Route::get('/bank-accounts/{bankAccount}', [App\Http\Controllers\Dashboard\BankAccountController::class, 'show'])->name('bank-accounts.show');
+    Route::post('/bank-accounts/{bankAccount}/transactions', [App\Http\Controllers\Dashboard\BankAccountController::class, 'storeTransaction'])->name('bank-accounts.transactions.store');
+    Route::get('/bank-transactions/{transaction}/edit', [App\Http\Controllers\Dashboard\BankAccountController::class, 'editTransaction'])->name('bank-accounts.transactions.edit');
+    Route::put('/bank-transactions/{transaction}', [App\Http\Controllers\Dashboard\BankAccountController::class, 'updateTransaction'])->name('bank-accounts.transactions.update');
+    Route::resource('/bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->except(['show'])->names('bank-accounts');
+
+    // مسارات إدارة الشيكات
+    Route::resource('/checks', App\Http\Controllers\Dashboard\CheckController::class)->names('checks');
+
+    // مسارات دليل البنوك
+    Route::resource('/banks', App\Http\Controllers\Dashboard\BankController::class)->except(['create', 'show', 'edit'])->names('banks');
 // Cash Safes Routes
 Route::prefix('cash-safes')->name('cash-safes.')->group(function () {
     Route::get('/', [App\Http\Controllers\Dashboard\CashSafeController::class, 'index'])->name('index');
