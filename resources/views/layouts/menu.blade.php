@@ -316,7 +316,6 @@
 {{-- =================================================== --}}
 <li class="menu-item {{ request()->is('dashboard/investors*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
     <a href="{{ url('dashboard/investors') }}" class="menu-link">
-        {{-- أيقونة المستثمرين --}}
         <span class="svg-icon menu-icon"><i class="fas fa-user-tie"></i></span>
         <span class="menu-text">المستثمرون</span>
     </a>
@@ -327,7 +326,6 @@
 {{-- =================================================== --}}
 <li class="menu-item menu-item-submenu {{ request()->is('dashboard/projects*') || request()->is('dashboard/reportproject*') ? 'menu-item-open' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
-        {{-- أيقونة المشاريع --}}
         <span class="svg-icon menu-icon"><i class="fas fa-project-diagram"></i></span>
         <span class="menu-text">المشاريع</span>
         <i class="menu-arrow"></i>
@@ -355,7 +353,6 @@
 {{-- =================================================== --}}
 <li class="menu-item {{ request()->is('dashboard/client-payments*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
     <a href="{{ url('dashboard/client-payments') }}" class="menu-link">
-        {{-- أيقونة العقود --}}
         <span class="svg-icon menu-icon"><i class="fas fa-file-signature"></i></span>
         <span class="menu-text">العقود</span>
     </a>
@@ -366,7 +363,6 @@
 {{-- =================================================== --}}
 <li class="menu-item {{ request()->is('dashboard/customers*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
     <a href="{{ url('dashboard/customers') }}" class="menu-link">
-        {{-- أيقونة العملاء --}}
         <span class="svg-icon menu-icon"><i class="fas fa-users"></i></span>
         <span class="menu-text">العملاء</span>
     </a>
@@ -377,7 +373,6 @@
 {{-- =================================================== --}}
 <li class="menu-item {{ request()->is('dashboard/employees*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
     <a href="{{ url('dashboard/employees') }}" class="menu-link">
-        {{-- أيقونة المستخدمين --}}
         <span class="svg-icon menu-icon"><i class="fas fa-users-cog"></i></span>
         <span class="menu-text">المستخدمون</span>
     </a>
