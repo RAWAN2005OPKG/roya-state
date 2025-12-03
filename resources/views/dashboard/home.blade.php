@@ -82,23 +82,50 @@
             </div>
         </div>
 
-        {{-- الإجراءات السريعة --}}
-        <div class="col-lg-4 mb-4">
-            <div class="card card-custom h-100">
-                <div class="card-header">
-                    <h3 class="card-title">إجراءات سريعة</h3>
+{{-- الإجراءات السريعة --}}
+<div class="col-lg-4 mb-4">
+    <div class="card card-custom h-100">
+        <div class="card-header">
+            <h3 class="card-title">إجراءات سريعة</h3>
+        </div>
+        <div class="card-body">
+            <div class="row quick-actions">
+                {{-- 1. رابط إنشاء فاتورة مبيعات --}}
+                <div class="col-6 mb-3">
+                    <a href="{{ route('dashboard.sales.create') }}" class="btn btn-light-primary w-100 py-3">
+                        <i class="fas fa-file-invoice-dollar d-block mb-2 font-size-h3"></i>
+                        إنشاء فاتورة
+                    </a>
                 </div>
-                <div class="card-body">
-                    <div class="row quick-actions">
-                        <div class="col-6 mb-3"><a href="#" class="btn btn-light-primary w-100"><i class="fas fa-file-invoice-dollar"></i> إنشاء فاتورة</a></div>
-                        <div class="col-6 mb-3"><a href="#" class="btn btn-light-danger w-100"><i class="fas fa-plus-circle"></i> إضافة مصروف</a></div>
-                        <div class="col-6"><a href="#" class="btn btn-light-success w-100"><i class="fas fa-box"></i> منتج جديد</a></div>
-                        <div class="col-6"><a href="#" class="btn btn-light-info w-100"><i class="fas fa-user-plus"></i> عميل جديد</a></div>
-                    </div>
+
+                {{-- 2. رابط إضافة مصروف --}}
+                <div class="col-6 mb-3">
+                    <a href="{{ route('dashboard.expenses.create') }}" class="btn btn-light-danger w-100 py-3">
+                        <i class="fas fa-plus-circle d-block mb-2 font-size-h3"></i>
+                        إضافة مصروف
+                    </a>
+                </div>
+
+                {{-- 3. رابط إضافة منتج جديد --}}
+                <div class="col-6">
+                    <a href="{{ route('dashboard.products.create') }}" class="btn btn-light-success w-100 py-3">
+                        <i class="fas fa-box d-block mb-2 font-size-h3"></i>
+                        منتج جديد
+                    </a>
+                </div>
+
+                {{-- 4. رابط إضافة عميل جديد --}}
+                <div class="col-6">
+                    <a href="{{ route('dashboard.customers.create') }}" class="btn btn-light-info w-100 py-3">
+                        <i class="fas fa-user-plus d-block mb-2 font-size-h3"></i>
+                        عميل جديد
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
 
     {{-- صف الفواتير المتأخرة --}}
     <div class="row">

@@ -10,9 +10,14 @@
     <div class="page-header">
         <h1><i class="fas fa-boxes"></i> المنتجات والخدمات</h1>
         <div class="header-actions">
-            {{-- زر إضافة منتج يفتح نافذة منبثقة (Modal) --}}
-            <button id="addProductBtn" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة منتج</button>
-            <a href="{{ route('dashboard.products.trash.index') }}" class="btn btn-danger"><i class="fas fa-trash"></i> سلة المحذوفات</a>
+
+            <a href="{{ route('dashboard.products.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> إضافة منتج
+            </a>
+
+            <a href="{{ route('dashboard.products.trash.index') }}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> سلة المحذوفات
+            </a>
         </div>
     </div>
 
