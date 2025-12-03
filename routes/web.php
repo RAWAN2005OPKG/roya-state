@@ -47,7 +47,11 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
 
     // مسارات إدارة الخزائن
     Route::resource('/cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->names('cash-safes');
+// مسار الربح السنوي
+Route::get('/annual-profit', [App\Http\Controllers\Dashboard\AnnualProfitController::class, 'index'])->name('annual-profit.index');
 
+// مسار التنبيهات
+Route::get('/alerts', [App\Http\Controllers\Dashboard\AlertController::class, 'index'])->name('alerts.index');
     // مسارات إدارة الحسابات البنكية (مع الحركات)
     Route::get('/bank-accounts/{bankAccount}', [App\Http\Controllers\Dashboard\BankAccountController::class, 'show'])->name('bank-accounts.show');
     Route::post('/bank-accounts/{bankAccount}/transactions', [App\Http\Controllers\Dashboard\BankAccountController::class, 'storeTransaction'])->name('bank-accounts.transactions.store');

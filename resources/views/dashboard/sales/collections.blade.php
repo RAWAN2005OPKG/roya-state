@@ -1,14 +1,12 @@
 @extends('layouts.container')
 @section('title', 'تحصيل الفواتير')
-
-@push('styles')
-    {{-- تأكد من أن هذا الملف موجود ويحتوي على الأنماط الصحيحة --}}
+      @section('styles')
     <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
-@endpush
+<link rel="stylesheet" href="{{ asset('css/shared-styles.css') }}">
+@endsection
 
 @section('content')
 <main class="main-content">
-    {{-- 1. رأس الصفحة --}}
     <div class="page-header">
         <h1><i class="fas fa-hand-holding-usd"></i> تحصيل الفواتير</h1>
         <div class="header-actions">
@@ -16,32 +14,18 @@
         </div>
     </div>
 
-    {{-- 2. بطاقات الإحصائيات (KPIs) --}}
     <div class="kpi-grid">
-        <div class="kpi-card">
-            <div class="label">إجمالي المبالغ المستحقة</div>
-            <div class="value text-danger">{{ number_format($totalDue, 2) }}</div>
-        </div>
-        <div class="kpi-card">
-            <div class="label">فواتير غير مدفوعة</div>
-            <div class="value">{{ $unpaidCount }}</div>
-        </div>
-        <div class="kpi-card">
-            <div class="label">فواتير متأخرة</div>
-            <div class="value text-warning">{{ $overdueCount }}</div>
-        </div>
+        <div class="kpi-card"><div class="label">إجمالي المبالغ المستحقة</div><div class="value text-danger">{{ number_format($totalDue ?? 0, 2) }}</div></div>
+        <div class="kpi-card"><div class="label">فواتير غير مدفوعة</div><div class="value">{{ $unpaidCount ?? 0 }}</div></div>
+        <div class="kpi-card"><div class="label">فواتير متأخرة</div><div class="value text-warning">{{ $overdueCount ?? 0 }}</div></div>
     </div>
 
-    {{-- 3. حاوية الجدول والفلاتر --}}
     <div class="table-container">
         <div class="table-controls">
-            {{-- فورم البحث --}}
             <form action="{{ route('dashboard.collections') }}" method="GET" class="search-form">
-                <input type="text" name="search" class="form-control" placeholder="ابحث برقم الفاتورة أو اسم العميل..." value="{{ request('search') }}">
+                <input type="text" name="search" class="form-control" placeholder="ابحث برقم الفاتورة أو العميل..." value="{{ request('search') }}">
                 <button type="submit" class="btn btn-primary">بحث</button>
             </form>
-
-            {{-- فلاتر الحالة --}}
             <div class="status-filters">
                 <a href="{{ route('dashboard.collections') }}" class="btn btn-sm {{ !request('status') ? 'btn-info' : 'btn-light' }}">الكل</a>
                 <a href="{{ route('dashboard.collections', ['status' => 'unpaid']) }}" class="btn btn-sm {{ request('status') == 'unpaid' ? 'btn-danger' : 'btn-light' }}">غير مدفوعة</a>
@@ -50,7 +34,6 @@
             </div>
         </div>
 
-        {{-- 4. جدول عرض البيانات --}}
         <div class="table-wrapper">
             <table class="data-table">
                 <thead>
@@ -75,36 +58,26 @@
                             <td>{{ number_format($invoice->paid_amount, 2) }}</td>
                             <td class="font-weight-bold text-danger">{{ number_format($invoice->total_amount - $invoice->paid_amount, 2) }}</td>
                             <td>
-                                <span class="badge badge-{{ $invoice->status }}">
-                                    {{-- ترجمة الحالات --}}
-                                    @if($invoice->status == 'unpaid') غير مدفوعة
-                                    @elseif($invoice->status == 'partial') مدفوعة جزئياً
-                                    @elseif($invoice->status == 'overdue') متأخرة
-                                    @else {{ $invoice->status }}
-                                    @endif
+                                <span class="badge badge-{{ $invoice->status_class ?? 'light' }}">
+                                    {{ $invoice->status_name ?? $invoice->status }}
                                 </span>
                             </td>
-                            <td class="action-buttons">
-                                {{-- زر لتسجيل دفعة (يفتح نافذة منبثقة) --}}
+                            <td class="action-buttons no-print">
                                 <button class="btn-icon" title="تسجيل دفعة"><i class="fas fa-dollar-sign"></i></button>
-                                {{-- زر لعرض تفاصيل الفاتورة --}}
                                 <a href="{{ route('dashboard.sales.show', $invoice->id) }}" class="btn-icon" title="عرض الفاتورة"><i class="fas fa-eye"></i></a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center" style="padding: 2rem;">
-                                لا توجد فواتير مستحقة حالياً.
-                            </td>
+                            <td colspan="8" class="text-center" style="padding: 2rem;">لا توجد فواتير مستحقة حالياً.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        {{-- 5. روابط تقسيم الصفحات --}}
-        @if($invoices->hasPages())
-            <div class="mt-4">
+        @if(isset($invoices) && $invoices->hasPages())
+            <div class="mt-4 d-flex justify-content-center">
                 {{ $invoices->appends(request()->query())->links() }}
             </div>
         @endif

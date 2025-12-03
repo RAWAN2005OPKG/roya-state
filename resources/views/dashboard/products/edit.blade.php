@@ -1,5 +1,9 @@
 @extends('layouts.container')
 @section('title', 'تعديل المنتج')
+ @section('styles')
+    <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+@endsection
 
 @section('content')
 <main class="main-content">

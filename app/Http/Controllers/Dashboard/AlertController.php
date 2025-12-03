@@ -3,60 +3,33 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Alert;
 use Illuminate\Http\Request;
+use App\Models\Check;
+use Carbon\Carbon;
 
 class AlertController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = Alert::query();
-        $search = $request->input('search');
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
+        // 1. تنبيهات الشيكات المستحقة خلال 7 أيام قادمة
+        $upcomingChecks = Check::where('status', 'in_wallet') // الشيكات التي لم تُصرف بعد
+                               ->whereBetween('due_date', [Carbon::now(), Carbon::now()->addDays(7)])
+                               ->orderBy('due_date', 'asc')
+                               ->get();
 
-        if ($search) {
-            $query->where('title', 'LIKE', "%{$search}%")
-                  ->orWhere('message', 'LIKE', "%{$search}%");
-        }
+        // 2. تنبيهات الشيكات المرتجعة التي لم يتم التعامل معها
+        $returnedChecks = Check::where('status', 'returned')
+                               // يمكنك إضافة شرط آخر هنا إذا كان هناك حقل يدل على أنه تم التعامل معها
+                               ->get();
 
-        $alerts = $query->orderBy($sortBy, $sortOrder)->paginate(15);
+        // يمكنك إضافة المزيد من التنبيهات هنا بنفس الطريقة
+        // مثال: تنبيهات المنتجات التي وصلت لحد الطلب
+        // $lowStockProducts = Product::whereColumn('stock', '<=', 'reorder_level')->get();
 
-        return view('dashboard.alerts.index', compact('alerts', 'search', 'sortBy', 'sortOrder'));
-    }
-
-    public function create()
-    {
-        return view('dashboard.alerts.create');
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'message' => 'required|string',
-            'type' => 'required|in:cheque_due,contract_expiry,payment_due,general',
-            'priority' => 'required|in:high,medium,low',
-            'due_date' => 'nullable|date',
-        ]);
-        $validated['status'] = 'active'; 
-
-        Alert::create($validated);
-        return redirect()->route('dashboard.alerts.index')->with('success', 'تم إنشاء التنبيه بنجاح.');
-    }
-
-    public function update(Request $request, Alert $alert)
-    {
-        $validated = $request->validate([
-            'status' => 'required|in:active,dismissed,resolved',
-        ]);
-        $alert->update($validated);
-        return back()->with('success', 'تم تحديث حالة التنبيه.');
-    }
-
-    public function destroy(Alert $alert)
-    {
-        $alert->delete();
-        return back()->with('success', 'تم حذف التنبيه.');
+        return view('dashboard.alerts.index', compact(
+            'upcomingChecks',
+            'returnedChecks'
+            // 'lowStockProducts'
+        ));
     }
 }

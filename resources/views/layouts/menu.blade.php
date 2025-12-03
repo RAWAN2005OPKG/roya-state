@@ -311,9 +311,7 @@
         </ul>
     </div>
 </li>
-  {{-- =================================================== --}}
 {{-- 4. قائمة المستثمرين --}}
-{{-- =================================================== --}}
 <li class="menu-item {{ request()->is('dashboard/investors*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
     <a href="{{ url('dashboard/investors') }}" class="menu-link">
         <span class="svg-icon menu-icon"><i class="fas fa-user-tie"></i></span>
@@ -339,7 +337,7 @@
                 </a>
             </li>
             <li class="menu-item" aria-haspopup="true">
-                <a href="{{ url('dashboard/reportproject/index') }}" class="menu-link">
+                <a href="{{ url('dashboard/reportproject') }}" class="menu-link">
                     <i class="menu-bullet menu-bullet-dot"><span></span></i>
                     <span class="menu-text">تحليل جميع المشاريع</span>
                 </a>
@@ -378,25 +376,21 @@
     </a>
 </li>
 
-                    <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.daily') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">التقرير اليومي</span>
-                        </a>
-                    </li>
-                    <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.years') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">الربح السنوي</span>
-                        </a>
-                    </li>
 
-                    <li class="menu-item" aria-haspopup="true">
-                        <a href="{{url('dashboard.alerts') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"></span>
-                            <span class="menu-text">التنبيهات</span>
-                        </a>
-                    </li>
+                <li class="menu-item {{ request()->routeIs('dashboard.annual-profit.index') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+    <a href="{{ route('dashboard.annual-profit.index') }}" class="menu-link">
+        <span class="svg-icon menu-icon"><i class="fas fa-chart-line"></i></span>
+        <span class="menu-text">الربح السنوي</span>
+    </a>
+</li>
+
+<li class="menu-item {{ request()->routeIs('dashboard.alerts.index') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+    <a href="{{ route('dashboard.alerts.index') }}" class="menu-link">
+        <span class="svg-icon menu-icon"><i class="fas fa-bell"></i></span>
+        <span class="menu-text">التنبيهات</span>
+    </a>
+</li>
+
 <li class="menu-item" aria-haspopup="true">
         {{-- عند الضغط على هذا الرابط، سيتم تنفيذ الفورم المخفي لتسجيل الخروج --}}
         <a href="{{ route('logout') }}"

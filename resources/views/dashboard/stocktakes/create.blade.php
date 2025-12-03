@@ -1,5 +1,9 @@
 @extends('layouts.container')
 @section('title', 'إضافة جرد جديد')
+  @section('styles')
+    <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared-styles.css') }}">
+@endsection
 
 @section('content')
 <main class="main-content" x-data="stocktakeManager()">
@@ -74,7 +78,7 @@
                 const select = document.getElementById('product-select-stocktake');
                 const selectedId = select.value;
                 if (!selectedId || this.items.some(i => i.id == selectedId)) return;
-                
+
                 const productData = this.allProducts[selectedId];
                 this.items.push({
                     id: productData.id,

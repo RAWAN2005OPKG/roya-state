@@ -1,5 +1,9 @@
 @extends('layouts.container')
 @section('title', 'إضافة قائمة أسعار جديدة')
+  @section('styles')
+    <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared-styles.css') }}">
+@endsection
 
 @section('content')
 <main class="main-content" x-data="{ type: 'percentage' }">

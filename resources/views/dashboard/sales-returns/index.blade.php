@@ -2,7 +2,11 @@
 @section('title', 'مردودات المبيعات')
 
 @push('styles')
+  @section('styles')
     <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared-styles.css') }}">
+@endsection
+
 @endpush
 
 @section('content')
@@ -39,7 +43,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td colspan="5" class="text-center" style="padding: 2rem;">لا توجد مردودات مبيعات لعرضها.</td></tr>
+                    {{-- @forelse ($returns as $return)
+                        <tr>
+                            <td><strong>{{ $return->number }}</strong></td>
+                            <td>{{ $return->customer->name ?? 'N/A' }}</td>
+                            <td>{{ $return->return_date->format('Y-m-d') }}</td>
+                            <td>{{ number_format($return->total_amount, 2) }} ج.م</td>
+                            <td class="action-buttons no-print">
+                                <a href="#" class="btn-icon" title="عرض"><i class="fas fa-eye"></i></a>
+                                <a href="#" class="btn-icon" title="طباعة"><i class="fas fa-print"></i></a>
+                            </td>
+                        </tr>
+                    @empty --}}
+                        <tr>
+                            <td colspan="5" class="text-center" style="padding: 2rem;">لا توجد مردودات مبيعات لعرضها.</td>
+                        </tr>
+                    {{-- @endforelse --}}
                 </tbody>
             </table>
         </div>

@@ -153,46 +153,48 @@
             </div>
 
             <!-- 3. تبويب الشيكات -->
-            <div class="tab-pane fade" id="tab_checks" role="tabpanel">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr class="text-uppercase">
-                                <th>رقم الشيك</th>
-                                <th>النوع</th>
-                                <th>صاحب الشيك</th>
-                                <th>المبلغ</th>
-                                <th>تاريخ الاستحقاق</th>
-                                <th>الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($checks as $check)
-                            <tr>
-                                <td>{{ $check->check_number }}</td>
-                                <td>
-                                    @if($check->type == 'incoming')<span class="label label-light-success label-inline">وارد</span>
-                                    @else<span class="label label-light-danger label-inline">صادر</span>@endif
-                                </td>
-                                <td>{{ $check->holder_name }}</td>
-                                <td class="font-weight-bold">{{ number_format($check->amount, 2) }} {{ $check->currency }}</td>
-                                <td>{{ $check->due_date->format('Y-m-d') }}</td>
-                                <td>
-                                    @if($check->status == 'cashed') <span class="label label-light-info label-inline">تم الصرف</span>
-                                    @elseif($check->status == 'returned') <span class="label label-light-warning label-inline">مرتجع</span>
-                                    @else <span class="label label-light-dark label-inline">في الحافظة</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            @empty
-                            <tr><td colspan="6" class="text-center p-5 text-muted">لا توجد شيكات لعرضها.</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <div class="tab-pane fade" id="checks_tab" role="tabpanel">
+          <div class="table-responsive">
+            <table class="table table-hover">
+            <thead>
+                <tr class="text-uppercase">
+                    <th>رقم الشيك</th>
+                    <th>المبلغ</th>
+                    <th>تاريخ الاستحقاق</th>
+                    <th>الحالة</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($checks as $check)
+                <tr>
+                    <td>{{ $check->cheque_number }}</td>
+                    <td class="font-weight-bold">{{ number_format($check->amount, 2) }} {{ $check->currency }}</td>
+                    <td>{{ $check->due_date->format('Y-m-d') }}</td>
+                    <td>
+                        @if($check->status == 'in_wallet')
+                            <span class="label label-lg font-weight-bold label-light-warning label-inline">في المحفظة</span>
+                        @elseif($check->status == 'cashed')
+                            <span class="label label-lg font-weight-bold label-light-success label-inline">تم صرفه</span>
+                        @else
+                            <span class="label label-lg font-weight-bold label-light-danger label-inline">مرتجع</span>
+                        @endif
+                    </td>
+                    <td>
+                        <a href="{{ route('dashboard.checks.edit', $check->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل الشيك">
+                            <i class="la la-edit"></i>
+                        </a>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="text-center p-5 text-muted">لا توجد شيكات لعرضها.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
-</div>
-
-@endsection
+       <div class="d-flex justify-content-center mt-3">
+        {{ $checks->appends(['tab' => 'checks'])->links() }}
+    </div>
+    </div>
