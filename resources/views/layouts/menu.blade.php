@@ -148,12 +148,6 @@
                     </a>
                 </li>
 
-                <li class="menu-item {{ request()->routeIs('dashboard.banks.*') ? 'menu-item-active' : '' }}">
-    <a href="{{ route('dashboard.banks.index') }}" class="menu-link">
-        <i class="menu-bullet menu-bullet-dot"><span></span></i>
-        <span class="menu-text">دليل البنوك</span>
-    </a>
-</li>
 
   <li class="menu-item {{ request()->routeIs('dashboard.cash-safes.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.cash-safes.index') }}" class="menu-link">

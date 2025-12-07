@@ -1,4 +1,4 @@
-@extends('layouts.metronic')
+@extends('layouts.container')
 @section('title', 'تعديل حركة بنكية')
 
 @section('content')
