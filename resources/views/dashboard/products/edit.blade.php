@@ -1,8 +1,8 @@
 @extends('layouts.container')
 @section('title', 'تعديل المنتج')
- @section('styles')
+  @section('styles')
     <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
-<link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/-shared-styles.css') }}">
 @endsection
 
 @section('content')
