@@ -1,9 +1,10 @@
 @extends('layouts.container')
 @section('title', 'المنتجات والخدمات')
-   @section('styles')
+ 
+  @push('styles')
     <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
-<link rel="stylesheet" href="{{ asset('css/-shared-styles.css') }}">
-@endsection
+    <link rel="stylesheet" href="{{ asset('css/-shared-styles.css') }}">
+@endpush
 
 @section('content')
 <main class="main-content">

@@ -44,7 +44,7 @@
         <div class="header-actions">
             <a href="{{ route('dashboard.contracts.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة عقد جديد</a>
 <a href="{{ route('dashboard.contracts.trash.index') }}" class="btn btn-danger"><i class="fas fa-trash"></i> سلة المحذوفات</a>
-       
+
         </div>
     </div>
 
