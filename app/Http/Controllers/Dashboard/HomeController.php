@@ -52,7 +52,32 @@ class HomeController extends Controller
                                                   ->take(5)
                                                   ->get();
 
-        // إرسال كل البيانات إلى الواجهة
+
+// سنقوم بجلب اسم العميل بدلاً من الـ ID
+$latestRevenues = SaleInvoice::join('customers', 'sale_invoices.customer_id', '=', 'customers.id')
+                            ->select(
+                                'sale_invoices.issue_date as date',
+                                'customers.name as description',
+                                'sale_invoices.total_amount as amount'
+                            )
+                            ->selectRaw("'revenue' as type")
+                            ->latest('date');
+
+$latestExpenses = Expense::select(
+                                'date',
+                                'payee as description', // استخدام حقل المدفوع له
+                                'amount'
+                            )
+                           ->selectRaw("'expense' as type")
+                           ->latest('date');
+
+// دمج الحركتين وترتيبهم وأخذ آخر 10 حركات
+$latestTransactions = $latestRevenues->union($latestExpenses)
+                                      ->orderBy('date', 'desc')
+                                      ->take(10)
+                                      ->get();
+
+
         return view('dashboard.home', compact(
             'totalRevenue',
             'totalExpenses',
@@ -61,7 +86,10 @@ class HomeController extends Controller
             'revenueData',
             'expenseData',
             'overdueSalesInvoices',
-            'overduePurchaseInvoices'
-        ));
+            'overduePurchaseInvoices',
+               'latestTransactions',
+ ));
     }
 }
+
+

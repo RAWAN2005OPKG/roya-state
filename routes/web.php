@@ -44,8 +44,9 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
 
     // مسار المركز المالي
     Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
-
-    // مسارات إدارة الخزائن
+//مسار ولي خالص
+    Route::resource('/waleed-transactions', App\Http\Controllers\Dashboard\WaleedTransactionController::class);
+// مسارات إدارة الخزائن
     Route::resource('/cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->names('cash-safes');
 // مسار الربح السنوي
 Route::get('/annual-profit', [App\Http\Controllers\Dashboard\AnnualProfitController::class, 'index'])->name('annual-profit.index');

@@ -184,7 +184,13 @@
                         <span class="menu-text">تحويل المشاريع</span>
                     </a>
                 </li>
-            </ul>
+           <li class="menu-item {{ request()->routeIs('dashboard.waleed-transactions.*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+    <a href="{{ route('dashboard.waleed-transactions.index') }}" class="menu-link">
+        <span class="svg-icon menu-icon"><i class="fas fa-user-tie"></i></span>
+        <span class="menu-text">سجل وليد الخالص</span>
+    </a>
+</li>
+ </ul>
         </div>
     </li>
 
@@ -199,7 +205,6 @@
 <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
         <span class="svg-icon menu-icon">
-            {{-- يمكنك استخدام أيقونة من Metronic أو FontAwesome --}}
             <i class="fas fa-chart-line"></i>
         </span>
         <span class="menu-text">المبيعات</span>
@@ -249,7 +254,7 @@
 </li>
 <!-- نهاية قائمة المبيعات -->
 
-<!-- بداية قائمة المنتجات والمخزون -->
+<!-- بداية قائمة المنتجات والمخزون
 <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
         <span class="svg-icon menu-icon">
@@ -304,7 +309,7 @@
 
         </ul>
     </div>
-</li>
+</li>-->
 {{-- 4. قائمة المستثمرين --}}
 <li class="menu-item {{ request()->is('dashboard/investors*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
     <a href="{{ url('dashboard/investors') }}" class="menu-link">

@@ -1,7 +1,7 @@
 @extends('layouts.container')
 @section('title', 'تعديل المصروف')
 
-@section('styles')
+@push('styles')
 <style>
     :root {
         --primary-color: #4f46e5;
@@ -31,7 +31,7 @@
     .dynamic-section { grid-column: 1 / -1; padding: 20px; background-color: var(--light-bg); border-radius: 12px; border: 2px solid var(--border-color); margin-top: 15px; }
     .dynamic-section h4 { color: var(--primary-color); margin-bottom: 15px; }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <main class="main-content">

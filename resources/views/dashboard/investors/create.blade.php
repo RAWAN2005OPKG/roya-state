@@ -1,7 +1,7 @@
 @extends('layouts.container')
 @section('title', 'إضافة مستثمر جديد')
 
-@section('styles')
+@push('styles')
     <style>
         .form-container { background-color: #fff; padding: 30px; border-radius: 16px; max-width: 800px; margin: 40px auto; }
         .form-group { margin-bottom: 20px; }
@@ -12,7 +12,8 @@
         .payment-methods-group { display: flex; gap: 25px; align-items: center; flex-wrap: wrap; padding: 10px 0; }
         .payment-methods-group label { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; cursor: pointer; }
         .payment-methods-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
-    </style>@endsection
+    </style>@endpush
+
 
 @section('content')
 <main class="main-content">

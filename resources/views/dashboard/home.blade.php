@@ -1,48 +1,66 @@
 @extends('layouts.container')
 @section('title', 'لوحة التحكم الرئيسية')
 
-@section('styles')
-{{-- هذا الـ CSS مخصص لهذه الصفحة فقط --}}
+@push('styles')
+
 <style>
     .kpi-card {
-        background-color: #fff;
-        border-radius: 12px;
+        background-color: #ffffff;
+        border-radius: 0.75rem; /* 12px */
         padding: 25px;
         text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); /* ظل احترافي */
         transition: all 0.3s ease;
+        height: 100%; /* لجعل كل الكروت بنفس الارتفاع */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
+
     .kpi-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        transform: translateY(-5px); /* حركة بسيطة عند المرور بالماوس */
+        box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.1);
     }
+
     .kpi-card .kpi-title {
         font-size: 1rem;
-        color: #6c757d;
+        color: #858796; /* لون رمادي متناسق */
         margin-bottom: 10px;
+        font-weight: 600;
     }
+
     .kpi-card .kpi-value {
         font-size: 2.2rem;
         font-weight: 700;
-        color: #343a40;
+        color: #3a3b45; /* لون أسود غير حاد */
     }
-    .kpi-value.positive { color: #28a745; }
-    .kpi-value.negative { color: #dc3545; }
 
+    /* ألوان خاصة للأرقام الموجبة والسالبة */
+    .kpi-value.positive {
+        color: #1cc88a; /* أخضر */
+    }
+    .kpi-value.negative {
+        color: #e74a3b; /* أحمر */
+    }
+
+    /* تصميم أزرار الإجراءات السريعة */
     .quick-actions .btn {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100px;
+        height: 110px; /* زيادة الارتفاع قليلاً */
         font-size: 1rem;
-        gap: 8px;
+        font-weight: 600;
+        gap: 8px; /* مسافة بين الأيقونة والنص */
+        border-radius: 0.75rem;
     }
+
     .quick-actions .btn i {
-        font-size: 1.5rem;
+        font-size: 1.8rem; /* تكبير الأيقونة */
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <div class="container-fluid">
@@ -82,49 +100,23 @@
             </div>
         </div>
 
-{{-- الإجراءات السريعة --}}
-<div class="col-lg-4 mb-4">
-    <div class="card card-custom h-100">
-        <div class="card-header">
-            <h3 class="card-title">إجراءات سريعة</h3>
-        </div>
-        <div class="card-body">
-            <div class="row quick-actions">
-                {{-- 1. رابط إنشاء فاتورة مبيعات --}}
-                <div class="col-6 mb-3">
-                    <a href="{{ route('dashboard.sales.create') }}" class="btn btn-light-primary w-100 py-3">
-                        <i class="fas fa-file-invoice-dollar d-block mb-2 font-size-h3"></i>
-                        إنشاء فاتورة
-                    </a>
+        {{-- الإجراءات السريعة --}}
+        <div class="col-lg-4 mb-4">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <h3 class="card-title">إجراءات سريعة</h3>
                 </div>
-
-                {{-- 2. رابط إضافة مصروف --}}
-                <div class="col-6 mb-3">
-                    <a href="{{ route('dashboard.expenses.create') }}" class="btn btn-light-danger w-100 py-3">
-                        <i class="fas fa-plus-circle d-block mb-2 font-size-h3"></i>
-                        إضافة مصروف
-                    </a>
-                </div>
-
-                {{-- 3. رابط إضافة منتج جديد --}}
-                <div class="col-6">
-                    <a href="{{ route('dashboard.products.create') }}" class="btn btn-light-success w-100 py-3">
-                        <i class="fas fa-box d-block mb-2 font-size-h3"></i>
-                        منتج جديد
-                    </a>
-                </div>
-
-                {{-- 4. رابط إضافة عميل جديد --}}
-                <div class="col-6">
-                    <a href="{{ route('dashboard.customers.create') }}" class="btn btn-light-info w-100 py-3">
-                        <i class="fas fa-user-plus d-block mb-2 font-size-h3"></i>
-                        عميل جديد
-                    </a>
+                <div class="card-body">
+                    <div class="row quick-actions">
+                        <div class="col-6 mb-3"><a href="{{ route('dashboard.sales.create') }}" class="btn btn-light-primary w-100"><i class="fas fa-file-invoice-dollar"></i> إنشاء فاتورة</a></div>
+                        <div class="col-6 mb-3"><a href="{{ route('dashboard.expenses.create') }}" class="btn btn-light-danger w-100"><i class="fas fa-plus-circle"></i> إضافة مصروف</a></div>
+                        <div class="col-6"><a href="{{ route('dashboard.products.create') }}" class="btn btn-light-success w-100"><i class="fas fa-box"></i> منتج جديد</a></div>
+                        <div class="col-6"><a href="{{ route('dashboard.customers.create') }}" class="btn btn-light-info w-100"><i class="fas fa-user-plus"></i> عميل جديد</a></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
     {{-- صف الفواتير المتأخرة --}}
@@ -183,20 +175,20 @@
     document.addEventListener("DOMContentLoaded", function( ) {
         const ctx = document.getElementById('revenueExpenseChart').getContext('2d');
         new Chart(ctx, {
-            type: 'bar', // يمكنك تغييره إلى 'line'
+            type: 'bar',
             data: {
                 labels: @json($months),
                 datasets: [{
                     label: 'الإيرادات',
                     data: @json($revenueData),
-                    backgroundColor: 'rgba(40, 167, 69, 0.5)',
-                    borderColor: 'rgba(40, 167, 69, 1)',
+                    backgroundColor: 'rgba(27, 197, 189, 0.5)',
+                    borderColor: 'rgba(27, 197, 189, 1)',
                     borderWidth: 1
                 }, {
                     label: 'المصروفات',
                     data: @json($expenseData),
-                    backgroundColor: 'rgba(220, 53, 69, 0.5)',
-                    borderColor: 'rgba(220, 53, 69, 1)',
+                    backgroundColor: 'rgba(246, 78, 96, 0.5)',
+                    borderColor: 'rgba(246, 78, 96, 1)',
                     borderWidth: 1
                 }]
             },
@@ -204,12 +196,11 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                    y: { beginAtZero: true }
                 }
             }
         });
     });
 </script>
 @endpush
+

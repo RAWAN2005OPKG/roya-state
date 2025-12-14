@@ -1,7 +1,7 @@
 @extends('layouts.container')
 @section('title', 'سجل المصروفات')
 
-@section('styles')
+@push('styles')
 <style>
     .table-container { background-color: #fff; padding: 30px; border-radius: 16px; max-width: 1400px; margin: 40px auto; }
     .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
@@ -37,7 +37,7 @@
         }
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <main class="main-content">

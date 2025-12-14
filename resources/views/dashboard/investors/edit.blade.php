@@ -1,7 +1,7 @@
 @extends('layouts.container')
 @section('title', 'تعديل بيانات المستثمر')
 
-@section('styles')
+@push('styles')
     <style>
         .form-container { background-color: #fff; padding: 30px; border-radius: 16px; max-width: 800px; margin: 40px auto; }
         .form-group { margin-bottom: 20px; }
@@ -14,7 +14,7 @@
         .payment-methods-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
     .form-errors { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
     </style>
-@endsection
+@endpush
 
 @section('content')
 <main class="main-content">

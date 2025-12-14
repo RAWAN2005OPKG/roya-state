@@ -1,8 +1,7 @@
 @extends('layouts.container')
 @section('title', 'سلة المحذوفات - المصروفات')
 
-{{-- قسم الأنماط (CSS) --}}
-@section('styles')
+@push('styles')
 <style>
     :root {
         --primary-color: #4f46e5;
@@ -81,7 +80,7 @@
     .btn-delete-force:hover { background-color: #fef2f2; }
     .empty-row td { padding: 40px; text-align: center; color: var(--text-muted); font-size: 1.1rem; }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <main class="main-content">
@@ -89,7 +88,7 @@
         <div class="container-header">
             <h2 class="container-title"><i class="fas fa-trash-alt"></i> سلة المحذوفات (المصروفات)</h2>
 
-        
+
             <a href="{{ route('dashboard.expenses.index') }}" class="btn-back">
                 <i class="fas fa-arrow-right"></i> العودة للمصروفات
             </a>
@@ -121,7 +120,7 @@
                         <td>{{ $expense->deleted_at->format('Y-m-d') }}</td>
                         <td class="actions-cell">
 
-                         
+
                             <form action="{{ route('dashboard.expenses.trash.restore', $expense->id) }}" method="POST" style="margin: 0;">
                                 @csrf
                                 @method('PUT')
