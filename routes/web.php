@@ -45,7 +45,11 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     // مسار المركز المالي
     Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
 //مسار ولي خالص
-    Route::resource('/waleed-transactions', App\Http\Controllers\Dashboard\WaleedTransactionController::class);
+Route::resource('/waleed-transactions', App\Http\Controllers\Dashboard\WaleedTransactionController::class);
+
+Route::get('/waleed-transactions/trash', [App\Http\Controllers\Dashboard\WaleedTransactionController::class, 'trash'])->name('waleed-transactions.trash');
+Route::put('/waleed-transactions/{id}/restore', [App\Http\Controllers\Dashboard\WaleedTransactionController::class, 'restore'])->name('waleed-transactions.restore');
+Route::delete('/waleed-transactions/{id}/force-delete', [App\Http\Controllers\Dashboard\WaleedTransactionController::class, 'forceDelete'])->name('waleed-transactions.forceDelete');
 // مسارات إدارة الخزائن
     Route::resource('/cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->names('cash-safes');
 // مسار الربح السنوي

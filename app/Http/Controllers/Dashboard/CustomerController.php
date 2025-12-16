@@ -8,7 +8,9 @@ use App\Models\Customer;
 use Illuminate\Validation\Rule;
 use App\Exports\CustomersExport;
 use Maatwebsite\Excel\Facades\Excel;
-
+use App\Models\User;
+use App\Notifications\NewCustomerNotification;
+use Illuminate\Support\Facades\Notification;
 class CustomerController extends Controller
 {
     public function index(Request $request)
@@ -50,12 +52,15 @@ class CustomerController extends Controller
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255', 'unique:customers,email'],
             'address' => ['nullable', 'string', 'max:255'],
-            // --- إضافة الحقول الجديدة هنا ---
             'agreement_amount' => ['nullable', 'numeric', 'min:0'],
             'currency' => ['nullable', 'string', 'max:10'],
         ]);
 
         Customer::create($validated);
+ $salesTeam = User::where('role', 'sales')->orWhere('role', 'admin')->get();
+        if ($salesTeam->isNotEmpty()) {
+            Notification::send($salesTeam, new NewCustomerNotification($customer));
+        }
 
         return redirect()->route('dashboard.customers.index')->with('success', 'تم إضافة العميل بنجاح.');
     }

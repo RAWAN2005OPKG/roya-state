@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Project;
-use App\Exports\ProjectsExport; 
+use App\Exports\ProjectsExport;
 use Illuminate\Support\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-
+use App\Models\User;
+use App\Notifications\ProjectStatusChangedNotification;
+use Illuminate\Support\Facades\Notification;
 class ProjectController extends Controller
 {
     public function index(Request $request)
@@ -61,8 +63,25 @@ class ProjectController extends Controller
             if ($project->project_media) Storage::disk('public')->delete($project->project_media);
             $validated['project_media'] = $request->file('project_media')->store('projects', 'public');
         }
-        $project->update($validated);
-        return redirect()->route('dashboard.projects.index')->with('success', 'تم تحديث المشروع بنجاح.');
+       $oldStatus = $project->status;
+        $newStatus = $validatedData['status'];
+
+        $project->update($validatedData);
+
+        // >>== إرسال إشعار فقط إذا تغيرت حالة المشروع ==<<
+        if ($oldStatus !== $newStatus) {
+            $projectManager = $project->manager;
+            $admins = User::where('role', 'admin')->get();
+
+            $recipients = $admins;
+            if ($projectManager) {
+                $recipients = $recipients->push($projectManager)->unique();
+            }
+
+            if ($recipients->isNotEmpty()) {
+                Notification::send($recipients, new ProjectStatusChangedNotification($project, $newStatus));
+            }
+        } return redirect()->route('dashboard.projects.index')->with('success', 'تم تحديث المشروع بنجاح.');
     }
 
     public function destroy(Project $project)
@@ -70,7 +89,7 @@ class ProjectController extends Controller
         $project->delete();
         return back()->with('success', 'تم نقل المشروع إلى سلة المحذوفات.');
     }
-    
+
     public function trash()
     {
         $trashedProjects = Project::onlyTrashed()->latest('deleted_at')->paginate(10);

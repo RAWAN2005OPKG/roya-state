@@ -63,12 +63,30 @@ class WaleedTransactionController extends Controller
                          ->with('success', 'تم تعديل الحركة بنجاح.');
     }
 
-    // >>== دالة الحذف (جديدة) ==<<
-    public function destroy(WaleedTransaction $waleedTransaction)
+ public function destroy(WaleedTransaction $waleedTransaction)
     {
         $waleedTransaction->delete();
-
         return redirect()->route('dashboard.waleed-transactions.index')
-                         ->with('success', 'تم حذف الحركة بنجاح.');
+                         ->with('success', 'تم نقل الحركة إلى سلة المحذوفات بنجاح.');
     }
-}
+ public function trash()
+    {
+        $trashedTransactions = WaleedTransaction::onlyTrashed()->latest()->paginate(15);
+        return view('dashboard.waleed_transactions.trash', compact('trashedTransactions'));
+    }
+
+    public function restore($id)
+    {
+        $transaction = WaleedTransaction::onlyTrashed()->findOrFail($id);
+        $transaction->restore();
+        return redirect()->route('dashboard.waleed-transactions.trash')
+                         ->with('success', 'تم استرجاع الحركة بنجاح.');
+    }
+
+    public function forceDelete($id)
+    {
+        $transaction = WaleedTransaction::onlyTrashed()->findOrFail($id);
+        $transaction->forceDelete();
+        return redirect()->route('dashboard.waleed-transactions.trash')
+                         ->with('success', 'تم حذف الحركة نهائياً.');
+    }}

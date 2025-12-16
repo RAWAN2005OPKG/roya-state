@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Cheque;
-
+use App\Models\User;
+use App\Notifications\ChequeStatusChangedNotification;
+use Illuminate\Support\Facades\Notification;
 class ChequeController extends Controller
 {
     public function store(Request $request)
@@ -36,7 +38,12 @@ class ChequeController extends Controller
 
         Cheque::create($validated);
 
-
+ if ($oldStatus !== $newStatus) {
+            $admins = User::where('role', 'admin')->get();
+            if ($admins->isNotEmpty()) {
+                Notification::send($admins, new ChequeStatusChangedNotification($check, $newStatus));
+            }
+        }
         return redirect()->route('dashboard.cheques.index')->with('success', 'تمت إضافة الشيك بنجاح!');
     }
 }

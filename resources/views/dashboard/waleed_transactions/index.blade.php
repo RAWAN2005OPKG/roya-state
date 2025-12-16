@@ -10,7 +10,9 @@
             </h3>
         </div>
         <div class="card-toolbar">
-            <a href="{{ route('dashboard.waleed-transactions.create') }}" class="btn btn-primary font-weight-bolder">
+          <a href="{{ route('dashboard.waleed-transactions.trash') }}" class="btn btn-danger font-weight-bolder mr-2">
+        <i class="fas fa-trash"></i> سلة المحذوفات
+    </a>  <a href="{{ route('dashboard.waleed-transactions.create') }}" class="btn btn-primary font-weight-bolder">
                 <i class="fas fa-plus"></i> إضافة حركة جديدة
             </a>
         </div>
@@ -30,7 +32,7 @@
                         <th>صرف لمين</th>
                         <th>بيانات المصاريف</th>
                         <th>ملاحظات</th>
-                        <th>إجراءات</th> {{-- >>== عمود جديد ==<< --}}
+                        <th>إجراءات</th>
                     </tr>
                 </thead>
                 <tbody>

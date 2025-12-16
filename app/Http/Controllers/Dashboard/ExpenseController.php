@@ -1,14 +1,15 @@
 <?php
 
 namespace App\Http\Controllers\Dashboard;
-
+use Illuminate\Support\Facades\Notification;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use App\Exports\ExpensesExport;
 use Maatwebsite\Excel\Facades\Excel;
-
+use App\Models\User;
+use App\Notifications\NewExpenseNotification;
 class ExpenseController extends Controller
 {
     /**
@@ -67,7 +68,10 @@ class ExpenseController extends Controller
         }
 
         Expense::create($validated);
-
+  $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new NewExpenseNotification($expense));
+        }
         return redirect()->route('dashboard.expenses.index')->with('success', 'تم حفظ المصروف بنجاح.');
     }
 

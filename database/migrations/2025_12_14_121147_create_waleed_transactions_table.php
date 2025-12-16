@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('expense_details')->nullable(); // بيانات المصاريف
             $table->text('notes')->nullable(); // ملاحظات
             $table->timestamps();
-        });
+       $table->softDeletes();          });
     }
 
     public function down(): void
