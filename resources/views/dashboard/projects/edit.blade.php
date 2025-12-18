@@ -1,6 +1,6 @@
 @extends('layouts.container')
 @section('title', 'تعديل المشروع: ' . $project->name)
-   @section('styles')
+@push('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
 
@@ -136,9 +136,8 @@ input:hover, select:hover, textarea:hover {
     display: block;
 }
 </style>
-@endsection
+@endpush
 
-@endsection
 @section('content')
 <main class="main-content">
     <div class="card card-custom" style="max-width: 1100px; margin: auto;">

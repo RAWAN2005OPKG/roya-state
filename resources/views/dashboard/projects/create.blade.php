@@ -1,6 +1,6 @@
 @extends('layouts.container')
 @section('title', 'إضافة مشروع جديد')
-@section('styles')
+@push('styles')
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
         * {
@@ -490,7 +490,7 @@
     }
     </style>
 
-@endsection
+@endpush
 
 @section('content')
 

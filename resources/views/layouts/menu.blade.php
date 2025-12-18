@@ -166,7 +166,12 @@
                         <span class="menu-text">إدارة البنوك</span>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->routeIs('dashboard.checks.*') ? 'menu-item-active' : '' }}">
+               <li class="menu-item {{ request()->routeIs('dashboard.cash-safes.*') ? 'menu-item-active' : '' }}">
+                    <a href="{{ route('dashboard.cash-safes.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">تحويلات  بنكية</span>
+                    </a>
+                </li> <li class="menu-item {{ request()->routeIs('dashboard.checks.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.checks.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">إدارة الشيكات</span>
@@ -190,7 +195,13 @@
         <span class="menu-text">سجل وليد الخالص</span>
     </a>
 </li>
- </ul>
+ <li class="menu-item {{ request()->routeIs('dashboard.khaleed-mohamed.*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+    <a href="{{ route('dashboard.khaleed-mohamed.index') }}" class="menu-link">
+        <span class="svg-icon menu-icon"><i class="fas fa-users"></i></span>
+        <span class="menu-text">سجل خالد ومحمد</span>
+    </a>
+</li>
+</ul>
         </div>
     </li>
 

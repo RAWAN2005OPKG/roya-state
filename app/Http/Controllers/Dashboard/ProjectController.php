@@ -46,10 +46,34 @@ class ProjectController extends Controller
         return redirect()->route('dashboard.projects.index')->with('success', 'تم إضافة المشروع بنجاح.');
     }
 
-    public function show(Project $project)
-    {
-        return view('dashboard.projects.show', compact('project'));
-    }
+
+public function show(Project $project)
+{
+    // استخدام load() لجلب كل العلاقات بكفاءة بعد تحميل المشروع
+    $project->load(
+        'customers',
+        'investors',
+        'expenses',
+        'khaleedMohamedTransactions'
+    );
+
+    // حساب الإجماليات المالية للمشروع
+    $totalExpenses = $project->expenses->sum('amount');
+    $totalKhaleedMohamed = $project->khaleedMohamedTransactions->sum(function($t) {
+        return $t->amount_shekel ?: $t->amount_dollar; // يجب توحيد العملة هنا للجمع الدقيق
+    });
+
+    // >>== ملاحظة: يجب توحيد العملات للحصول على أرقام دقيقة ==<<
+    $totalProjectCosts = $totalExpenses + $totalKhaleedMohamed;
+    $remainingBudget = $project->budget - $totalProjectCosts;
+
+    return view('dashboard.projects.show', compact(
+        'project',
+        'totalProjectCosts',
+        'remainingBudget'
+    ));
+}
+
 
     public function edit(Project $project)
     {

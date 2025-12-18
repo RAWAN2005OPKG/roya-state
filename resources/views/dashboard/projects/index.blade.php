@@ -1,7 +1,7 @@
 @extends('layouts.container')
 @section('title', 'إدارة المشاريع')
 
-@section('styles')
+@push('styles')
 <style>
     .main-content {
         padding: 20px;
@@ -32,7 +32,7 @@
         font-size: 0.9rem;
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <main class="main-content">

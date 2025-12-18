@@ -34,7 +34,12 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     // الصفحة الرئيسية للوحة التحكم
     Route::get('/', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('home');
     Route::get('/home', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('home');
-
+Route::prefix('/khaleed-mohamed')->name('khaleed-mohamed.')->group(function () {
+    Route::get('/trash', [App\Http\Controllers\Dashboard\KhaleedMohamedController::class, 'trash'])->name('trash');
+    Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\KhaleedMohamedController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\KhaleedMohamedController::class, 'forceDelete'])->name('force-delete');
+});
+Route::resource('/khaleed-mohamed', App\Http\Controllers\Dashboard\KhaleedMohamedController::class);
 // --- الوحدات المالية ---
     Route::resource('accounts', App\Http\Controllers\Dashboard\AccountController::class);
     Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);
@@ -111,10 +116,16 @@ Route::prefix('checks')->name('checks.')->group(function () {
     Route::delete('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'destroy'])->name('destroy');
     Route::post('/{check}/update-status', [App\Http\Controllers\Dashboard\CheckController::class, 'updateStatus'])->name('update-status');
 });
-
+Route::prefix('bank-transactions')->name('bank-transactions.')->group(function () {
+        Route::get('/trash', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'trash'])->name('trash');
+        Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'forceDelete'])->name('force-delete');
+    });
+    Route::resource('bank-transactions', App\Http\Controllers\Dashboard\BankTransactionController::class);
     // --- وحدات التحويلات ---
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->only(['index', 'store']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
+    Route::resource('purchases', App\Http\Controllers\Dashboard\PurchaseController::class);
 
 
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
@@ -315,10 +326,10 @@ Route::resource('stocktakes', App\Http\Controllers\Dashboard\StocktakeController
 
 
 Route::get('/create-test-user', function () {
-    if (!App\Models\User::where('email', 'admin@app.com')->exists()) {
+    if (!App\Models\User::where('email', 'rayapalinfo@gmail.com')->exists()) {
         App\Models\User::create([
-            'email' => "admin@app.com",
-            'name' => "admin",
+            'email' => "rayapalinfo@gmail.com",
+            'name' => "khalid@20252",
             'password' => Illuminate\Support\Facades\Hash::make('123456'),
         ]);
         return "Test user created.";

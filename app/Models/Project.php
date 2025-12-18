@@ -35,7 +35,10 @@ class Project extends Model
         return $this->hasMany(Expense::class);
     }
 
-
+public function khaleedMohamedTransactions()
+{
+    return $this->hasMany(KhaleedMohamedTransaction::class);
+}
     public function getCustomersAttribute()
     {
         $this->loadMissing('contracts.contractable');
