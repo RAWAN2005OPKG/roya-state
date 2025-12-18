@@ -166,12 +166,19 @@
                         <span class="menu-text">إدارة البنوك</span>
                     </a>
                 </li>
-               <li class="menu-item {{ request()->routeIs('dashboard.cash-safes.*') ? 'menu-item-active' : '' }}">
-                    <a href="{{ route('dashboard.cash-safes.index') }}" class="menu-link">
-                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                        <span class="menu-text">تحويلات  بنكية</span>
-                    </a>
-                </li> <li class="menu-item {{ request()->routeIs('dashboard.checks.*') ? 'menu-item-active' : '' }}">
+             <li class="menu-item" aria-haspopup="true">
+    <a href="{{ route('dashboard.bank-transactions.index') }}" class="menu-link">
+        <span class="svg-icon menu-icon"><i class="fas fa-university"></i></span>
+        <span class="menu-text">الحركات البنكية</span>
+    </a>
+</li>
+<li class="menu-item" aria-haspopup="true">
+    <a href="{{ route('dashboard.bank-transactions.trash') }}" class="menu-link">
+        <span class="svg-icon menu-icon"><i class="fas fa-trash-alt"></i></span>
+        <span class="menu-text">سلة محذوفات البنوك</span>
+    </a>
+</li>
+                <li class="menu-item {{ request()->routeIs('dashboard.checks.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.checks.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">إدارة الشيكات</span>
@@ -204,6 +211,29 @@
 </ul>
         </div>
     </li>
+<li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+    <a href="javascript:;" class="menu-link menu-toggle">
+        <span class="svg-icon menu-icon"><i class="fas fa-shopping-cart"></i></span>
+        <span class="menu-text">المشتريات</span>
+        <i class="menu-arrow"></i>
+    </a>
+    <div class="menu-submenu">
+        <ul class="menu-subnav">
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.purchases.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">فواتير الشراء</span>
+                </a>
+            </li>
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.purchase-returns.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">مرجوعات المشتريات</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
 
 
                      <li class="menu-item" aria-haspopup="true">
@@ -265,7 +295,7 @@
 </li>
 <!-- نهاية قائمة المبيعات -->
 
-<!-- بداية قائمة المنتجات والمخزون
+<!-- بداية قائمة المنتجات والمخزون-->
 <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
         <span class="svg-icon menu-icon">
@@ -320,7 +350,7 @@
 
         </ul>
     </div>
-</li>-->
+</li>
 {{-- 4. قائمة المستثمرين --}}
 <li class="menu-item {{ request()->is('dashboard/investors*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
     <a href="{{ url('dashboard/investors') }}" class="menu-link">

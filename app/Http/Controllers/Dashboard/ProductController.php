@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Product;
-use Illuminate\Http\Request;
+use App\Models\Supplier;use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class ProductController extends Controller
@@ -30,8 +30,12 @@ class ProductController extends Controller
      */
     public function create()
     {
-        // يمكن إنشاء صفحة منفصلة للإضافة إذا أردت ذلك مستقبلاً
-        return view('dashboard.products.create');
+        $suppliers = Supplier::all();
+
+        $products = Product::all();
+
+        // 3. قم بتمرير كلا المتغيرين إلى الـ view
+        return view('dashboard.products.create', compact('suppliers', 'products'));
     }
 
     /**

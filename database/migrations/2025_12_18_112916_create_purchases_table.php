@@ -14,7 +14,8 @@ return new class extends Migration {
             $table->decimal('unit_price', 15, 2);
             $table->decimal('total', 15, 2);
             $table->timestamps();
-        });
+       $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null'); // يجب أن يكون لديك جدول للموردين
+ });
     }
     public function down(): void { Schema::dropIfExists('purchase_items'); }
 };

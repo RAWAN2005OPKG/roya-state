@@ -125,8 +125,11 @@ Route::prefix('bank-transactions')->name('bank-transactions.')->group(function (
     // --- وحدات التحويلات ---
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->only(['index', 'store']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
-    Route::resource('purchases', App\Http\Controllers\Dashboard\PurchaseController::class);
+Route::resource('products', App\Http\Controllers\Dashboard\ProductController::class);
+// أو
+Route::get('products/create', [App\Http\Controllers\Dashboard\AnotherController::class, 'create']);
 
+    Route::resource('purchase-returns', App\Http\Controllers\Dashboard\PurchaseReturnController::class);
 
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
 Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);

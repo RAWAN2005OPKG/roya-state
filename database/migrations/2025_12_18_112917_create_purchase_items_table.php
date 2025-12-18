@@ -14,7 +14,9 @@ return new class extends Migration {
             $table->decimal('unit_price', 15, 2);
             $table->decimal('total', 15, 2);
             $table->timestamps();
-        });
+       $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('set null'); // يجب أن يكون لديك جدول للمنتجات
+$table->string('product_name'); // لتخزين اسم المنتج في حال حذفه من جدول المنتجات
+ });
     }
     public function down(): void { Schema::dropIfExists('purchase_items'); }
 };
