@@ -1,142 +1,97 @@
-@extends('layouts.container')
-@section('title', 'إدارة المشاريع')
 
-@push('styles')
-<style>
-    .main-content {
-        padding: 20px;
-        background-color: #f8f9fa;
-    }
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    .table-controls {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 15px;
-    }
-    .table th a {
-        text-decoration: none;
-        color: inherit;
-    }
-    .table th a:hover {
-        text-decoration: underline;
-    }
-    .table td, .table th {
-        vertical-align: middle;
-    }
-    .badge {
-        font-size: 0.9rem;
-    }
-</style>
-@endpush
+@extends('layouts.container')
+@section('title', 'قائمة المشاريع العقارية')
 
 @section('content')
-<main class="main-content">
-    <div class="page-header">
-        <h1><i class="fas fa-project-diagram"></i> إدارة المشاريع</h1>
-        <div class="header-actions">
-            <a href="{{ route('dashboard.projects.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة مشروع</a>
-            <a href="{{ route('dashboard.projects.trash.index') }}" class="btn btn-danger"><i class="fas fa-trash"></i> سلة المحذوفات</a>
+<div class="card card-custom">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">
+                <i class="fas fa-list-alt text-primary mr-2"></i>
+                قائمة المشاريع العقارية
+            </h3>
+        </div>
+        <div class="card-toolbar">
+            <a href="{{ route('dashboard.projects.create') }}" class="btn btn-primary">
+                <i class="la la-plus"></i> إضافة مشروع جديد
+            </a>
         </div>
     </div>
+    <div class="card-body">
 
-    <div class="card card-custom">
-        <div class="card-body">
-            <div class="table-controls d-flex justify-content-between align-items-center mb-3">
-                <form action="{{ route('dashboard.projects.index') }}" method="GET" class="search-form d-flex">
-                    <input type="text" name="search" class="form-control me-2" placeholder="ابحث بالاسم..." value="{{ $search ?? '' }}">
-                    <button type="submit" class="btn btn-light-primary">بحث</button>
-                </form>
-                <div class="header-actions">
-                    <a href="{{ route('dashboard.projects.export.excel') }}" class="btn btn-success me-2"><i class="fas fa-file-excel"></i> تصدير Excel</a>
-                    <button onclick="window.print();" class="btn btn-info"><i class="fas fa-print"></i> طباعة</button>
-                </div>
-            </div>
+        {{-- رسائل التنبيه --}}
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
 
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle text-center">
-                    <thead class="table-light">
-                        <tr>
-                            <th>اسم المشروع</th>
-                            <th>الحالة</th>
-                            <th>الميزانية</th>
-                            <th>إجمالي الاستثمارات</th>
-                            <th>عدد العقود</th>
-                            <th>عدد المصاريف</th>
-                            <th>تحكم</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($projects as $project)
-                            <tr>
-                                <td>
-                                    <a href="{{ route('dashboard.projects.show', $project->id) }}">
-                                        <strong>{{ $project->project_name }}</strong>
-                                    </a>
-                                </td>
-                                <td><span class="badge bg-info">{{ $project->project_status ?? '-' }}</span></td>
-                                <td>{{ number_format($project->budget ?? 0, 2) }} {{ $project->currency }}</td>
-
-                                {{-- ======================================================= --}}
-                                {{-- |          هذا هو السطر الذي تم تصحيحه              | --}}
-                                {{-- ======================================================= --}}
-                                <td>{{ number_format($project->total_investments_value ?? 0, 2) }} {{ $project->currency }}</td>
-
-                                <td>{{ $project->contracts_count }}</td>
-                                <td>{{ $project->expenses_count }}</td>
-                                <td nowrap>
-                                    <a href="{{ route('dashboard.projects.show', $project->id) }}" class="btn btn-sm btn-info me-1" title="عرض"><i class="fas fa-eye"></i></a>
-                                    <a href="{{ route('dashboard.projects.edit', $project->id) }}" class="btn btn-sm btn-primary me-1" title="تعديل"><i class="fas fa-edit"></i></a>
-                                    <form id="delete-form-{{ $project->id }}" action="{{ route('dashboard.projects.destroy', $project->id) }}" method="POST" style="display: inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-danger" title="حذف" onclick="confirmDelete({{ $project->id }})"><i class="fas fa-trash"></i></button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center py-4">لا توجد مشاريع لعرضها.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mt-3 text-center">
-                {{ $projects->appends(request()->query())->links() }}
-            </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم المشروع</th>
+                        <th>الموقع</th>
+                        <th>تاريخ البدء</th>
+                        <th>التكلفة المتوقعة ($)</th>
+                        <th>الحالة</th>
+                        <th>نسبة الإنجاز</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($projects as $project)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $project->name }}</td>
+                        <td>{{ $project->location ?? '-' }}</td>
+                        <td>{{ $project->start_date->format('Y-m-d') }}</td>
+                        <td>${{ number_format($project->estimated_cost_usd, 2) }}</td>
+                        <td>
+                            <span class="badge badge-light-{{ $project->status == 'in_progress' ? 'warning' : ($project->status == 'completed' ? 'success' : 'info') }}">
+                                {{ $project->status }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="progress" style="height: 15px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ $project->completion_percentage }}%;" aria-valuenow="{{ $project->completion_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ $project->completion_percentage }}%
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ route('dashboard.projects.show', $project->id) }}" class="btn btn-sm btn-icon btn-info" title="عرض التفاصيل">
+                                <i class="la la-eye"></i>
+                            </a>
+                            <a href="{{ route('dashboard.projects.edit', $project->id) }}" class="btn btn-sm btn-icon btn-warning" title="تعديل">
+                                <i class="la la-edit"></i>
+                            </a>
+                            {{-- زر الحذف (يتطلب نموذج Form للحذف) --}}
+                            <form action="{{ route('dashboard.projects.destroy', $project->id) }}" method="POST" style="display: inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-icon btn-danger" title="حذف" onclick="return confirm('هل أنت متأكد من حذف هذا المشروع؟')">
+                                    <i class="la la-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="text-center">لا توجد مشاريع مسجلة حالياً.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    </div>
-</main>
-@endsection
 
-@section('script')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function confirmDelete(id ) {
-    Swal.fire({
-        title: 'هل أنت متأكد؟',
-        text: "سيتم نقل هذا المشروع إلى سلة المحذوفات!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'نعم، انقله!',
-        cancelButtonText: 'إلغاء'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById('delete-form-' + id).submit();
-        }
-    });
-}
-</script>
+        {{-- روابط التنقل بين الصفحات --}}
+        <div class="d-flex justify-content-center">
+            {{ $projects->links() }}
+        </div>
+
+    </div>
+</div>
 @endsection

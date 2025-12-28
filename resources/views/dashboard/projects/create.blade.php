@@ -1,514 +1,244 @@
+
 @extends('layouts.container')
-@section('title', 'إضافة مشروع جديد')
-@push('styles')
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
-        * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Cairo', 'Arial', sans-serif;
-    }
-    .background {
-        background: linear-gradient(135deg, #efeff0 0%, #cdcacf 100%);
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        min-height: 100vh;
-        direction: rtl;
-        padding: 40px 20px;
-        overflow-y: auto;
-    }
-    .form-container {
-        background: #ffffff;
-        padding: 30px 40px;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-        width: 100%;
-        max-width: 1100px;
-        border: 1px solid #e9ecef;
-        position: relative;
-        overflow: hidden;
-    }
-    @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-  .form-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #f8f9fa;
-        position: relative;
-    }
- .header-content {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-
-    .header-text h1 {
-        font-size: 1.8rem;
-        background: linear-gradient(135deg, #cecfd4, #9e9ca0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin: 0;
-        font-weight: 700;
-    }
-
-    .header-text p {
-        font-size: 1rem;
-        color: #000000;
-        margin: 0;
-    }
-
-    .form-section {
-        margin-bottom: 35px;
-        background: #ffffff;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        border: 1px solid #f1f3f4;
-        transition: all 0.3s ease;
-    }
-
-    .form-section:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    }
-
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 0;
-        background: linear-gradient(135deg, #ffffff, #cac7ce);
-        color: white;
-        font-size: 1.2rem;
-        padding: 20px 25px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .section-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
-    }
-
-    .section-header:hover::before {
-        left: 100%;
-    }
-
-    .section-header i {
-        margin-left: 5px;
-        font-size: 1.3rem;
-    }
-
-    .section-header h3 {
-        margin: 0;
-        font-weight: 600;
-        color: white;
-    }
-
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 25px;
-        padding: 25px;
-    }
-
-    .form-group.full-width {
-        grid-column: 1 / -1;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        position: relative;
-    }
-
-    .form-group label {
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-    }
-
-    .form-group:focus-within label {
-        color: #c3c5cf;
-        transform: translateY(-2px);
-    }
-
-    .form-group label.required::after {
-        content: '*';
-        color: #dc3545;
-        margin-right: 5px;
-        font-weight: bold;
-    }
-
-    input, select, textarea {
-        width: 100%;
-        padding: 12px 16px;
-        background-color: #ffffff;
-        border: 2px solid #e9ecef;
-        border-radius: 10px;
-        color: #495057;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        font-family: inherit;
-    }
-
-    input:focus, select:focus, textarea:focus {
-        outline: none;
-        border-color: #cacee2;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        transform: translateY(-1px);
-    }
-
-    input:hover, select:hover, textarea:hover {
-        border-color: #bcb6c2;
-    }
-
-    .input-with-currency {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .input-with-currency input {
-        padding-left: 60px;
-    }
-
-    .input-with-currency .currency {
-        position: absolute;
-        left: 16px;
-        color: #6c757d;
-        font-weight: 500;
-        font-size: 0.9rem;
-        background: #f8f9fa;
-        padding: 4px 8px;
-        border-radius: 6px;
-        transition: all 0.3s ease;
-    }
-
-    .form-group:focus-within .currency {
-        background: #667eea;
-        color: white;
-    }
-
-    .dynamic-section {
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        padding: 25px;
-        border-radius: 15px;
-        margin-top: 20px;
-        border: 2px dashed #dee2e6;
-        position: relative;
-        overflow: hidden;
-        grid-column: 1 / -1;
-    }
-
-    .dynamic-section.hidden {
-        display: none;
-    }
-
-    .dynamic-section.show {
-        display: block;
-        animation: slideDown 0.4s ease;
-    }
-
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .dynamic-section h4 {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 20px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .file-upload-area {
-        border: 3px dashed #dee2e6;
-        border-radius: 15px;
-        padding: 40px 20px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        position: relative;
-        overflow: hidden;
-    }
-
-
-
-    .file-upload-area::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
-    }
-
-    .file-upload-area:hover::before {
-        left: 100%;
-    }
-
-    .upload-content i {
-        font-size: 3rem;
-        background: linear-gradient(135deg, #fcfcfc, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 16px;
-        display: block;
-    }
-
-    .upload-content p {
-        font-size: 1.1rem;
-        color: #495057;
-        margin-bottom: 8px;
-        font-weight: 500;
-    }
-
-    .file-types {
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-
-    .media-preview {
-        margin-top: 20px;
-        position: relative;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .media-preview img,
-    .media-preview video {
-        width: 100%;
-        max-height: 300px;
-        object-fit: cover;
-        border-radius: 15px;
-    }
-
-    .remove-media {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background: #dc3545;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-    }
-
-    .remove-media:hover {
-        background: #c82333;
-        transform: scale(1.1);
-    }
-
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 15px;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 2px solid #f8f9fa;
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        padding: 12px 25px;
-        border: none;
-        border-radius: 10px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        position: relative;
-        overflow: hidden;
-        min-width: 140px;
-        justify-content: center;
-    }
-
-    .btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
-    }
-
-    .btn:hover::before {
-        left: 100%;
-    }
-
-    .btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .btn:active {
-        transform: translateY(-1px);
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: #ffffff;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-primary:hover {
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-secondary {
-        background: linear-gradient(135deg, #6c757d, #495057);
-        color: #ffffff;
-        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, #28a745, #20c997);
-        color: #ffffff;
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-    }
-
-    .btn-info {
-        color: #ffffff;
-        box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
-    }
-
-    .hidden {
-        display: none !important;
-    }
-
-    /* تحسينات الاستجابة */
-    @media (max-width: 768px) {
-        .background {
-            padding: 10px;
-        }
-
-        .form-container {
-            padding: 20px;
-        }
-
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .form-actions {
-            flex-direction: column;
-        }
-
-        .btn {
-            width: 100%;
-        }
-
-        .header-text h1 {
-            font-size: 1.5rem;
-        }
-    }
-
-    select {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-        background-position: left 12px center;
-        background-repeat: no-repeat;
-        background-size: 16px 12px;
-        padding-left: 40px;
-        appearance: none;
-    }
-
-    textarea {
-        resize: vertical;
-        min-height: 120px;
-    }
-        .btn.loading {
-        pointer-events: none;
-        opacity: 0.7;
-    }
-
-    .btn.loading::after {
-        content: '';
-        width: 16px;
-        height: 16px;
-        border: 2px solid transparent;
-        border-top: 2px solid currentColor;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-right: 8px;
-    }
-
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-    </style>
-
-@endpush
+@section('title', 'إنشاء مشروع عقاري جديد')
 
 @section('content')
-
-<main class="main-content">
-    <div class="card card-custom" style="max-width: 1100px; margin: auto;">
-        <div class="card-header"><h3 class="card-title">نموذج إضافة مشروع جديد</h3></div>
-        <div class="card-body">
-            @if ($errors->any())<div class="alert alert-danger"><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
-            <form action="{{ route('dashboard.projects.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @include('dashboard.projects.form-fields')
-                <div class="form-actions mt-4">
-                    <button type="submit" class="btn btn-primary">حفظ المشروع</button>
-                    <a href="{{ route('dashboard.projects.index') }}" class="btn btn-secondary">إلغاء</a>
-                </div>
-            </form>
-        </div>
+<div class="card card-custom">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-plus-circle text-primary mr-2"></i>
+            إضافة مشروع جديد
+        </h3>
     </div>
-</main>
+    <form action="{{ route('dashboard.projects.store') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="card-body">
+
+            {{-- رسائل التنبيه --}}
+            @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            {{-- 1. تفاصيل المشروع الأساسية --}}
+            <h4 class="mb-5 text-primary">1. البيانات الأساسية للمشروع</h4>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="name">اسم المشروع <span class="text-danger">*</span></label>
+                    <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="location">الموقع</label>
+                    <input type="text" name="location" id="location" class="form-control" value="{{ old('location') }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label for="start_date">تاريخ البدء <span class="text-danger">*</span></label>
+                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}" required>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="estimated_end_date">تاريخ الانتهاء المتوقع</label>
+                    <input type="date" name="estimated_end_date" id="estimated_end_date" class="form-control" value="{{ old('estimated_end_date') }}">
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="duration_months">مدة البناء (بالشهور)</label>
+                    <input type="number" name="duration_months" id="duration_months" class="form-control" value="{{ old('duration_months') }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label for="main_contractor">المقاول الرئيسي</label>
+                    <input type="text" name="main_contractor" id="main_contractor" class="form-control" value="{{ old('main_contractor') }}">
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="architect">المهندس المعماري</label>
+                    <input type="text" name="architect" id="architect" class="form-control" value="{{ old('architect') }}">
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="estimated_cost_usd">التكلفة المتوقعة ($)</label>
+                    <input type="number" name="estimated_cost_usd" id="estimated_cost_usd" class="form-control" value="{{ old('estimated_cost_usd') }}" step="0.01">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description">وصف المشروع</label>
+                <textarea name="description" id="description" class="form-control" rows="3">{{ old('description') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="notes">ملاحظات إضافية</label>
+                <textarea name="notes" id="notes" class="form-control" rows="2">{{ old('notes') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="attachments">مرفقات المشروع (متعددة)</label>
+                <input type="file" name="attachments[]" id="attachments" class="form-control-file" multiple>
+            </div>
+
+            <hr class="my-10">
+
+            {{-- 2. الوحدات العقارية --}}
+            <h4 class="mb-5 text-primary">2. الوحدات العقارية <small class="text-muted">(يمكن إضافة أكثر من وحدة)</small></h4>
+            <div id="units-container">
+                {{-- سيتم إضافة حقول الوحدات هنا بواسطة JavaScript --}}
+            </div>
+            <button type="button" id="add-unit-btn" class="btn btn-success btn-sm mt-3">
+                <i class="fas fa-plus"></i> إضافة وحدة جديدة
+            </button>
+
+            <hr class="my-10">
+
+            {{-- 3. المستثمرون --}}
+            <h4 class="mb-5 text-primary">3. المستثمرون <small class="text-muted">(يمكن إضافة أكثر من مستثمر)</small></h4>
+            <div id="investors-container">
+                {{-- سيتم إضافة حقول المستثمرين هنا بواسطة JavaScript --}}
+            </div>
+            <button type="button" id="add-investor-btn" class="btn btn-info btn-sm mt-3">
+                <i class="fas fa-user-plus"></i> إضافة مستثمر
+            </button>
+
+        </div>
+        <div class="card-footer text-left">
+            <button type="submit" class="btn btn-primary mr-2">حفظ المشروع</button>
+            <a href="{{ route('dashboard.projects.index') }}" class="btn btn-secondary">إلغاء</a>
+        </div>
+    </form>
+</div>
 @endsection
 
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> {{-- افترضنا استخدام jQuery --}}
+<script>
+    $(document ).ready(function() {
+        let unitIndex = 0;
+        let investorIndex = 0;
+
+        // دالة إضافة وحدة جديدة
+        function addUnitField() {
+            const unitHtml = `
+                <div class="unit-item border p-4 mb-4 rounded" data-index="${unitIndex}">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-warning">تفاصيل الوحدة #${unitIndex + 1}</h5>
+                        <button type="button" class="btn btn-danger btn-sm remove-unit-btn">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 form-group">
+                            <label>رقم الوحدة <span class="text-danger">*</span></label>
+                            <input type="text" name="units[${unitIndex}][unit_number]" class="form-control" required>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>نوع الوحدة <span class="text-danger">*</span></label>
+                            <select name="units[${unitIndex}][unit_type]" class="form-control" required>
+                                <option value="apartment">شقة</option>
+                                <option value="villa">فيلا</option>
+                                <option value="office">مكتب</option>
+                                <option value="land">أرض</option>
+                                <option value="commercial">تجاري</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>المساحة (م²)<span class="text-danger">*</span></label>
+                            <input type="number" name="units[${unitIndex}][area_sqm]" class="form-control" step="0.01" required>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>السعر المتوقع ($)<span class="text-danger">*</span></label>
+                            <input type="number" name="units[${unitIndex}][expected_price_usd]" class="form-control" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>الطابق</label>
+                            <input type="number" name="units[${unitIndex}][floor_number]" class="form-control">
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>الحالة</label>
+                            <select name="units[${unitIndex}][status]" class="form-control">
+                                <option value="available">متاحة</option>
+                                <option value="reserved">محجوزة</option>
+                                <option value="sold">مباعة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>المواصفات</label>
+                        <textarea name="units[${unitIndex}][specifications]" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+            `;
+            $('#units-container').append(unitHtml);
+            unitIndex++;
+        }
+
+        // دالة إضافة مستثمر جديد
+        function addInvestorField() {
+            const investorHtml = `
+                <div class="investor-item border p-4 mb-4 rounded" data-index="${investorIndex}">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-warning">تفاصيل المستثمر #${investorIndex + 1}</h5>
+                        <button type="button" class="btn btn-danger btn-sm remove-investor-btn">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label>اختيار المستثمر <span class="text-danger">*</span></label>
+                            <select name="investors[${investorIndex}][investor_id]" class="form-control" required>
+                                <option value="">اختر مستثمر...</option>
+                                @foreach($investors as $investor)
+                                    <option value="{{ $investor->id }}">{{ $investor->name }} ({{ $investor->company }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>نسبة الاستثمار (%) <span class="text-danger">*</span></label>
+                            <input type="number" name="investors[${investorIndex}][investment_percentage]" class="form-control" step="0.01" min="0.01" max="100" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>المبلغ المستثمر فعلياً ($)</label>
+                            <input type="number" name="investors[${investorIndex}][invested_amount]" class="form-control" step="0.01" value="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات خاصة بالمستثمر في هذا المشروع</label>
+                        <textarea name="investors[${investorIndex}][notes]" class="form-control" rows="1"></textarea>
+                    </div>
+                </div>
+            `;
+            $('#investors-container').append(investorHtml);
+            investorIndex++;
+        }
+
+        // عند النقر على زر إضافة وحدة
+        $('#add-unit-btn').on('click', addUnitField);
+
+        // عند النقر على زر إضافة مستثمر
+        $('#add-investor-btn').on('click', addInvestorField);
+
+        // عند النقر على زر حذف وحدة
+        $(document).on('click', '.remove-unit-btn', function() {
+            $(this).closest('.unit-item').remove();
+            // لا نحتاج لإعادة ترقيم الحقول لأننا نستخدم الـ index في الـ Controller
+        });
+
+        // عند النقر على زر حذف مستثمر
+        $(document).on('click', '.remove-investor-btn', function() {
+            $(this).closest('.investor-item').remove();
+        });
+
+        // إضافة حقل وحدة ومستثمر افتراضيين عند تحميل الصفحة
+        addUnitField();
+        addInvestorField();
+    });
+</script>
+@endpush

@@ -27,4 +27,9 @@ class Investor extends Model
 {
     return $this->morphMany(Contract::class, 'contractable');
 }
-}
+public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class)
+            ->withPivot('investment_percentage', 'invested_amount', 'notes')
+            ->withTimestamps();
+    }}

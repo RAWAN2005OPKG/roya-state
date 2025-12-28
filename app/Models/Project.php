@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
@@ -11,59 +13,44 @@ class Project extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'project_name', 'project_title', 'start_date', 'end_date', 'currency',
-        'apartment_price', 'down_payment', 'project_status', 'project_media', 'budget',
+        'name',
+        'location',
+        'description',
+        'start_date',
+        'estimated_end_date',
+        'duration_months',
+        'main_contractor',
+        'architect',
+        'estimated_cost_usd',
+        'notes',
+        'attachments',
+        'completion_percentage',
+        'status',
     ];
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date' => 'date',
-        'apartment_price' => 'decimal:2',
-        'down_payment' => 'decimal:2',
-        'budget' => 'decimal:2',
+        'estimated_end_date' => 'date',
+        'attachments' => 'array',
+        'estimated_cost_usd' => 'float',
+        'completion_percentage' => 'integer',
     ];
 
-
-    public function contracts()
+    /**
+     * علاقة الوحدات (One-to-Many)
+     */
+    public function units(): HasMany
     {
-        return $this->hasMany(Contract::class);
+        return $this->hasMany(ProjectUnit::class);
     }
 
-
-    public function expenses()
+    /**
+     * علاقة المستثمرين (Many-to-Many)
+     */
+    public function investors(): BelongsToMany
     {
-        return $this->hasMany(Expense::class);
+        return $this->belongsToMany(Investor::class)
+            ->withPivot('investment_percentage', 'invested_amount', 'notes')
+            ->withTimestamps();
     }
-
-public function khaleedMohamedTransactions()
-{
-    return $this->hasMany(KhaleedMohamedTransaction::class);
-}
-    public function getCustomersAttribute()
-    {
-        $this->loadMissing('contracts.contractable');
-        return $this->contracts
-            ->where('contractable_type', Customer::class)
-            ->map->contractable
-            ->unique('id');
-    }
-
-
-    public function getInvestorsAttribute()
-    {
-        $this->loadMissing('contracts.contractable');
-        return $this->contracts
-            ->where('contractable_type', Investor::class)
-            ->map->contractable
-            ->unique('id');
-    }
-
-
-   public function getTotalInvestmentsValueAttribute()
-{
-    return $this->contracts()
-        ->where('contractable_type', Investor::class)
-        ->sum('investment_amount');
-}
-
 }

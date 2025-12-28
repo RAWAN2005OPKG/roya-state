@@ -3,156 +3,160 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Investor;
 use App\Models\Project;
-use App\Exports\ProjectsExport;
-use Illuminate\Support\Facades\Excel;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use App\Models\User;
-use App\Notifications\ProjectStatusChangedNotification;
-use Illuminate\Support\Facades\Notification;
+
 class ProjectController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * عرض قائمة المشاريع.
+     */
+    public function index()
     {
-        $query = Project::withCount(['contracts', 'expenses']);
-        $search = $request->input('search');
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
-
-        if ($search) {
-            $query->where('project_name', 'LIKE', "%{$search}%")
-                  ->orWhere('project_title', 'LIKE', "%{$search}%");
-        }
-
-        $projects = $query->orderBy($sortBy, $sortOrder)->paginate(10);
-        return view('dashboard.projects.index', compact('projects', 'search', 'sortBy', 'sortOrder'));
+        $projects = Project::orderBy('id', 'desc')->paginate(10);
+        return view('dashboard.projects.index', compact('projects'));
     }
 
+    /**
+     * عرض نموذج إنشاء مشروع جديد.
+     */
     public function create()
     {
-        $project = new Project();
-        return view('dashboard.projects.create', compact('project'));
+        $investors = Investor::all(); // لجلب قائمة المستثمرين لإضافتهم للمشروع
+        return view('dashboard.projects.create', compact('investors'));
     }
 
+    /**
+     * حفظ مشروع جديد في قاعدة البيانات.
+     */
     public function store(Request $request)
     {
-        $validated = $this->validateProject($request);
-        if ($request->hasFile('project_media')) {
-            $validated['project_media'] = $request->file('project_media')->store('projects', 'public');
-        }
-        Project::create($validated);
-        return redirect()->route('dashboard.projects.index')->with('success', 'تم إضافة المشروع بنجاح.');
-    }
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'start_date' => 'required|date',
+            'estimated_end_date' => 'nullable|date|after_or_equal:start_date',
+            'estimated_cost_usd' => 'nullable|numeric|min:0',
+            'attachments.*' => 'nullable|file|max:5000', // 5MB max per file
 
+            // قواعد التحقق للوحدات
+            'units' => 'nullable|array',
+            'units.*.unit_number' => 'required_with:units|string|max:255',
+            'units.*.unit_type' => ['required_with:units', Rule::in(['apartment', 'villa', 'office', 'land', 'commercial'])],
+            'units.*.area_sqm' => 'required_with:units|numeric|min:1',
+            'units.*.expected_price_usd' => 'required_with:units|numeric|min:0',
 
-public function show(Project $project)
-{
-    // استخدام load() لجلب كل العلاقات بكفاءة بعد تحميل المشروع
-    $project->load(
-        'customers',
-        'investors',
-        'expenses',
-        'khaleedMohamedTransactions'
-    );
+            // قواعد التحقق للمستثمرين
+            'investors' => 'nullable|array',
+            'investors.*.investor_id' => 'required_with:investors|exists:investors,id',
+            'investors.*.investment_percentage' => 'required_with:investors|numeric|min:0.01|max:100',
+        ]);
 
-    // حساب الإجماليات المالية للمشروع
-    $totalExpenses = $project->expenses->sum('amount');
-    $totalKhaleedMohamed = $project->khaleedMohamedTransactions->sum(function($t) {
-        return $t->amount_shekel ?: $t->amount_dollar; // يجب توحيد العملة هنا للجمع الدقيق
-    });
+        // استخدام DB::transaction لضمان حفظ جميع البيانات أو عدم حفظ أي منها
+        try {
+            DB::beginTransaction();
 
-    // >>== ملاحظة: يجب توحيد العملات للحصول على أرقام دقيقة ==<<
-    $totalProjectCosts = $totalExpenses + $totalKhaleedMohamed;
-    $remainingBudget = $project->budget - $totalProjectCosts;
-
-    return view('dashboard.projects.show', compact(
-        'project',
-        'totalProjectCosts',
-        'remainingBudget'
-    ));
-}
-
-
-    public function edit(Project $project)
-    {
-        return view('dashboard.projects.edit', compact('project'));
-    }
-
-    public function update(Request $request, Project $project)
-    {
-        $validated = $this->validateProject($request, $project->id);
-        if ($request->hasFile('project_media')) {
-            if ($project->project_media) Storage::disk('public')->delete($project->project_media);
-            $validated['project_media'] = $request->file('project_media')->store('projects', 'public');
-        }
-       $oldStatus = $project->status;
-        $newStatus = $validatedData['status'];
-
-        $project->update($validatedData);
-
-        // >>== إرسال إشعار فقط إذا تغيرت حالة المشروع ==<<
-        if ($oldStatus !== $newStatus) {
-            $projectManager = $project->manager;
-            $admins = User::where('role', 'admin')->get();
-
-            $recipients = $admins;
-            if ($projectManager) {
-                $recipients = $recipients->push($projectManager)->unique();
+            // 1. معالجة المرفقات
+            $attachmentsPaths = [];
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $path = $file->store('projects/attachments', 'public');
+                    $attachmentsPaths[] = $path;
+                }
             }
 
-            if ($recipients->isNotEmpty()) {
-                Notification::send($recipients, new ProjectStatusChangedNotification($project, $newStatus));
+            // 2. إنشاء المشروع الرئيسي
+            $project = Project::create([
+                'name' => $request->name,
+                'location' => $request->location,
+                'description' => $request->description,
+                'start_date' => $request->start_date,
+                'estimated_end_date' => $request->estimated_end_date,
+                'duration_months' => $request->duration_months,
+                'main_contractor' => $request->main_contractor,
+                'architect' => $request->architect,
+                'estimated_cost_usd' => $request->estimated_cost_usd ?? 0,
+                'notes' => $request->notes,
+                'attachments' => $attachmentsPaths,
+                'completion_percentage' => $request->completion_percentage ?? 0,
+                'status' => $request->status ?? 'planning',
+            ]);
+
+            // 3. حفظ الوحدات
+            if ($request->units) {
+                $unitsData = collect($request->units)->map(function ($unit) {
+                    return [
+                        'unit_number' => $unit['unit_number'],
+                        'unit_type' => $unit['unit_type'],
+                        'floor_number' => $unit['floor_number'] ?? null,
+                        'area_sqm' => $unit['area_sqm'],
+                        'expected_price_usd' => $unit['expected_price_usd'],
+                        'specifications' => $unit['specifications'] ?? null,
+                        'status' => $unit['status'] ?? 'available',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                })->toArray();
+
+                $project->units()->createMany($unitsData);
             }
-        } return redirect()->route('dashboard.projects.index')->with('success', 'تم تحديث المشروع بنجاح.');
+
+            // 4. ربط المستثمرين
+            if ($request->investors) {
+                $investorsData = collect($request->investors)->mapWithKeys(function ($investor) {
+                    return [
+                        $investor['investor_id'] => [
+                            'investment_percentage' => $investor['investment_percentage'],
+                            'invested_amount' => $investor['invested_amount'] ?? 0,
+                            'notes' => $investor['notes'] ?? null,
+                        ]
+                    ];
+                })->toArray();
+
+                $project->investors()->attach($investorsData);
+            }
+
+            DB::commit();
+
+            return redirect()->route('dashboard.projects.show', $project->id)
+                ->with('success', 'تم إنشاء المشروع بنجاح مع الوحدات والمستثمرين.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // يمكنك تسجيل الخطأ هنا: \Log::error($e->getMessage());
+            return back()->withInput()->with('error', 'حدث خطأ أثناء حفظ المشروع: ' . $e->getMessage());
+        }
     }
 
-    public function destroy(Project $project)
+    /**
+     * عرض تفاصيل مشروع محدد.
+     */
+    public function show(Project $project)
     {
-        $project->delete();
-        return back()->with('success', 'تم نقل المشروع إلى سلة المحذوفات.');
+        // حساب الإحصائيات لعرضها في الواجهة
+        $totalUnits = $project->units->count();
+        $unitsSold = $project->units->where('status', 'sold')->count();
+        $unitsAvailable = $totalUnits - $unitsSold;
+
+        // حساب إجمالي القيمة المتوقعة للوحدات
+        $totalExpectedValue = $project->units->sum('expected_price_usd');
+
+        // إضافة حقل افتراضي لنسبة الإنجاز إذا لم يكن موجوداً في قاعدة البيانات
+        if (!isset($project->completion_percentage)) {
+            $project->completion_percentage = 65; // قيمة افتراضية للاختبار
+        }
+
+        return view('dashboard.projects.show', compact(
+            'project',
+            'totalUnits',
+            'unitsSold',
+            'unitsAvailable',
+            'totalExpectedValue'
+        ));
     }
 
-    public function trash()
-    {
-        $trashedProjects = Project::onlyTrashed()->latest('deleted_at')->paginate(10);
-        return view('dashboard.projects.trash', compact('trashedProjects'));
-    }
-
-    public function restore($id)
-    {
-        Project::withTrashed()->findOrFail($id)->restore();
-        return back()->with('success', 'تم استعادة المشروع بنجاح.');
-    }
-
-    public function forceDelete($id)
-    {
-        $project = Project::withTrashed()->findOrFail($id);
-        if ($project->project_media) Storage::disk('public')->delete($project->project_media);
-        $project->forceDelete();
-        return back()->with('success', 'تم حذف المشروع نهائيًا.');
-    }
-
-    public function exportExcel()
-    {
-        return Excel::download(new ProjectsExport, 'projects.xlsx');
-    }
-
-    private function validateProject(Request $request, $projectId = null)
-    {
-        $rules = [
-            'project_name' => ['required', 'string', 'max:255'],
-            'project_title' => ['nullable', 'string', 'max:255'],
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date'],
-            'currency' => ['nullable', 'string', 'max:10'],
-            'apartment_price' => ['nullable', 'numeric', 'min:0'],
-            'down_payment' => ['nullable', 'numeric', 'min:0'],
-            'budget' => ['nullable', 'numeric', 'min:0'],
-            'project_status' => ['nullable', 'string', 'max:50'],
-            'project_media' => ['nullable', 'file', 'mimes:jpg,jpeg,png,mp4', 'max:20480'],
-        ];
-        return $request->validate($rules);
-    }
 }

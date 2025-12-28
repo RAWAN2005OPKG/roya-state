@@ -216,14 +216,15 @@ Route::prefix('contracts/{contract}')->as('contracts.')->group(function () {
     Route::resource('employees', App\Http\Controllers\Dashboard\EmployeeController::class);
 
     // 8. المشاريع (Projects)
-    Route::get('/projects/export/excel', [App\Http\Controllers\Dashboard\ProjectController::class, 'exportExcel'])->name('projects.export.excel');
-    Route::prefix('projects/trash')->name('projects.trash.')->controller(App\Http\Controllers\Dashboard\ProjectController::class)->group(function () {
-        Route::get('/', 'trash')->name('index');
-        Route::put('/{id}/restore', 'restore')->name('restore');
-        Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
+Route::prefix('projects')->name('projects.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Dashboard\ProjectController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Dashboard\ProjectController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Dashboard\ProjectController::class, 'store'])->name('store');
+        Route::get('/{project}', [App\Http\Controllers\Dashboard\ProjectController::class, 'show'])->name('show');
+        Route::get('/{project}/edit', [App\Http\Controllers\Dashboard\ProjectController::class, 'edit'])->name('edit');
+        Route::put('/{project}', [App\Http\Controllers\Dashboard\ProjectController::class, 'update'])->name('update');
+        Route::delete('/{project}', [App\Http\Controllers\Dashboard\ProjectController::class, 'destroy'])->name('destroy');
     });
-    Route::resource('projects',App\Http\Controllers\Dashboard\ProjectController::class);
-
     Route::get('/daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'index'])->name('daily.index');
     Route::post('/daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'store'])->name('daily.store');
 
