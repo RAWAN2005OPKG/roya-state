@@ -5,17 +5,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('purchase_items', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('purchase_id')->constrained('purchases')->onDelete('cascade');
-            $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('set null'); // يجب أن يكون لديك جدول للمنتجات
-            $table->string('product_name'); // لتخزين اسم المنتج في حال حذفه من جدول المنتجات
-            $table->integer('quantity');
-            $table->decimal('unit_price', 15, 2);
-            $table->decimal('total', 15, 2);
-            $table->timestamps();
-       $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null'); // يجب أن يكون لديك جدول للموردين
- });
+Schema::create('purchases', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
+    $table->string('invoice_number')->unique();
+    $table->date('invoice_date');
+    $table->date('due_date')->nullable();
+    $table->decimal('total_amount', 10, 2);
+    $table->decimal('paid_amount', 10, 2)->default(0);
+    $table->string('payment_method');
+    $table->enum('status', ['paid', 'partially_paid', 'unpaid'])->default('unpaid');
+    $table->timestamps();
+});
+
     }
     public function down(): void { Schema::dropIfExists('purchase_items'); }
 };

@@ -11,10 +11,19 @@ class Contract extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-         'contractable_id', 'contractable_type', 'project_id', 'contract_id',
-    'signing_date', 'status', 'investment_amount', 'currency', 'terms',
-    'attachment', 'details',
-    ];
+    'contractable_id',
+    'contractable_type',
+    'contract_id',
+    'project_id',
+    'signing_date',
+    'investment_amount',
+    'currency',
+    'status',
+    'terms',
+    'attachment',
+    'details', // هذا هو حقل الـ JSON المهم
+];
+
 
     protected $casts = [
         'signing_date' => 'date',

@@ -33,4 +33,10 @@ class BankController extends Controller
         $bank->delete();
         return back()->with('success', 'تم حذف البنك بنجاح.');
     }
-}
+public function show(Bank $bank)
+{
+   
+    $bank->load('accounts.transactions');
+
+    return view('dashboard.banks.show', compact('bank'));
+}}

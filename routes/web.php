@@ -68,12 +68,16 @@ Route::get('/alerts', [App\Http\Controllers\Dashboard\AlertController::class, 'i
     Route::get('/bank-transactions/{transaction}/edit', [App\Http\Controllers\Dashboard\BankAccountController::class, 'editTransaction'])->name('bank-accounts.transactions.edit');
     Route::put('/bank-transactions/{transaction}', [App\Http\Controllers\Dashboard\BankAccountController::class, 'updateTransaction'])->name('bank-accounts.transactions.update');
     Route::resource('/bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->except(['show'])->names('bank-accounts');
+ Route::get('bank-accounts/{bankAccount}/statement', [App\Http\Controllers\Dashboard\BankAccountStatementController::class, 'show'])->name('bank-accounts.statement.show');
+
+    // مسار لتخزين الحركة الجديدة من صفحة كشف الحساب
+    Route::post('bank-accounts/{bankAccount}/transactions', [App\Http\Controllers\Dashboard\BankAccountStatementController::class, 'store'])->name('bank-accounts.transactions.store');
 
     // مسارات إدارة الشيكات
     Route::resource('/checks', App\Http\Controllers\Dashboard\CheckController::class)->names('checks');
 
     // مسارات دليل البنوك
-    Route::resource('/banks', App\Http\Controllers\Dashboard\BankController::class)->except(['create', 'show', 'edit'])->names('banks');
+    Route::resource('/banks', App\Http\Controllers\Dashboard\BankController::class);
 // Cash Safes Routes
 Route::prefix('cash-safes')->name('cash-safes.')->group(function () {
     Route::get('/', [App\Http\Controllers\Dashboard\CashSafeController::class, 'index'])->name('index');
@@ -125,11 +129,14 @@ Route::prefix('bank-transactions')->name('bank-transactions.')->group(function (
     // --- وحدات التحويلات ---
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->only(['index', 'store']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
-Route::resource('products', App\Http\Controllers\Dashboard\ProductController::class);
-// أو
-Route::get('products/create', [App\Http\Controllers\Dashboard\AnotherController::class, 'create']);
+ Route::get('/purchases', [App\Http\Controllers\Dashboard\PurchaseController::class, 'index'])->name('purchases.index');
 
-    Route::resource('purchase-returns', App\Http\Controllers\Dashboard\PurchaseReturnController::class);
+    Route::resource('purchases', App\Http\Controllers\Dashboard\PurchaseController::class);
+ Route::get('purchase-returns', [App\Http\Controllers\Dashboard\PurchaseReturnController::class, 'index'])->name('purchase-returns.index');
+
+    Route::get('purchase-returns/create', [App\Http\Controllers\Dashboard\PurchaseReturnController::class, 'create'])->name('purchase-returns.create');
+    Route::post('purchase-returns', [App\Http\Controllers\Dashboard\PurchaseReturnController::class, 'store'])->name('purchase-returns.store');
+    Route::delete('purchase-returns/{purchase_return}', [App\Http\Controllers\Dashboard\PurchaseReturnController::class, 'destroy'])->name('purchase-returns.destroy');
 
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
 Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);
@@ -173,15 +180,13 @@ Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryCo
     Route::resource('reportproject', App\Http\Controllers\Dashboard\ReportProjectController::class);
 
     // 6. العقود (Contracts)
-Route::name('contracts.')->group(function () {
-    Route::get('contracts/trash', [ App\Http\Controllers\Dashboard\ContractController::class, 'trash'])->name('trash.index');
-    Route::post('contracts/restore/{id}', [ App\Http\Controllers\Dashboard\ContractController::class, 'restore'])->name('trash.restore'); // استخدمت POST بدلاً من PUT لأنها أكثر شيوعاً للاستعادة
-    Route::delete('contracts/forceDelete/{id}', [ App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('trash.forceDelete');
-
-   Route::get('contracts/export/excel', [ App\Http\Controllers\Dashboard\ContractController::class, 'exportExcel'])->name('export.excel');
-});
 
 Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController::class);
+
+    Route::get('contracts/trash', [App\Http\Controllers\Dashboard\ContractController::class, 'trash'])->name('contracts.trash');
+    Route::post('contracts/{id}/restore', [App\Http\Controllers\Dashboard\ContractController::class, 'restore'])->name('contracts.restore');
+    Route::delete('contracts/{id}/force-delete', [App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('contracts.forceDelete');
+
 
 
 // 7. الدفعات (Payments)
@@ -228,15 +233,12 @@ Route::prefix('contracts/{contract}')->as('contracts.')->group(function () {
     Route::resource('alerts', App\Http\Controllers\Dashboard\AlertController::class);
 
      // 9. المقاولون والموردون (Subcontractors)
-    Route::get('/subcontractors/export/excel', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'exportExcel'])->name('subcontractors.export.excel');
+  Route::resource('subcontractors', App\Http\Controllers\Dashboard\SubcontractorController::class);
 
-    Route::prefix('subcontractors/trash')->name('subcontractors.trash.')->controller(App\Http\Controllers\Dashboard\SubcontractorController::class)->group(function () {
-        Route::get('/', 'trash')->name('index');
-        Route::put('/{id}/restore', 'restore')->name('restore');
-        Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
-    });
-    Route::resource('subcontractors', App\Http\Controllers\Dashboard\SubcontractorController::class);
-
+Route::get('subcontractors/trash', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'trash'])->name('subcontractors.trash');
+Route::post('subcontractors/{id}/restore', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'restore'])->name('subcontractors.restore');
+Route::delete('subcontractors/{id}/force-delete', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'forceDelete'])->name('subcontractors.forceDelete');
+Route::get('subcontractors/export/excel', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'exportExcel'])->name('subcontractors.exportExcel');
 //  المشتريات (Purchases)
 Route::prefix('purchases')->as('purchases.')->group(function () {
 
@@ -319,12 +321,6 @@ Route::resource('stocktakes', App\Http\Controllers\Dashboard\StocktakeController
     Route::get('/cheques', [App\Http\Controllers\Dashboard\ChequeController::class, 'index'])->name('cheques.index');
     Route::post('/cheques', [App\Http\Controllers\Dashboard\ChequeController::class, 'store'])->name('cheques.store');
     Route::post('/funds-transfers', [App\Http\Controllers\Dashboard\FundsTransferController::class, 'store'])->name('funds-transfers.store');
-    Route::get('/payments', [App\Http\Controllers\Dashboard\PaymentVoucherController::class, 'index'])->name('payments.index');
-    Route::post('/payments', [App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('payments.store');
-    Route::get('/add-transaction', [App\Http\Controllers\Dashboard\DashboardController::class, 'index'])->name('add_transaction.create');
-    Route::get('client-payments', [App\Http\Controllers\Dashboard\ContractController::class, 'index'])->name('client-payments');
-    Route::get('years', [App\Http\Controllers\Dashboard\AnnualReportController::class, 'index'])->name('report.annual');
-    Route::post('alerts/refresh', [App\Http\Controllers\Dashboard\AlertController::class, 'refreshAlerts'])->name('alerts.refresh');
 });
 
 
@@ -332,8 +328,8 @@ Route::get('/create-test-user', function () {
     if (!App\Models\User::where('email', 'rayapalinfo@gmail.com')->exists()) {
         App\Models\User::create([
             'email' => "rayapalinfo@gmail.com",
-            'name' => "khalid@20252",
-            'password' => Illuminate\Support\Facades\Hash::make('123456'),
+            'name' => "khalid",
+            'password' => Illuminate\Support\Facades\Hash::make('khalid@20252'),
         ]);
         return "Test user created.";
     }

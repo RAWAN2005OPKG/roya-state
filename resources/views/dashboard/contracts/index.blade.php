@@ -1,7 +1,7 @@
 @extends('layouts.container')
 @section('title', 'إدارة العقود')
 
-@section('styles')
+@push('styles')
 <style>
     :root {
         --primary-color: #4f46e5; --primary-hover: #3730a3; --light-bg: #f8fafc;
@@ -32,10 +32,10 @@
     .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
     .badge-customer { background-color: #e0e7ff; color: #3730a3; }
     .badge-investor { background-color: #d1fae5; color: #065f46; }
-    .badge-employee { background-color: #fef3c7; color: #92400e; }
+    .badge-subcontractor { background-color: #fef3c7; color: #92400e; } /* تم تغيير الاسم ليكون أوضح */
     .action-buttons a, .action-buttons button { color: var(--text-muted); background: none; border: none; padding: 5px; font-size: 1.1rem; cursor: pointer; }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <main class="main-content">
@@ -43,15 +43,18 @@
         <h1><i class="fas fa-file-signature"></i> إدارة العقود</h1>
         <div class="header-actions">
             <a href="{{ route('dashboard.contracts.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة عقد جديد</a>
-<a href="{{ route('dashboard.contracts.trash.index') }}" class="btn btn-danger"><i class="fas fa-trash"></i> سلة المحذوفات</a>
-
+            {{-- هذا المسار يجب أن يكون معرّفًا في routes/web.php --}}
+            <a href="{{ route('dashboard.contracts.trash') }}" class="btn btn-danger"><i class="fas fa-trash"></i> سلة المحذوفات</a>
         </div>
     </div>
 
+    {{-- تم إضافة تحقق للتأكد من وجود المتغيرات قبل عرضها --}}
+    @if(isset($totalContracts) && isset($totalValue))
     <div class="kpi-grid">
         <div class="kpi-card"><div class="label">إجمالي العقود</div><div class="value">{{ $totalContracts }}</div></div>
         <div class="kpi-card"><div class="label">إجمالي قيمة العقود</div><div class="value">{{ number_format($totalValue, 2) }} <small>ILS</small></div></div>
     </div>
+    @endif
 
     <div class="table-container">
         <div class="table-controls">
@@ -79,19 +82,21 @@
                     @forelse ($contracts as $contract)
                         <tr>
                             <td><strong>{{ $contract->contract_id }}</strong></td>
+                            {{-- التحقق من وجود العلاقة قبل محاولة الوصول إليها --}}
                             <td>{{ $contract->contractable->name ?? 'غير محدد' }}</td>
                             <td>
                                 @if($contract->contractable_type == \App\Models\Customer::class)
                                     <span class="badge badge-customer">عقد عميل</span>
                                 @elseif($contract->contractable_type == \App\Models\Investor::class)
                                     <span class="badge badge-investor">عقد استثمار</span>
-                                @else
-                                    <span class="badge badge-employee">عقد مقاول</span>
+                                @elseif($contract->contractable_type == \App\Models\Subcontractor::class) {{-- تم التصحيح --}}
+                                    <span class="badge badge-subcontractor">عقد مقاول</span>
                                 @endif
                             </td>
+                            {{-- التحقق من وجود العلاقة قبل محاولة الوصول إليها --}}
                             <td>{{ $contract->project->project_name ?? '-' }}</td>
                             <td>{{ number_format($contract->investment_amount, 2) }} {{ $contract->currency }}</td>
-                            <td>{{ $contract->signing_date->format('Y-m-d') }}</td>
+                            <td>{{ $contract->signing_date ? $contract->signing_date->format('Y-m-d') : '-' }}</td>
                             <td>{{ $contract->status }}</td>
                             <td class="action-buttons">
                                 <a href="{{ route('dashboard.contracts.show', $contract->id) }}" title="عرض"><i class="fas fa-eye"></i></a>
@@ -110,7 +115,10 @@
             </table>
         </div>
 
-        <div class="mt-4">{{ $contracts->appends(request()->query())->links() }}</div>
+        {{-- إضافة التحقق من وجود المتغير قبل استخدامه --}}
+        @if(isset($contracts))
+            <div class="mt-4">{{ $contracts->appends(request()->query())->links() }}</div>
+        @endif
     </div>
 </main>
 @endsection

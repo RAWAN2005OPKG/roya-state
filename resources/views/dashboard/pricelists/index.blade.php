@@ -1,10 +1,9 @@
 @extends('layouts.container')
 @section('title', 'قوائم الأسعار')
-  @section('styles')
-    <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
-<link rel="stylesheet" href="{{ asset('css/shared-styles.css') }}">
-@endsection
-
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-style.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/shared-styles.css') }}">
+@endpush
 @section('content')
 <main class="main-content">
     <div class="page-header">

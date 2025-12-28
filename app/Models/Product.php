@@ -20,4 +20,7 @@ class Product extends Model
         'weight',
         'is_active',
     ];
-}
+ public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }}

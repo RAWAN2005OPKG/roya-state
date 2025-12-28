@@ -211,24 +211,28 @@
 </ul>
         </div>
     </li>
-<li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+<li class="menu-item menu-item-submenu {{ request()->is('dashboard/purchases*') || request()->is('dashboard/purchase-returns*') ? 'menu-item-open menu-item-here' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
         <span class="svg-icon menu-icon"><i class="fas fa-shopping-cart"></i></span>
         <span class="menu-text">المشتريات</span>
         <i class="menu-arrow"></i>
     </a>
     <div class="menu-submenu">
+        <i class="menu-arrow"></i>
         <ul class="menu-subnav">
-            <li class="menu-item" aria-haspopup="true">
+            {{-- رابط فواتير الشراء --}}
+            <li class="menu-item {{ request()->is('dashboard/purchases*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
                 <a href="{{ route('dashboard.purchases.index') }}" class="menu-link">
                     <i class="menu-bullet menu-bullet-dot"><span></span></i>
                     <span class="menu-text">فواتير الشراء</span>
                 </a>
             </li>
-            <li class="menu-item" aria-haspopup="true">
+
+            {{-- رابط مرتجعات المشتريات --}}
+            <li class="menu-item {{ request()->is('dashboard/purchase-returns*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
                 <a href="{{ route('dashboard.purchase-returns.index') }}" class="menu-link">
                     <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                    <span class="menu-text">مرجوعات المشتريات</span>
+                    <span class="menu-text">مرتجعات المشتريات</span>
                 </a>
             </li>
         </ul>
@@ -389,12 +393,14 @@
 {{-- =================================================== --}}
 {{-- 6. قائمة العقود --}}
 {{-- =================================================== --}}
-<li class="menu-item {{ request()->is('dashboard/client-payments*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
-    <a href="{{ url('dashboard/client-payments') }}" class="menu-link">
+
+<li class="menu-item {{ request()->is('dashboard/contracts*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+    <a href="{{ route('dashboard.contracts.index') }}" class="menu-link">
         <span class="svg-icon menu-icon"><i class="fas fa-file-signature"></i></span>
         <span class="menu-text">العقود</span>
     </a>
 </li>
+
 
 {{-- =================================================== --}}
 {{-- 7. قائمة العملاء --}}

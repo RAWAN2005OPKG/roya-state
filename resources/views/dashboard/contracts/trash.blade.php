@@ -1,7 +1,7 @@
 @extends('layouts.container')
 @section('title', 'سلة محذوفات العقود')
 
-@section('styles')
+@push('styles')
     <style>
         body { background: #f8f9fa; color: #333; font-family: 'Cairo', sans-serif; direction: rtl; }
         .main-content { width: 100%; max-width: 1600px; margin: 40px auto; padding: 0 20px; }
@@ -11,7 +11,8 @@
         .btn-action.restore { color: #198754; }
         .btn-action.delete { color: #dc3545; }
     </style>
-@endsection
+@endpush
+
 
 @section('content')
 <main class="main-content">

@@ -1,14 +1,13 @@
 @extends('layouts.container')
 @section('title', 'تعديل العقد: ' . $contract->contract_id)
 
-@section('styles')
-{{-- الأنماط تبقى كما هي --}}
+@push('styles')
 <style>
     .form-section { background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef; }
     .form-section-title { font-size: 1.3rem; color: #4f46e5; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #4f46e5; }
     .hidden-section { display: none; }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <main class="main-content" style="padding-top: 40px;">

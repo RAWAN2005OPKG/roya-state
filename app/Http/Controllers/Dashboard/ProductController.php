@@ -2,74 +2,56 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Models\Product;
-use App\Models\Supplier;use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Product;
+use App\Models\Supplier;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     /**
-     * عرض قائمة بجميع المنتجات (التي لم يتم حذفها).
-     *
-     * @return \Illuminate\View\View
+     * Display a listing of the resource.
      */
     public function index()
     {
-        // جلب أحدث المنتجات من قاعدة البيانات
-        $products = Product::latest()->get();
-
-        // عرض الواجهة مع تمرير بيانات المنتجات إليها
+        // عرض قائمة المنتجات
+        $products = Product::with('supplier')->latest()->paginate(10);
         return view('dashboard.products.index', compact('products'));
     }
 
     /**
-     * عرض فورم إنشاء منتج جديد.
-     * (في حالتنا، نستخدم نافذة منبثقة في صفحة index، لذلك هذه الدالة غير مستخدمة حالياً)
-     *
-     * @return \Illuminate\View\View
+     * Show the form for creating a new resource.
      */
     public function create()
     {
         $suppliers = Supplier::all();
 
-        $products = Product::all();
-
-        // 3. قم بتمرير كلا المتغيرين إلى الـ view
-        return view('dashboard.products.create', compact('suppliers', 'products'));
+        return view('dashboard.products.create', compact('suppliers'));
     }
 
     /**
-     * تخزين منتج جديد تم إرساله من الفورم في قاعدة البيانات.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        // التحقق من صحة البيانات المدخلة
         $request->validate([
-            'name' => 'required|string|max:255',
-            'sku' => 'nullable|string|max:255|unique:products,sku',
-            'category' => 'nullable|string|max:255',
-            'purchase_price' => 'nullable|numeric|min:0',
-            'sale_price' => 'required|numeric|min:0',
-            'quantity' => 'nullable|integer|min:0',
-            'weight' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255|unique:products,name',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'unit_price' => 'required|numeric|min:0',
+            'selling_price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
         ]);
 
-        // إنشاء سجل جديد في جدول المنتجات
-        Product::create($request->all());
+        DB::transaction(function () use ($request) {
+            Product::create($request->all());
+        });
 
-        // إعادة التوجيه إلى صفحة قائمة المنتجات مع رسالة نجاح
-        return redirect()->route('dashboard.products.index')->with('success', 'تمت إضافة المنتج بنجاح.');
+        return redirect()->route('dashboard.products.index')->with('success', 'تم إضافة المنتج بنجاح.');
     }
 
     /**
-     * عرض منتج محدد.
-     * (غير مستخدمة حالياً ولكنها جزء من الـ resource controller)
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\View\View
+     * Display the specified resource.
      */
     public function show(Product $product)
     {
@@ -77,100 +59,40 @@ class ProductController extends Controller
     }
 
     /**
-     * عرض صفحة تعديل منتج محدد.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\View\View
+     * Show the form for editing the specified resource.
      */
     public function edit(Product $product)
     {
-        // عرض واجهة التعديل مع تمرير بيانات المنتج الحالي إليها
-        return view('dashboard.products.edit', compact('product'));
+        $suppliers = Supplier::all();
+        return view('dashboard.products.edit', compact('product', 'suppliers'));
     }
 
     /**
-     * تحديث بيانات منتج محدد في قاعدة البيانات.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\RedirectResponse
+     * Update the specified resource in storage.
      */
     public function update(Request $request, Product $product)
     {
-        // التحقق من صحة البيانات (مع تجاهل SKU الحالي للمنتج عند التحقق من التفرد)
         $request->validate([
-            'name' => 'required|string|max:255',
-            'sku' => 'nullable|string|max:255|unique:products,sku,' . $product->id,
-            'category' => 'nullable|string|max:255',
-            'purchase_price' => 'nullable|numeric|min:0',
-            'sale_price' => 'required|numeric|min:0',
-            'quantity' => 'nullable|integer|min:0',
-            'weight' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255|unique:products,name,' . $product->id,
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'unit_price' => 'required|numeric|min:0',
+            'selling_price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
         ]);
 
-        // تحديث بيانات المنتج بالبيانات الجديدة
-        $product->update($request->all());
+        DB::transaction(function () use ($request, $product) {
+            $product->update($request->all());
+        });
 
-        // إعادة التوجيه إلى صفحة قائمة المنتجات مع رسالة نجاح
         return redirect()->route('dashboard.products.index')->with('success', 'تم تحديث المنتج بنجاح.');
     }
 
     /**
-     * حذف منتج (نقله إلى سلة المحذوفات - Soft Delete).
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\RedirectResponse
+     * Remove the specified resource from storage.
      */
     public function destroy(Product $product)
     {
-        // تنفيذ الحذف المؤقت
         $product->delete();
-
-        // إعادة التوجيه مع رسالة نجاح
-        return redirect()->route('dashboard.products.index')->with('success', 'تم نقل المنتج إلى سلة المحذوفات.');
-    }
-
-    /**
-     * عرض جميع المنتجات الموجودة في سلة المحذوفات.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function trash()
-    {
-        // جلب المنتجات التي تم حذفها حذفاً مؤقتاً فقط
-        $trashedProducts = Product::onlyTrashed()->latest()->get();
-
-        // عرض واجهة سلة المحذوفات
-        return view('dashboard.products.trash', compact('trashedProducts'));
-    }
-
-    /**
-     * استعادة منتج محدد من سلة المحذوفات.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function restore($id)
-    {
-        // البحث عن المنتج في سلة المحذوفات فقط ثم استعادته
-        Product::onlyTrashed()->findOrFail($id)->restore();
-
-        // إعادة التوجيه إلى سلة المحذوفات مع رسالة نجاح
-        return redirect()->route('dashboard.products.trash.index')->with('success', 'تم استعادة المنتج بنجاح.');
-    }
-
-    /**
-     * حذف منتج بشكل نهائي من قاعدة البيانات.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function forceDelete($id)
-    {
-        // البحث عن المنتج في سلة المحذوفات فقط ثم حذفه نهائياً
-        Product::onlyTrashed()->findOrFail($id)->forceDelete();
-
-        // إعادة التوجيه إلى سلة المحذوفات مع رسالة نجاح
-        return redirect()->route('dashboard.products.trash.index')->with('success', 'تم حذف المنتج نهائياً.');
+        return redirect()->route('dashboard.products.index')->with('success', 'تم حذف المنتج بنجاح.');
     }
 }

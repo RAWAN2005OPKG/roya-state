@@ -3,170 +3,109 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Bank;
 use App\Models\BankAccount;
-use App\Models\BankTransaction;
+use App\Models\Bank;
 use Illuminate\Http\Request;
 
 class BankAccountController extends Controller
 {
     /**
-     * Display a listing of the bank accounts.
+     * عرض قائمة بكل الحسابات البنكية
      */
     public function index()
     {
-        $bankAccounts = BankAccount::latest()->paginate(10);
-        $banks = Bank::where('is_active', true)->pluck('name', 'name');
+        // جلب الحسابات مع اسم البنك المرتبط بها بكفاءة (Eager Loading)
+        $bankAccounts = BankAccount::with('bank')->latest()->paginate(15);
 
+        // إحصائيات للصفحة
         $totalAccounts = BankAccount::count();
         $activeAccounts = BankAccount::where('is_active', true)->count();
 
-        return view('dashboard.bank_accounts.index', compact(
+        return view('dashboard.bank-accounts.index', compact(
             'bankAccounts',
-            'banks',
             'totalAccounts',
             'activeAccounts'
         ));
     }
 
     /**
-     * Store a newly created bank account in storage.
+     * عرض نموذج إضافة حساب بنكي جديد
+     */
+    public function create()
+    {
+        // جلب البنوك النشطة لعرضها في القائمة المنسدلة
+        $banks = Bank::where('is_active', true)->orderBy('name')->get();
+
+        if ($banks->isEmpty()) {
+            return redirect()->route('dashboard.banks.index')
+                ->with('error', 'يجب عليك إضافة بنك واحد على الأقل قبل إضافة حساب بنكي.');
+        }
+
+        return view('dashboard.bank-accounts.create', compact('banks'));
+    }
+
+    /**
+     * تخزين حساب بنكي جديد في قاعدة البيانات
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'bank_name' => 'required|string|max:255',
+        // التحقق من صحة البيانات، مع التأكد من وجود 'bank_id'
+        $validated = $request->validate([
+            'bank_id' => 'required|exists:banks,id', // <-- التصحيح الأهم: استخدام bank_id
             'account_name' => 'required|string|max:255',
-            'account_number' => 'required|string|unique:bank_accounts,account_number',
-            'initial_balance' => 'required|numeric|min:0',
+            'account_number' => 'required|string|max:255|unique:bank_accounts,account_number',
+            'iban' => 'nullable|string|max:255|unique:bank_accounts,iban',
+            'currency' => 'required|string|max:10',
+            'current_balance' => 'nullable|numeric|min:0', // اسم الحقل الصحيح
         ]);
 
-        $validatedData['balance'] = $validatedData['initial_balance'];
+        BankAccount::create($validated);
 
-        BankAccount::create($validatedData);
-
-        return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تمت إضافة الحساب البنكي بنجاح.');
+        return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم إضافة الحساب البنكي بنجاح.');
     }
 
     /**
-     * Display the transaction history for a specific bank account.
-     */
-    public function show(BankAccount $bankAccount)
-    {
-        $transactions = $bankAccount->transactions()->latest()->paginate(15);
-        $banks = Bank::where('is_active', true)->pluck('name', 'name');
-
-        return view('dashboard.bank_accounts.show', compact('bankAccount', 'transactions', 'banks'));
-    }
-
-    /**
-     * Show the form for editing the specified bank account.
-     * (This is handled by a modal in the index view, so this function is not strictly needed but good to have for consistency)
+     * عرض نموذج تعديل حساب بنكي
      */
     public function edit(BankAccount $bankAccount)
     {
-        // Redirecting to index as editing is done via modal
-        return redirect()->route('dashboard.bank-accounts.index');
+        // جلب كل البنوك النشطة للسماح بتغيير البنك
+        $banks = Bank::where('is_active', true)->orderBy('name')->get();
+
+        return view('dashboard.bank-accounts.edit', compact('bankAccount', 'banks'));
     }
 
     /**
-     * Update the specified bank account in storage.
+     * تحديث بيانات حساب بنكي في قاعدة البيانات
      */
     public function update(Request $request, BankAccount $bankAccount)
     {
-        $validatedData = $request->validate([
-            'bank_name' => 'required|string|max:255',
+        $validated = $request->validate([
+            'bank_id' => 'required|exists:banks,id', // <-- التصحيح الأهم: استخدام bank_id
             'account_name' => 'required|string|max:255',
-            'account_number' => 'required|string|unique:bank_accounts,account_number,' . $bankAccount->id,
+            'account_number' => 'required|string|max:255|unique:bank_accounts,account_number,' . $bankAccount->id,
+            'iban' => 'nullable|string|max:255|unique:bank_accounts,iban,' . $bankAccount->id,
+            'currency' => 'required|string|max:10',
             'is_active' => 'required|boolean',
         ]);
 
-        $bankAccount->update($validatedData);
+        $bankAccount->update($validated);
 
         return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم تعديل الحساب البنكي بنجاح.');
     }
 
     /**
-     * Remove the specified bank account from storage.
+     * حذف حساب بنكي من قاعدة البيانات
      */
     public function destroy(BankAccount $bankAccount)
     {
-        $bankAccount->delete();
-        return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم حذف الحساب البنكي بنجاح.');
-    }
-
-    /**
-     * Store a new bank transaction.
-     */
-    public function storeTransaction(Request $request, BankAccount $bankAccount)
-    {
-        $validatedData = $request->validate([
-            'type' => 'required|in:deposit,withdrawal,transfer,personal_withdrawal',
-            'amount' => 'required|numeric|min:0',
-            'currency' => 'required|string',
-            'date' => 'required|date',
-            'client_name' => 'nullable|string|max:255',
-            'client_phone' => 'nullable|string|max:255',
-            'payer_id_number' => 'nullable|string|max:255',
-            'project_name' => 'nullable|string|max:255',
-            'source' => 'nullable|string|max:255',
-            'transfer_details' => 'nullable|string|max:255',
-            'transfer_number' => 'nullable|string|max:255',
-            'payer_bank_name' => 'nullable|string|max:255',
-            'beneficiary_bank_name' => 'nullable|string|max:255',
-            'details' => 'nullable|string',
-            'notes' => 'nullable|string',
-        ]);
-
-        $transaction = $bankAccount->transactions()->create($validatedData);
-
-        if ($transaction->type == 'deposit') {
-            $bankAccount->balance += $transaction->amount;
-        } else {
-            $bankAccount->balance -= $transaction->amount;
+        // يمكنك إضافة شرط هنا لمنع حذف حساب يحتوي على حركات أو رصيد
+        if ($bankAccount->transactions()->exists() || $bankAccount->current_balance > 0) {
+            return back()->with('error', 'لا يمكن حذف حساب بنكي يحتوي على حركات أو رصيد.');
         }
-        $bankAccount->save();
 
-        return back()->with('success', 'تم تسجيل الحركة البنكية وتحديث الرصيد بنجاح.');
-    }
+        $bankAccount->delete();
 
-    /**
-     * Show the form for editing a specific transaction.
-     */
-    public function editTransaction(BankTransaction $transaction)
-    {
-        $banks = Bank::where('is_active', true)->pluck('name', 'name');
-
-        return view('dashboard.bank_accounts.edit_transaction', compact('transaction', 'banks'));
-    }
-
-    /**
-     * Update a specific transaction in storage.
-     */
-    public function updateTransaction(Request $request, BankTransaction $transaction)
-    {
-        $validatedData = $request->validate([
-            'type' => 'required|in:deposit,withdrawal,transfer,personal_withdrawal',
-            'amount' => 'required|numeric|min:0',
-            'currency' => 'required|string',
-            'date' => 'required|date',
-            'client_name' => 'nullable|string|max:255',
-            'client_phone' => 'nullable|string|max:255',
-            'payer_id_number' => 'nullable|string|max:255',
-            'project_name' => 'nullable|string|max:255',
-            'source' => 'nullable|string|max:255',
-            'transfer_details' => 'nullable|string|max:255',
-            'transfer_number' => 'nullable|string|max:255',
-            'payer_bank_name' => 'nullable|string|max:255',
-            'beneficiary_bank_name' => 'nullable|string|max:255',
-            'details' => 'nullable|string',
-            'notes' => 'nullable|string',
-        ]);
-
-        // ملاحظة: هذا التحديث لا يعيد حساب الرصيد الإجمالي للحساب
-        $transaction->update($validatedData);
-
-        return redirect()->route('dashboard.bank-accounts.show', $transaction->bank_account_id)
-                         ->with('success', 'تم تعديل الحركة البنكية بنجاح.');
+        return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم حذف الحساب البنكي بنجاح.');
     }
 }

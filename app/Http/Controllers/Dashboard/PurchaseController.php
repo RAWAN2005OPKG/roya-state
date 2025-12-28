@@ -4,119 +4,122 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Purchase;
-use App\Models\PurchaseItem;
+use App\Models\Supplier;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\Supplier;
-use App\Models\Product;class PurchaseController extends Controller
+use Illuminate\Validation\Rule;
+
+class PurchaseController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * عرض قائمة بكل فواتير الشراء.
      */
     public function index()
     {
-        // عرض قائمة فواتير الشراء
-        $purchases = Purchase::with('supplier')->latest()->paginate(10);
+        $purchases = Purchase::with('supplier')->latest()->paginate(15);
         return view('dashboard.purchases.index', compact('purchases'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * عرض نموذج إضافة فاتورة شراء جديدة.
      */
-
-     public function create()
+    public function create()
     {
-        // جلب قائمة الموردين والمنتجات
-        $suppliers = Supplier::all();
-        $products = Product::all();
-
-        return view('dashboard.purchase_returns.create', compact('suppliers', 'products'));
+        $suppliers = Supplier::orderBy('name')->get();
+        $products = Product::orderBy('name')->get();
+        return view('dashboard.purchases.create', compact('suppliers', 'products'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * تخزين فاتورة الشراء الجديدة في قاعدة البيانات.
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'supplier_id' => 'required|exists:suppliers,id', // إضافة التحقق من المورد
-            'return_date' => 'required|date',
-            'total_amount' => 'required|numeric|min:0',
+        $validated = $request->validate([
+            'supplier_id' => 'required|exists:suppliers,id',
+            'invoice_number' => 'required|string|unique:purchases,invoice_number',
+            'invoice_date' => 'required|date',
+            'due_date' => 'nullable|date|after_or_equal:invoice_date',
+            'total_amount' => 'required|numeric|min:0.01',
+            'paid_amount' => 'required|numeric|min:0|lte:total_amount', // المبلغ المدفوع يجب أن يكون أقل من أو يساوي الإجمالي
+            'payment_method' => ['required', Rule::in(['cash', 'bank'])],
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id', // تم تغييرها إلى required
+            'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
+        ], [
+            'supplier_id.required' => 'يجب اختيار المورد.',
+            'invoice_number.unique' => 'رقم الفاتورة هذا مستخدم من قبل.',
+            'paid_amount.lte' => 'المبلغ المدفوع لا يمكن أن يكون أكبر من الإجمالي.',
+            'items.required' => 'يجب إضافة صنف واحد على الأقل للفاتورة.',
         ]);
 
-        DB::transaction(function () use ($request) {
-            // إنشاء مرجوع المشتريات الرئيسي
-            $return = PurchaseReturn::create([
-                'supplier_id' => $request->supplier_id,
-                'return_number' => 'PR-' . time(), // رقم مرجع افتراضي
-                'return_date' => $request->return_date,
-                'total_amount' => $request->total_amount,
-                'payment_method' => $request->payment_method,
-                'notes' => $request->notes,
-            ]);
+        try {
+            $purchase = DB::transaction(function () use ($validated) {
+                // تحديد حالة الفاتورة (مدفوعة، غير مدفوعة، ...)
+                $status = 'unpaid';
+                if ($validated['paid_amount'] == $validated['total_amount']) {
+                    $status = 'paid';
+                } elseif ($validated['paid_amount'] > 0 && $validated['paid_amount'] < $validated['total_amount']) {
+                    $status = 'partially_paid';
+                }
 
-            // إضافة أصناف المرتجع
-            foreach ($request->items as $itemData) {
-                // جلب اسم المنتج الفعلي
-                $product = Product::find($itemData['product_id']);
-                $productName = $product ? $product->name : 'منتج محذوف';
-
-                PurchaseReturnItem::create([
-                    'purchase_return_id' => $return->id,
-                    'product_id' => $itemData['product_id'],
-                    'product_name' => $productName,
-                    'quantity' => $itemData['quantity'],
-                    'unit_price' => $itemData['unit_price'],
-                    'total' => $itemData['quantity'] * $itemData['unit_price'],
+                // 1. إنشاء سجل الفاتورة الرئيسي
+                $purchase = Purchase::create([
+                    'supplier_id' => $validated['supplier_id'],
+                    'invoice_number' => $validated['invoice_number'],
+                    'invoice_date' => $validated['invoice_date'],
+                    'due_date' => $validated['due_date'],
+                    'total_amount' => $validated['total_amount'],
+                    'paid_amount' => $validated['paid_amount'],
+                    'payment_method' => $validated['payment_method'],
+                    'status' => $status,
                 ]);
-            }
 
-            // هنا يجب إضافة منطق القيد المحاسبي (Journal Entry) وتحديث المخزون
-        });
+                // 2. إضافة الأصناف و (اختياري) تحديث المخزون
+                foreach ($validated['items'] as $item) {
+                    $purchase->items()->create([
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price'],
+                        'total' => $item['quantity'] * $item['unit_price'],
+                    ]);
 
-        return redirect()->route('dashboard.purchase-returns.index')->with('success', 'تم إضافة مرجوع المشتريات بنجاح.');
+                    // (اختياري ومهم) تحديث المخزون: زيادة كمية المنتج
+                    // Product::find($item['product_id'])->increment('stock', $item['quantity']);
+                }
+
+                return $purchase;
+            });
+
+            return redirect()->route('dashboard.purchases.index')
+                             ->with('success', "تم حفظ فاتورة الشراء رقم #{$purchase->invoice_number} بنجاح.");
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.')->withInput();
+        }
     }
+
     /**
-     * Display the specified resource.
+     * عرض تفاصيل فاتورة شراء معينة.
      */
     public function show(Purchase $purchase)
     {
-        // عرض تفاصيل فاتورة الشراء
+        $purchase->load('supplier', 'items.product');
         return view('dashboard.purchases.show', compact('purchase'));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Purchase $purchase)
-    {
-        // عرض نموذج تعديل فاتورة الشراء
-        return view('dashboard.purchases.edit', compact('purchase'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Purchase $purchase)
-    {
-        // تحديث فاتورة الشراء
-        // ... (منطق التحديث) ...
-        return redirect()->route('dashboard.purchases.index')->with('success', 'تم تحديث فاتورة الشراء بنجاح.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
+     * حذف فاتورة شراء.
      */
     public function destroy(Purchase $purchase)
     {
-        // حذف (Soft Delete) فاتورة الشراء
+        // يمكنك إضافة منطق هنا لمنع الحذف في حالات معينة
+        // أو لإعادة الكميات للمخزون قبل الحذف
         $purchase->delete();
-        return redirect()->route('dashboard.purchases.index')->with('success', 'تم نقل فاتورة الشراء إلى سلة المحذوفات.');
-    }
 
-    // يمكنك إضافة دوال أخرى مثل trash و restore هنا
+        return redirect()->route('dashboard.purchases.index')
+                         ->with('success', 'تم حذف فاتورة الشراء بنجاح.');
+    }
 }

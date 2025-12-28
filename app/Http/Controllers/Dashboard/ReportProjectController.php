@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request; // ** التصحيح الأول: استخدام المسار الصحيح لكلاس Request **
-use App\Models\ReportProject; // ** التصحيح الثاني: استخدام المودل الصحيح الخاص بتقارير المشاريع **
-use App\Exports\ReportProjectExport; // تأكدي من أن اسم ملف التصدير صحيح
+use Illuminate\Http\Request;
+use App\Models\ReportProject;
+use App\Exports\ReportProjectExport;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 

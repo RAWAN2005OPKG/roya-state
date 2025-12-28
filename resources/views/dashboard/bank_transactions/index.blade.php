@@ -1,63 +1,94 @@
+
 @extends('layouts.container')
-@section('title', 'الحركات البنكية')
+@section('title', 'سجل الحركات البنكية')
 
 @section('content')
 <div class="card card-custom">
-    <div class="card-header flex-wrap border-0 pt-6 pb-0">
-        <div class="card-title">
-            <h3 class="card-label">سجل الحركات البنكية
-                <span class="d-block text-muted pt-2 font-size-sm">عرض أحدث الحركات المسجلة</span>
-            </h3>
-        </div>
-        <div class="card-toolbar">
-            <a href="{{ route('dashboard.bank-transactions.trash') }}" class="btn btn-danger font-weight-bolder mr-2">
-                <i class="fas fa-trash"></i> سلة المحذوفات
-            </a>
-            <a href="{{ route('dashboard.bank-transactions.create') }}" class="btn btn-primary font-weight-bolder">
-                <i class="fas fa-plus"></i> إضافة حركة جديدة
-            </a>
-        </div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">سجل الحركات البنكية</h3>
+        <a href="{{ route('dashboard.bank-transactions.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة حركة جديدة
+        </a>
     </div>
     <div class="card-body">
-        @if(session('success'))
+        @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+
         <div class="table-responsive">
-            <table class="table table-head-custom table-hover">
+            <table class="table table-hover">
                 <thead>
-                    <tr>
+                    <tr class="text-uppercase">
                         <th>التاريخ</th>
-                        <th>الحساب</th>
+                        <th>الحساب البنكي</th>
                         <th>النوع</th>
                         <th>المبلغ</th>
-                        <th>ملاحظات</th>
+                        <th>الوصف / التفاصيل</th>
                         <th>إجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($transactions as $transaction)
-                    <tr>
-                        <td>{{ $transaction->date }}</td>
-                        <td>{{ $transaction->bankAccount->account_name ?? '-' }} ({{ $transaction->bankAccount->bank->name ?? 'N/A' }})</td>
-                        <td><span class="label label-inline {{ $transaction->type == 'deposit' ? 'label-light-success' : 'label-light-danger' }}">{{ $transaction->type == 'deposit' ? 'إيداع' : 'سحب' }}</span></td>
-                        <td class="font-weight-bold">{{ number_format($transaction->amount, 2) }} {{ $transaction->currency }}</td>
-                        <td>{{ Str::limit($transaction->notes, 50) }}</td>
-                        <td nowrap="nowrap">
-                            <a href="{{ route('dashboard.bank-transactions.edit', $transaction->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل"><i class="la la-edit"></i></a>
-                            <form action="{{ route('dashboard.bank-transactions.destroy', $transaction->id) }}" method="POST" style="display:inline" onsubmit="return confirm('هل أنت متأكد من نقل هذه الحركة إلى سلة المحذوفات؟ سيتم عكس قيمتها من رصيد الحساب.');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-clean btn-icon" title="حذف"><i class="la la-trash"></i></button>
-                            </form>
-                        </td>
-                    </tr>
+                        {{-- تحديد لون الصف بناءً على نوع الحركة --}}
+                        @php
+                            $rowClass = '';
+                            if (in_array($transaction->type, ['deposit', 'transfer_in'])) {
+                                $rowClass = 'table-light-success';
+                            } elseif (in_array($transaction->type, ['withdrawal', 'transfer_out'])) {
+                                $rowClass = 'table-light-danger';
+                            }
+                        @endphp
+                        <tr class="{{ $rowClass }}">
+                            {{-- عرض التاريخ --}}
+                            <td>{{ $transaction->transaction_date->format('Y-m-d') }}</td>
+
+                            {{-- عرض اسم الحساب والبنك (مع التحقق من وجودها) --}}
+                            <td>
+                                {{ $transaction->bankAccount->account_name ?? 'حساب محذوف' }}
+                                <small class="d-block text-muted">{{ $transaction->bankAccount->bank->name ?? '' }}</small>
+                            </td>
+
+                            {{-- عرض نوع الحركة بشكل مقروء --}}
+                            <td>
+                                @if($transaction->type == 'deposit') <span class="badge badge-success">إيداع</span>
+                                @elseif($transaction->type == 'withdrawal') <span class="badge badge-danger">سحب</span>
+                                @elseif($transaction->type == 'transfer_in') <span class="badge badge-primary">حوالة واردة</span>
+                                @elseif($transaction->type == 'transfer_out') <span class="badge badge-warning">حوالة صادرة</span>
+                                @else <span class="badge badge-secondary">{{ $transaction->type }}</span>
+                                @endif
+                            </td>
+
+                            {{-- عرض المبلغ مع الإشارة (موجب أو سالب) --}}
+                            <td class="font-weight-bold">
+                                @if(in_array($transaction->type, ['deposit', 'transfer_in'])) +
+                                @else -
+                                @endif
+                                {{ number_format($transaction->amount, 2) }} {{ $transaction->currency }}
+                            </td>
+
+                            {{-- عرض التفاصيل --}}
+                            <td>{{ $transaction->details ?? '-' }}</td>
+
+                            {{-- أزرار التحكم --}}
+                            <td>
+                                <a href="{{ route('dashboard.bank-transactions.edit', $transaction->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل"><i class="la la-edit"></i></a>
+                                {{-- يمكنك إضافة زر حذف هنا لاحقًا --}}
+                            </td>
+                        </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center p-5 text-muted">لا توجد حركات بنكية لعرضها.</td></tr>
+                        <tr>
+                            <td colspan="6" class="text-center p-5 text-muted">
+                                <h4>لا توجد حركات لعرضها.</h4>
+                                <p>يمكنك البدء بإضافة حركة جديدة.</p>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="d-flex justify-content-center mt-5">
+
+        {{-- روابط التنقل بين الصفحات --}}
+        <div class="d-flex justify-content-center mt-4">
             {{ $transactions->links() }}
         </div>
     </div>

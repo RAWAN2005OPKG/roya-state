@@ -38,13 +38,20 @@
                                 <span class="label label-lg font-weight-bold label-light-danger label-inline">غير نشط</span>
                             @endif
                         </td>
-                        <td>
-                            <button class="btn btn-sm btn-clean btn-icon" data-toggle="modal" data-target="#editBankModal-{{ $bank->id }}" title="تعديل"><i class="la la-edit"></i></button>
-                            <form action="{{ route('dashboard.banks.destroy', $bank->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-clean btn-icon" title="حذف"><i class="la la-trash"></i></button>
-                            </form>
-                        </td>
+                       <td>
+    <a href="{{ route('dashboard.banks.show', $bank->id) }}" class="btn btn-sm btn-clean btn-icon" title="عرض التفاصيل والحسابات">
+        <i class="la la-eye"></i>
+    </a>
+
+    <button class="btn btn-sm btn-clean btn-icon" data-toggle="modal" data-target="#editBankModal-{{ $bank->id }}" title="تعديل">
+        <i class="la la-edit"></i>
+    </button>
+
+    <form action="{{ route('dashboard.banks.destroy', $bank->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد؟');">
+        @csrf @method('DELETE')
+        <button type="submit" class="btn btn-sm btn-clean btn-icon" title="حذف"><i class="la la-trash"></i></button>
+    </form>
+</td>
                     </tr>
                     @empty
                     <tr><td colspan="3" class="text-center p-5 text-muted">لم يتم إضافة أي بنوك بعد.</td></tr>

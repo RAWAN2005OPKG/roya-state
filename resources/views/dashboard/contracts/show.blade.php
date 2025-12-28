@@ -2,7 +2,7 @@
 
 @section('title', 'تفاصيل العقد رقم: ' . $contract->contract_id)
 
-@section('styles')
+@push('styles')
 <style>
     :root {
         --primary-color: #4f46e5; --primary-hover: #3730a3; --light-bg: #f8fafc;
@@ -34,7 +34,7 @@
     .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); color: #ffffff; }
     .btn-primary:hover { background-color: var(--primary-hover); border-color: var(--primary-hover); }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <main class="main-content">
