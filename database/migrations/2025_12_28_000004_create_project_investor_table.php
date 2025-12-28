@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('project_investor', function (Blueprint $table) {
             $table->id();
+            // يجب أن يكون جدول projects موجوداً قبل هذا الجدول
             $table->foreignId('project_id')->constrained()->onDelete('cascade');
+            // يجب أن يكون جدول investors موجوداً قبل هذا الجدول
             $table->foreignId('investor_id')->constrained()->onDelete('cascade');
             $table->decimal('investment_percentage', 5, 2)->comment('نسبة الاستثمار في المشروع');
             $table->decimal('invested_amount', 15, 2)->default(0)->comment('المبلغ المستثمر فعلياً');

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('project_units', function (Blueprint $table) {
             $table->id();
+            // يجب أن يكون جدول projects موجوداً قبل هذا الجدول
             $table->foreignId('project_id')->constrained()->onDelete('cascade');
             $table->string('unit_number')->comment('رقم الوحدة/اسمها');
             $table->enum('unit_type', ['apartment', 'villa', 'office', 'land', 'commercial'])->comment('نوع الوحدة');

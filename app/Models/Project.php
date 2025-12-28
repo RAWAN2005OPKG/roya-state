@@ -49,7 +49,7 @@ class Project extends Model
      */
     public function investors(): BelongsToMany
     {
-        return $this->belongsToMany(Investor::class)
+        return $this->belongsToMany(Investor::class, 'project_investor') // <--- تم إضافة اسم الجدول هنا
             ->withPivot('investment_percentage', 'invested_amount', 'notes')
             ->withTimestamps();
     }
