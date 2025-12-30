@@ -4,112 +4,68 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Investor;
+use App\Models\Project;
 use Illuminate\Http\Request;
-use App\Exports\InvestorsExport;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 
 class InvestorController extends Controller
 {
-
-    public function index(Request $request)
+    public function index()
     {
-        $query = Investor::query();
-
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('id_number', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('email', 'LIKE', "%{$searchTerm}%");
-            });
-        }
-
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-
-        $allowedSortBy = ['name', 'created_at', 'id_number'];
-        if (in_array($sortBy, $allowedSortBy)) {
-            $query->orderBy($sortBy, $sortOrder);
-        }
-
-        $investors = $query->paginate(15);
-
-        return view('dashboard.investors.index', [
-            'investors' => $investors,
-            'search' => $request->search ?? '',
-            'sort_by' => $sortBy,
-            'sort_order' => $sortOrder,
-        ]);
+        $investors = Investor::orderBy('id', 'desc')->paginate(10);
+        return view('dashboard.investors.index', compact('investors'));
     }
-
 
     public function create()
     {
-        return view('dashboard.investors.create');
+        $projects = Project::all(); // جلب جميع المشاريع للاختيار المتعدد
+        return view('dashboard.investors.create', compact('projects'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'id_number' => ['nullable', 'string', 'max:100', 'unique:investors,id_number'],
-            'phone' => ['nullable', 'string', 'max:50'],
-            'email' => ['nullable', 'email', 'max:255', 'unique:investors,email'],
-            'jobs' => ['nullable', 'string', 'max:255'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:investors,email',
+            'company' => 'nullable|string|max:255',
+
+            'investments' => 'nullable|array',
+            'investments.*.project_id' => 'required|exists:projects,id',
+            'investments.*.investment_percentage' => 'required|numeric|min:0.01|max:100',
+            'investments.*.invested_amount' => 'required|numeric|min:0',
+            'investments.*.currency' => 'required|in:USD,SAR,EUR',
         ]);
-        Investor::create($validated);
-        return redirect()->route('dashboard.investors.index')->with('success', 'تم إضافة المستثمر بنجاح.');
-    }
 
-    public function edit(Investor $investor)
-    {
-        return view('dashboard.investors.edit', compact('investor'));
-    }
+        try {
+            DB::beginTransaction();
 
-    public function update(Request $request, Investor $investor)
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'id_number' => ['nullable', 'string', 'max:100', 'unique:investors,id_number,' . $investor->id],
-            'phone' => ['nullable', 'string', 'max:50'],
-            'email' => ['nullable', 'email', 'max:255', 'unique:investors,email,' . $investor->id],
-            'jobs' => ['nullable', 'string', 'max:255'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
-        ]);
-        $investor->update($validated);
-        return redirect()->route('dashboard.investors.index')->with('success', 'تم تحديث بيانات المستثمر بنجاح.');
-    }
+            // 1. إنشاء المستثمر
+            $investor = Investor::create($request->only(['name', 'phone', 'email', 'company', 'notes']));
 
-    public function destroy(Investor $investor)
-    {
-        $investor->delete();
-        return back()->with('success', 'تم نقل المستثمر إلى سلة المحذوفات.');
-    }
+            // 2. ربط المشاريع
+            if ($request->investments) {
+                $investmentsData = [];
+                foreach ($request->investments as $investment) {
+                    $investmentsData[$investment['project_id']] = [
+                        'investment_percentage' => $investment['investment_percentage'],
+                        'invested_amount' => $investment['invested_amount'],
+                        'notes' => $investment['notes'] ?? null,
+                        // العملة غير موجودة في جدول الربط project_investor، لذا يجب تخزينها في مكان آخر أو إزالتها
+                        // سنفترض أن العملة موحدة (USD) أو يتم تخزينها في حقل notes مؤقتاً
+                    ];
+                }
+                $investor->projects()->attach($investmentsData);
+            }
 
-    public function trash()
-    {
-        $trashedInvestors = Investor::onlyTrashed()->latest('deleted_at')->paginate(15);
-        return view('dashboard.investors.trash', ['investors' => $trashedInvestors]);
-    }
+            DB::commit();
 
-    public function restore($id)
-    {
-        Investor::withTrashed()->findOrFail($id)->restore();
-        return back()->with('success', 'تم استعادة المستثمر بنجاح.');
-    }
+            return redirect()->route('dashboard.investors.index')
+                ->with('success', 'تم إضافة المستثمر بنجاح.');
 
-    public function forceDelete($id)
-    {
-        Investor::withTrashed()->findOrFail($id)->forceDelete();
-        return back()->with('success', 'تم حذف المستثمر نهائياً.');
-    }
-
-    public function exportExcel()
-    {
-        return Excel::download(new InvestorsExport, 'investors.xlsx');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'حدث خطأ أثناء حفظ المستثمر: ' . $e->getMessage());
+        }
     }
 }

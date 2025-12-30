@@ -195,15 +195,11 @@ Route::prefix('contracts/{contract}')->as('contracts.')->group(function () {
     Route::post('payments', [ App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('payments.store');
     Route::delete('payments/{payment}', [ App\Http\Controllers\Dashboard\PaymentController::class, 'destroy'])->name('payments.destroy');
 });
-
-    // 6. العملاء (Customers)
-     Route::get('/customers/export/excel', [App\Http\Controllers\Dashboard\CustomerController::class, 'exportExcel'])->name('customers.export.excel');
-    Route::prefix('customers/trash')->name('customers.trash.')->controller(App\Http\Controllers\Dashboard\CustomerController::class)->group(function () {
-        Route::get('/', 'trash')->name('index');
-        Route::post('/{id}/restore', 'restore')->name('restore');
-        Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
-    });
-    Route::resource('customers', App\Http\Controllers\Dashboard\CustomerController::class);
+Route::prefix('clients')->name('clients.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Dashboard\ClientController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Dashboard\ClientController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Dashboard\ClientController::class, 'store'])->name('store');
+});
    // 7. الموظفون (Employees)
     Route::get('/employees/export/excel', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'exportExcel'])->name('employees.export.excel');
     Route::get('/employees/{employee}/pay', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'showPayForm'])->name('employees.pay.form');

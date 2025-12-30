@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('investors', function (Blueprint $table) {
+        Schema::create('clients', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->comment('اسم المستثمر');
-            $table->string('email')->unique()->nullable();
-            $table->string('phone')->nullable();
-            $table->string('company')->nullable()->comment('الشركة التابع لها');
+            $table->string('name')->comment('اسم العميل');
+            $table->string('phone')->nullable()->comment('رقم الجوال');
+            $table->string('id_number')->unique()->nullable()->comment('رقم الهوية');
+            $table->string('address')->nullable()->comment('العنوان');
             $table->text('notes')->nullable();
-
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('investors');
+        Schema::dropIfExists('clients');
     }
 };

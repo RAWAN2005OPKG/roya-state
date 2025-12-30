@@ -10,24 +10,51 @@ class Payment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'contract_id',
+        'payable_id',
+        'payable_type',
+        'type',
+        'payment_date',
         'amount',
         'currency',
-        'payment_date',
-        'payment_method',
-        'description',
+        'exchange_rate',
+        'amount_ils',
+        'method',
+        'check_number',
+        'due_date',
+        'check_owner',
+        'check_type',
+        'sender_bank_account_id',
+        'receiver_bank_account_id',
+        'transaction_reference',
+        'delivered_by',
+        'received_by',
+        'notes',
     ];
 
     protected $casts = [
         'payment_date' => 'date',
-        'amount' => 'decimal:2',
+        'due_date' => 'date',
+        'amount' => 'float',
+        'exchange_rate' => 'float',
+        'amount_ils' => 'float',
     ];
 
     /**
-     * علاقة لجلب العقد الذي تنتمي إليه هذه الدفعة.
+     * علاقة Polymorphic: الكيان الذي تم الدفع له/منه (عميل/مستثمر/مقاول)
      */
-    public function contract()
+    public function payable()
     {
-        return $this->belongsTo(Contract::class);
+        return $this->morphTo();
+    }
+
+    // علاقات البنوك (إذا كانت موجودة لديك)
+    public function senderAccount()
+    {
+        return $this->belongsTo(BankAccount::class, 'sender_bank_account_id');
+    }
+
+    public function receiverAccount()
+    {
+        return $this->belongsTo(BankAccount::class, 'receiver_bank_account_id');
     }
 }

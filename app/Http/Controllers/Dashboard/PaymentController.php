@@ -3,95 +3,117 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Contract;
+use App\Models\Client;
+use App\Models\Investor;
 use App\Models\Payment;
-use App\Models\Fund; // تم التأكد من استيراد النموذج
+use App\Models\Bank; // افترضنا وجود هذا الموديل
+use App\Models\BankAccount; // افترضنا وجود هذا الموديل
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Exception;
-use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
     /**
-     * عرض نموذج إضافة دفعة جديدة لعقد معين.
+     * عرض واجهة القيود اليومية (إضافة دفعة).
      */
-    public function create(Contract $contract)
+    public function create()
     {
-        // حساب المبلغ المتبقي وتمريره للعرض
-        $remaining = $contract->investment_amount - $contract->total_paid;
+        $clients = Client::select('id', 'name', 'unique_id')->get();
+        $investors = Investor::select('id', 'name', 'unique_id')->get();
+        $banks = Bank::all(); // جلب البنوك
+        $bankAccounts = BankAccount::all(); // جلب الحسابات البنكية
 
-        // التأكد من أن استدعاء Fund::orderBy('name')->get() يتم بعد استيراد النموذج
-        $funds = Fund::orderBy('name')->get();
-
-        return view('dashboard.payments.create', compact('contract', 'funds', 'remaining'));
+        return view('dashboard.payments.create', compact('clients', 'investors', 'banks', 'bankAccounts'));
     }
 
     /**
-     * حفظ دفعة جديدة في قاعدة البيانات.
+     * حساب القيمة المعادلة بالشيكل.
      */
-    public function store(Request $request, Contract $contract)
+    private function calculateILSAmount($amount, $currency, $exchangeRate)
     {
-        $validated = $request->validate([
-            'amount' => ['required', 'numeric', 'min:0'],
-            'currency' => ['required', 'string', 'max:10'],
-            'payment_date' => ['required', 'date'],
-            'payment_method' => ['required', 'string', 'max:50'],
-            'description' => ['nullable', 'string'],
-            'fund_id' => ['required', 'exists:funds,id'],
+        if ($currency === 'ILS') {
+            return $amount;
+        }
+        return $amount * $exchangeRate;
+    }
+
+    /**
+     * حفظ الدفعة الجديدة.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'payable_type' => 'required|in:Client,Investor',
+            'payable_id' => 'required|integer',
+            'type' => 'required|in:in,out',
+            'payment_date' => 'required|date',
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'required|in:ILS,USD,JOD',
+            'exchange_rate' => 'required_if:currency,USD,JOD|numeric|min:0.01',
+            'method' => 'required|in:cash,bank_transfer,check',
+
+            // قواعد خاصة بطريقة الدفع
+            'check_number' => 'required_if:method,check|nullable|string|max:255',
+            'due_date' => 'required_if:method,check|nullable|date',
+            'check_owner' => 'required_if:method,check|nullable|string|max:255',
+            'sender_bank_account_id' => 'required_if:method,bank_transfer|nullable|exists:bank_accounts,id',
+            'receiver_bank_account_id' => 'required_if:method,bank_transfer|nullable|exists:bank_accounts,id',
+            'delivered_by' => 'required_if:method,cash|nullable|string|max:255',
+            'received_by' => 'required_if:method,cash|nullable|string|max:255',
         ]);
 
-        DB::beginTransaction();
         try {
-            $remaining = $contract->investment_amount - $contract->total_paid;
+            DB::beginTransaction();
 
-            // التحقق من المبلغ المدفوع
-            if ($validated['amount'] > $remaining) {
-                DB::rollBack();
-                return back()->with('error', 'المبلغ المدفوع يتجاوز المبلغ المتبقي على العقد.')->withInput();
-            }
+            // 1. تحديد الكيان القابل للدفع له/منه
+            $payableModel = 'App\\Models\\' . $request->payable_type;
+            $payable = $payableModel::findOrFail($request->payable_id);
 
-            // 1. إنشاء الدفعة
-            $contract->payments()->create($validated);
+            // 2. حساب القيمة بالشيكل
+            $amountILS = $this->calculateILSAmount(
+                $request->amount,
+                $request->currency,
+                $request->exchange_rate ?? 1
+            );
 
-            // 2. تحديث حقل total_paid في العقد (التصحيح الرئيسي)
-            $contract->total_paid += $validated['amount'];
-            $contract->save();
+            // 3. حفظ الدفعة
+            $payment = $payable->payments()->create([
+                'type' => $request->type,
+                'payment_date' => $request->payment_date,
+                'amount' => $request->amount,
+                'currency' => $request->currency,
+                'exchange_rate' => $request->exchange_rate ?? 1,
+                'amount_ils' => $amountILS,
+                'method' => $request->method,
+
+                // تفاصيل الشيك
+                'check_number' => $request->check_number,
+                'due_date' => $request->due_date,
+                'check_owner' => $request->check_owner,
+                'check_type' => $request->check_type,
+
+                // تفاصيل التحويل البنكي
+                'sender_bank_account_id' => $request->sender_bank_account_id,
+                'receiver_bank_account_id' => $request->receiver_bank_account_id,
+                'transaction_reference' => $request->transaction_reference,
+
+                // تفاصيل النقد
+                'delivered_by' => $request->delivered_by,
+                'received_by' => $request->received_by,
+                'notes' => $request->notes,
+            ]);
+
+            // 4. (خطوة إضافية) تحديث رصيد الحساب البنكي إذا كان تحويلاً
+            // هذه الخطوة تتطلب منطقاً إضافياً في نظامك المحاسبي
 
             DB::commit();
-            return redirect()->route('dashboard.contracts.show', $contract->id)->with('success', 'تم تسجيل الدفعة بنجاح.');
-        } catch (Exception $e) {
+
+            return redirect()->route('dashboard.payments.create')
+                ->with('success', 'تم تسجيل الدفعة بنجاح. القيمة بالشيكل: ' . number_format($amountILS, 2) . ' ILS');
+
+        } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Payment store error: " . $e->getMessage(), ['contract_id' => $contract->id, 'request' => $request->all()]);
-            return back()->with('error', 'حدث خطأ أثناء تسجيل الدفعة. يرجى مراجعة سجلات النظام.')->withInput();
-        }
-    }
-
-    /**
-     * حذف دفعة معينة.
-     */
-    public function destroy(Contract $contract, Payment $payment)
-    {
-        // التحقق من أن الدفعة تابعة للعقد
-        if ($payment->contract_id !== $contract->id) {
-            return back()->with('error', 'الدفعة غير مرتبطة بهذا العقد.')->withInput();
-        }
-
-        DB::beginTransaction();
-        try {
-            // 1. تحديث حقل total_paid في العقد (التصحيح الثاني)
-            $contract->total_paid -= $payment->amount;
-            $contract->save();
-
-            // 2. حذف الدفعة
-            $payment->delete();
-
-            DB::commit();
-            return back()->with('success', 'تم حذف الدفعة بنجاح.');
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error("Payment destroy error: " . $e->getMessage(), ['payment_id' => $payment->id]);
-            return back()->with('error', 'حدث خطأ أثناء حذف الدفعة. يرجى مراجعة سجلات النظام.')->withInput();
+            return back()->withInput()->with('error', 'حدث خطأ أثناء تسجيل الدفعة: ' . $e->getMessage());
         }
     }
 }
