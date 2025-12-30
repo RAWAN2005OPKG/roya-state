@@ -8,29 +8,28 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up(): void
     {
-        Schema::create('subcontractors', function (Blueprint $table) {
+        Schema::create('contractors', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // اسم المقاول أو الشركة
-            $table->string('service_type'); // نوع الخدمة (بناء، كهرباء، توريد مواد)
-            $table->string('phone')->nullable(); // رقم الهاتف
-            $table->string('contact_person')->nullable(); // اسم الشخص المسؤول للتواصل
-            $table->timestamps(); // حقول created_at و updated_at
-            $table->softDeletes(); // حقل deleted_at لسلة المحذوفات
+            $table->string('unique_id', 20)->unique()->nullable(); // ID فريد
+            $table->string('name')->comment('اسم المقاول/الشركة');
+            $table->string('contact_person')->nullable()->comment('اسم شخص الاتصال');
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->string('id_number')->nullable()->comment('رقم الهوية/السجل التجاري');
+            $table->text('notes')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down(): void
     {
-        Schema::dropIfExists('subcontractors');
+        Schema::dropIfExists('contractors');
     }
 };

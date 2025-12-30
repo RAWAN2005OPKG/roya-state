@@ -158,15 +158,6 @@ Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryCo
     });
     Route::resource('investors',  App\Http\Controllers\Dashboard\InvestorController::class)->except(['show']);
 
-    // 4. الاستثمارات (Investments)
-    Route::get('/investments/export/excel', [ App\Http\Controllers\Dashboard\InvestmentController::class, 'exportExcel'])->name('investments.export.excel');
-    Route::prefix('investments/trash')->name('investments.trash.')->controller( App\Http\Controllers\Dashboard\InvestmentController::class)->group(function () {
-        Route::get('/', 'trash')->name('index');
-        Route::put('/{id}/restore', 'restore')->name('restore');
-        Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
-    });
-    Route::resource('investments',  App\Http\Controllers\Dashboard\InvestmentController::class)->except(['show']);
-
     Route::get('/reportproject/export/excel', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'exportExcel'])->name('dashboard.reportproject.export.excel');
 
    Route::name('reportproject.')->group(function () {
@@ -188,13 +179,12 @@ Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController:
     Route::delete('contracts/{id}/force-delete', [App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('contracts.forceDelete');
 
 
+ Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Dashboard\PaymentController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Dashboard\PaymentController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('store');
+    });
 
-// 7. الدفعات (Payments)
-Route::prefix('contracts/{contract}')->as('contracts.')->group(function () {
-    Route::get('payments/create', [ App\Http\Controllers\Dashboard\PaymentController::class, 'create'])->name('payments.create');
-    Route::post('payments', [ App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('payments.store');
-    Route::delete('payments/{payment}', [ App\Http\Controllers\Dashboard\PaymentController::class, 'destroy'])->name('payments.destroy');
-});
 Route::prefix('clients')->name('clients.')->group(function () {
     Route::get('/', [App\Http\Controllers\Dashboard\ClientController::class, 'index'])->name('index');
     Route::get('/create', [App\Http\Controllers\Dashboard\ClientController::class, 'create'])->name('create');

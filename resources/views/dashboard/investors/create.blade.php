@@ -1,4 +1,3 @@
-{{-- مسار الملف: resources/views/dashboard/investors/create.blade.php --}}
 
 @extends('layouts.container')
 @section('title', 'إضافة مستثمر جديد')

@@ -102,6 +102,31 @@
         <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
     </li>
 
+{{-- 5. قائمة المشاريع --}}
+<li class="menu-item menu-item-submenu {{ request()->is('dashboard/projects*') || request()->is('dashboard/reportproject*') ? 'menu-item-open' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
+    <a href="javascript:;" class="menu-link menu-toggle">
+        <span class="svg-icon menu-icon"><i class="fas fa-project-diagram"></i></span>
+        <span class="menu-text">المشاريع</span>
+        <i class="menu-arrow"></i>
+    </a>
+    <div class="menu-submenu">
+        <ul class="menu-subnav">
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ url('dashboard/projects') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">جميع المشاريع</span>
+                </a>
+            </li>
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ url('dashboard/reportproject') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">تحليل جميع المشاريع</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+
     {{-- =================================================== --}}
     {{-- 2. القائمة المالية --}}
     {{-- =================================================== --}}
@@ -111,9 +136,20 @@
             <span class="svg-icon menu-icon"><i class="fas fa-wallet"></i></span>
             <span class="menu-text">الإدارة المالية</span>
             <i class="menu-arrow"></i>
-        </a>
-        <div class="menu-submenu">
-            <ul class="menu-subnav">
+        </a>        <div class="menu-submenu">
+        <ul class="menu-subnav">
+                <li class="menu-item" aria-haspopup="true">
+                    <a href="{{ route('dashboard.payments.create') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">تسجيل قيد يومي</span>
+                    </a>
+                </li>
+                <li class="menu-item" aria-haspopup="true">
+                    <a href="{{ route('dashboard.payments.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">سجل القيود (الدفعات)</span>
+                    </a>
+                </li>
                  <li class="menu-item {{ request()->routeIs('dashboard.financial-accounts.index') ? 'menu-item-active' : '' }}" aria-haspopup="true">
                 <a href="{{ route('dashboard.financial-accounts.index') }}" class="menu-link">
                     <i class="menu-bullet menu-bullet-dot"><span></span></i>
@@ -127,20 +163,6 @@
                 </a>
             </li>
 
-                <li class="menu-item {{ request()->routeIs('dashboard.accounts.*') ? 'menu-item-active' : '' }}">
-                    <a href="{{ route('dashboard.accounts.index') }}" class="menu-link">
-                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                        <span class="menu-text">دليل الحسابات</span>
-                    </a>
-                </li>
-
-
-                <li class="menu-item {{ request()->routeIs('dashboard.journal-entries.*') ? 'menu-item-active' : '' }}">
-                    <a href="{{ route('dashboard.journal-entries.index') }}" class="menu-link">
-                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                        <span class="menu-text">قيود اليومية</span>
-                    </a>
-                </li>
                 <li class="menu-item {{ request()->routeIs('dashboard.expenses.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.expenses.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
@@ -239,13 +261,6 @@
     </div>
 </li>
 
-
-                     <li class="menu-item" aria-haspopup="true">
-                        <a href="{{ route('dashboard.subcontractors.index') }}" class="menu-link">
-                            <span class="svg-icon menu-icon"><i class="fas fa-hard-hat"></i></span> {{-- يمكنك تغيير الأيقونة --}}
-                            <span class="menu-text">المقاولون والموردون</span>
-                        </a>
-                    </li>
                     <!-- بداية قائمة المبيعات -->
 <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
@@ -355,60 +370,40 @@
         </ul>
     </div>
 </li>
-{{-- 4. قائمة المستثمرين --}}
-<li class="menu-item {{ request()->is('dashboard/investors*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
-    <a href="{{ url('dashboard/investors') }}" class="menu-link">
-        <span class="svg-icon menu-icon"><i class="fas fa-user-tie"></i></span>
-        <span class="menu-text">المستثمرون</span>
-    </a>
-</li>
-
-{{-- =================================================== --}}
-{{-- 5. قائمة المشاريع --}}
-{{-- =================================================== --}}
-<li class="menu-item menu-item-submenu {{ request()->is('dashboard/projects*') || request()->is('dashboard/reportproject*') ? 'menu-item-open' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
-    <a href="javascript:;" class="menu-link menu-toggle">
-        <span class="svg-icon menu-icon"><i class="fas fa-project-diagram"></i></span>
-        <span class="menu-text">المشاريع</span>
-        <i class="menu-arrow"></i>
-    </a>
-    <div class="menu-submenu">
-        <ul class="menu-subnav">
-            <li class="menu-item" aria-haspopup="true">
-                <a href="{{ url('dashboard/projects') }}" class="menu-link">
-                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                    <span class="menu-text">جميع المشاريع</span>
-                </a>
-            </li>
-            <li class="menu-item" aria-haspopup="true">
-                <a href="{{ url('dashboard/reportproject') }}" class="menu-link">
-                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                    <span class="menu-text">تحليل جميع المشاريع</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-</li>
-
-{{-- =================================================== --}}
-{{-- 6. قائمة العقود --}}
-{{-- =================================================== --}}
+              <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+        <a href="javascript:;" class="menu-link menu-toggle">
+            <i class="menu-icon fas fa-users"></i>
+            <span class="menu-text">إدارة الأطراف</span>
+            <i class="menu-arrow"></i>
+        </a>
+        <div class="menu-submenu">
+            <ul class="menu-subnav">
+                <li class="menu-item" aria-haspopup="true">
+                    <a href="{{ route('dashboard.clients.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">العملاء</span>
+                    </a>
+                </li>
+                <li class="menu-item" aria-haspopup="true">
+                    <a href="{{ route('dashboard.investors.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">المستثمرون</span>
+                    </a>
+                </li>
+                <li class="menu-item" aria-haspopup="true">
+                    <a href="{{ route('dashboard.subcontractors.index') }}" class="menu-link">
+                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                        <span class="menu-text">المقاولون والموردون</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </li>{{-- 6. قائمة العقود --}}
 
 <li class="menu-item {{ request()->is('dashboard/contracts*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
     <a href="{{ route('dashboard.contracts.index') }}" class="menu-link">
         <span class="svg-icon menu-icon"><i class="fas fa-file-signature"></i></span>
         <span class="menu-text">العقود</span>
-    </a>
-</li>
-
-
-{{-- =================================================== --}}
-{{-- 7. قائمة العملاء --}}
-{{-- =================================================== --}}
-<li class="menu-item {{ request()->is('dashboard/customers*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
-    <a href="{{ url('dashboard/customers') }}" class="menu-link">
-        <span class="svg-icon menu-icon"><i class="fas fa-users"></i></span>
-        <span class="menu-text">العملاء</span>
     </a>
 </li>
 
