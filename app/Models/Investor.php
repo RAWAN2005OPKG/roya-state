@@ -35,4 +35,22 @@ class Investor extends Model
     } public function payments()
     {
         return $this->morphMany(Payment::class, 'payable');
+    }public function getTotalInvestedAttribute()
+    {
+        // إجمالي المبلغ المستثمر (بالشيكل)
+        return $this->projects->sum(function ($project) {
+            return $project->pivot->invested_amount; // يجب أن يكون هذا المبلغ موحداً بالشيكل أو يتم تحويله
+        });
+    }
+
+    public function getTotalPaidAttribute()
+    {
+        // إجمالي المبالغ التي صرفت للمستثمر (صرف)
+        return $this->payments()->where('type', 'out')->sum('amount_ils');
+    }
+
+    public function getRemainingInvestmentAttribute()
+    {
+        // المبلغ المتبقي للاستثمار (بافتراض أن الدفعات هي صرف للمستثمر)
+        return $this->total_invested - $this->total_paid;
     }}

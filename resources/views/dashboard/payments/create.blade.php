@@ -1,165 +1,290 @@
-@extends('layouts.container')
 
-@section('title', 'إضافة دفعة جديدة للعقد: ' . $contract->contract_id)
+@extends('layouts.container')
+@section('title', 'تسجيل قيد يومي (دفعة/قبض)')
 
 @push('styles')
 <style>
-    :root {
-        --primary-color: #4f46e5; --primary-hover: #3730a3; --light-bg: #f8fafc;
-        --white-bg: #ffffff; --text-color: #1f2937; --text-muted: #6b7280;
-        --border-color: #e5e7eb; --success-color: #10b981; --danger-color: #ef4444;
-        --warning-color: #f59e0b; --info-color: #3b82f6;
-        --shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+    .payment-details-box {
+        border: 1px solid #ebedf2;
+        padding: 20px;
+        border-radius: 6px;
+        margin-top: 20px;
     }
-    .main-content { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-    .card-custom { border: none; border-radius: 12px; box-shadow: var(--shadow); }
-    .card-header-custom { background-color: var(--primary-color); color: white; border-top-left-radius: 12px; border-top-right-radius: 12px; padding: 15px 20px; }
-    .card-header-custom h4 { margin: 0; font-weight: 600; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-    .kpi-card { padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center; }
-    .kpi-card h5 { margin-bottom: 5px; font-size: 1rem; }
-    .kpi-card h3 { font-size: 1.5rem; font-weight: 700; }
-    .bg-light { background-color: #f3f4f6 !important; }
-    .bg-success-light { background-color: #d1fae5 !important; }
-    .bg-warning-light { background-color: #fef3c7 !important; }
-    .bg-info-light { background-color: #dbeafe !important; }
-    .text-success { color: var(--success-color) !important; }
-    .text-warning { color: var(--warning-color) !important; }
-    .text-dark { color: var(--text-color) !important; }
-    .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); color: #ffffff; }
-    .btn-secondary { background-color: var(--text-muted); border-color: var(--text-muted); color: #ffffff; }
+    .exchange-rate-box {
+        background-color: #f3f6f9;
+        padding: 10px;
+        border-radius: 4px;
+    }
 </style>
 @endpush
 
 @section('content')
-<main class="main-content">
-    <div class="card card-custom">
-        <div class="card-header-custom">
-            <h4 class="m-0">إضافة دفعة جديدة للعقد رقم: {{ $contract->contract_id }}</h4>
-        </div>
-
+<div class="card card-custom gutter-b">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-money-bill-wave text-success mr-2"></i>
+            تسجيل دفعة/قبض (قيد يومي)
+        </h3>
+    </div>
+    <form action="{{ route('dashboard.payments.store') }}" method="POST">
+        @csrf
         <div class="card-body">
 
-            {{-- ملخص المبالغ المالية --}}
-            <div class="kpi-grid">
-                {{-- 1. إجمالي قيمة العقد --}}
-                <div class="kpi-card bg-light">
-                    <h5 class="text-secondary">إجمالي قيمة العقد</h5>
-                    <h3 class="text-dark">{{ format_number($contract->investment_amount) }} {{ $contract->currency }}</h3>
+            {{-- رسائل التنبيه والتحقق --}}
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <p>يرجى تصحيح الأخطاء التالية:</p>
+                    <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
                 </div>
+            @endif
 
-                {{-- 2. المبلغ المدفوع حتى الآن --}}
-                <div class="kpi-card bg-success-light">
-                    <h5 class="text-success">المبلغ المدفوع حتى الآن</h5>
-                    <h3 class="text-success">{{ format_number($contract->total_paid) }} {{ $contract->currency }}</h3>
+            {{-- 1. تحديد الكيان ونوع الحركة --}}
+            <h4 class="mb-5 text-primary">1. تحديد الكيان ونوع الحركة</h4>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label>الكيان المستهدف <span class="text-danger">*</span></label>
+                    <select name="payable_type" id="payable_type" class="form-control" required>
+                        <option value="">اختر نوع الكيان</option>
+                        <option value="Client">عميل</option>
+                        <option value="Investor">مستثمر</option>
+                        {{-- <option value="Contractor">مقاول</option> --}}
+                    </select>
                 </div>
-
-                {{-- 3. المبلغ المتبقي للدفع --}}
-                <div class="kpi-card @if($remaining > 0) bg-warning-light @else bg-info-light @endif">
-                    <h5 class="text-warning">المبلغ المتبقي للدفع</h5>
-                    <h3 class="text-warning">{{ format_number($remaining) }} {{ $contract->currency }}</h3>
+                <div class="col-md-4 form-group">
+                    <label>اسم الكيان (ID) <span class="text-danger">*</span></label>
+                    <select name="payable_id" id="payable_id" class="form-control" required>
+                        <option value="">اختر الكيان</option>
+                    </select>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>نوع الحركة <span class="text-danger">*</span></label>
+                    <select name="type" id="type" class="form-control" required>
+                        <option value="in">قبض (إيراد)</option>
+                        <option value="out">صرف (مصروف)</option>
+                    </select>
                 </div>
             </div>
 
-            {{-- رسائل الأخطاء والنجاح --}}
-            @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
-            @endif
+            {{-- عرض بيانات الكيان والمبلغ المتبقي --}}
+            <div id="payable-info" class="alert alert-info d-none">
+                <p><strong>الاسم:</strong> <span id="info-name"></span></p>
+                <p><strong>المبلغ المتبقي (افتراضي):</strong> <span id="info-remaining">0.00 ILS</span></p>
+            </div>
 
-            {{-- نموذج إضافة الدفعة --}}
-            <form method="POST" action="{{ route('dashboard.contracts.payments.store', $contract->id) }}">
-                @csrf
+            <hr class="my-10">
 
-                {{-- حقل المبلغ --}}
-                <div class="form-group mb-3">
-                    <label for="amount">مبلغ الدفعة (المتبقي: {{ format_number($remaining) }} {{ $contract->currency }})</label>
-                    <input id="amount" type="number" step="0.01" max="{{ $remaining }}" class="form-control @error('amount') is-invalid @enderror" name="amount" value="{{ old('amount') }}" required autofocus>
-                    @error('amount')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
+            {{-- 2. تفاصيل المبلغ والعملة --}}
+            <h4 class="mb-5 text-primary">2. تفاصيل المبلغ والعملة</h4>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label for="amount">المبلغ <span class="text-danger">*</span></label>
+                    <input type="number" name="amount" id="amount" class="form-control" step="0.01" min="0.01" required>
                 </div>
-
-               {{-- حقل العملة (للقراءة فقط) --}}
-               <div class="form-group mb-3">
-                    <label for="currency">العملة</label>
-                   <input id="currency" type="text" class="form-control @error('currency') is-invalid @enderror" name="currency" value="{{ old('currency', $contract->currency) }}" required readonly>
-                    @error('currency')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
-                </div>
-
-                {{-- حقل تاريخ الدفعة --}}
-                <div class="form-group mb-3">
-                    <label for="payment_date">تاريخ الدفعة</label>
-                    <input id="payment_date" type="date" class="form-control @error('payment_date') is-invalid @enderror" name="payment_date" value="{{ old('payment_date', date('Y-m-d')) }}" required>
-                    @error('payment_date')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
-                </div>
-
-                {{-- حقل طريقة الدفع --}}
-                <div class="form-group mb-3">
-                    <label for="payment_method">طريقة الدفع</label>
-                    <select id="payment_method" class="form-control @error('payment_method') is-invalid @enderror" name="payment_method" required>
-                        <option value="">اختر طريقة الدفع</option>
-                        <option value="Cash" {{ old('payment_method') == 'Cash' ? 'selected' : '' }}>نقداً</option>
-                        <option value="Bank Transfer" {{ old('payment_method') == 'Bank Transfer' ? 'selected' : '' }}>تحويل بنكي</option>
-                        <option value="Cheque" {{ old('payment_method') == 'Cheque' ? 'selected' : '' }}>شيك</option>
-                        <option value="Other" {{ old('payment_method') == 'Other' ? 'selected' : '' }}>أخرى</option>
+                <div class="col-md-4 form-group">
+                    <label for="currency">العملة <span class="text-danger">*</span></label>
+                    <select name="currency" id="currency" class="form-control" required>
+                        <option value="ILS">شيكل (ILS)</option>
+                        <option value="USD">دولار (USD)</option>
+                        <option value="JOD">دينار (JOD)</option>
                     </select>
-                    @error('payment_method')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
                 </div>
+                <div class="col-md-4 form-group exchange-rate-box d-none" id="exchange-rate-group">
+                    <label for="exchange_rate">سعر الصرف مقابل الشيكل <span class="text-danger">*</span></label>
+                    <input type="number" name="exchange_rate" id="exchange_rate" class="form-control" step="0.0001" value="1">
+                    <small class="form-text text-muted">القيمة بالشيكل: <strong id="amount-ils-display">0.00 ILS</strong></small>
+                </div>
+            </div>
 
-                {{-- حقل الخزنة (Fund) --}}
-                <div class="form-group mb-3">
-                    <label for="fund_id">الخزنة/الصندوق</label>
-                    <select id="fund_id" class="form-control @error('fund_id') is-invalid @enderror" name="fund_id" required>
-                        <option value="">اختر الخزنة</option>
-                        @foreach ($funds as $fund)
-                            <option value="{{ $fund->id }}" {{ old('fund_id') == $fund->id ? 'selected' : '' }}>{{ $fund->name }}</option>
-                        @endforeach
+            <hr class="my-10">
+
+            {{-- 3. طريقة الدفع وتفاصيلها --}}
+            <h4 class="mb-5 text-primary">3. طريقة الدفع</h4>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label for="method">طريقة الدفع <span class="text-danger">*</span></label>
+                    <select name="method" id="method" class="form-control" required>
+                        <option value="cash">نقدي</option>
+                        <option value="bank_transfer">تحويل بنكي</option>
+                        <option value="check">شيك</option>
                     </select>
-                    @error('fund_id')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
                 </div>
+            </div>
 
-                {{-- حقل الوصف --}}
-                <div class="form-group mb-3">
-                    <label for="description">الوصف/ملاحظات (اختياري)</label>
-                    <textarea id="description" class="form-control @error('description') is-invalid @enderror" name="description">{{ old('description') }}</textarea>
-                    @error('description')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
-                </div>
+            <div id="payment-details-container" class="payment-details-box">
+                {{-- تفاصيل طريقة الدفع ستظهر هنا ديناميكياً --}}
+            </div>
 
-                <div class="form-group mb-0">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> تسجيل الدفعة
-                    </button>
-                    <a href="{{ route('dashboard.contracts.show', $contract->id) }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> إلغاء
-                    </a>
-                </div>
-            </form>
+            <div class="form-group mt-5">
+                <label for="notes">ملاحظات على القيد</label>
+                <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
+            </div>
+
         </div>
-    </div>
-</main>
+        <div class="card-footer text-left">
+            <button type="submit" class="btn btn-success mr-2">تسجيل الدفعة</button>
+            <a href="{{ route('dashboard.payments.index') }}" class="btn btn-secondary">إلغاء</a>
+        </div>
+    </form>
+</div>
 @endsection
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document ).ready(function() {
+        const clients = @json($clients);
+        const investors = @json($investors);
+        const banks = @json($banks);
+        const bankAccounts = @json($bankAccounts);
+
+        // ====================================================================
+        // 1. منطق تحديد الكيان (Client/Investor)
+        // ====================================================================
+
+        $('#payable_type').on('change', function() {
+            const type = $(this).val();
+            const payableIdSelect = $('#payable_id');
+            payableIdSelect.empty().append('<option value="">اختر الكيان</option>');
+            $('#payable-info').addClass('d-none');
+
+            let data = [];
+            if (type === 'Client') {
+                data = clients;
+            } else if (type === 'Investor') {
+                data = investors;
+            }
+
+            data.forEach(item => {
+                payableIdSelect.append(`<option value="${item.id}" data-name="${item.name}" data-unique-id="${item.unique_id}">${item.name} (${item.unique_id})</option>`);
+            });
+        });
+
+        $('#payable_id').on('change', function() {
+            const selectedOption = $(this).find('option:selected');
+            if (selectedOption.val()) {
+                const name = selectedOption.data('name');
+                // المبلغ المتبقي يجب أن يتم جلبه عبر AJAX في تطبيق حقيقي
+                const remaining = '15,000.00 ILS'; // قيمة افتراضية
+
+                $('#info-name').text(name);
+                $('#info-remaining').text(remaining);
+                $('#payable-info').removeClass('d-none');
+            } else {
+                $('#payable-info').addClass('d-none');
+            }
+        });
+
+        // ====================================================================
+        // 2. منطق معالجة العملات
+        // ====================================================================
+
+        function calculateILS() {
+            const amount = parseFloat($('#amount').val()) || 0;
+            const currency = $('#currency').val();
+            let exchangeRate = parseFloat($('#exchange_rate').val()) || 1;
+
+            if (currency === 'ILS') {
+                $('#exchange-rate-group').addClass('d-none');
+                $('#exchange_rate').val(1);
+                exchangeRate = 1;
+            } else {
+                $('#exchange-rate-group').removeClass('d-none');
+            }
+
+            const amountILS = (amount * exchangeRate).toFixed(2);
+            $('#amount-ils-display').text(amountILS + ' ILS');
+        }
+
+        $('#amount, #currency, #exchange_rate').on('input change', calculateILS);
+        calculateILS(); // تشغيل عند التحميل
+
+        // ====================================================================
+        // 3. منطق تفاصيل طريقة الدفع
+        // ====================================================================
+
+        function renderPaymentDetails(method) {
+            const container = $('#payment-details-container');
+            container.empty();
+
+            let html = '';
+
+            if (method === 'cash') {
+                html = `
+                    <h5 class="text-success">تفاصيل الدفع النقدي</h5>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>من سلم المبلغ <span class="text-danger">*</span></label>
+                            <input type="text" name="delivered_by" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>من استلم المبلغ <span class="text-danger">*</span></label>
+                            <input type="text" name="received_by" class="form-control" required>
+                        </div>
+                    </div>
+                `;
+            } else if (method === 'check') {
+                html = `
+                    <h5 class="text-warning">تفاصيل الشيك</h5>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label>رقم الشيك <span class="text-danger">*</span></label>
+                            <input type="text" name="check_number" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>تاريخ الاستحقاق <span class="text-danger">*</span></label>
+                            <input type="date" name="due_date" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>نوع الشيك</label>
+                            <select name="check_type" class="form-control">
+                                <option value="personal">شخصي</option>
+                                <option value="certified">مصرفي/مصدق</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>اسم مالك الشيك <span class="text-danger">*</span></label>
+                        <input type="text" name="check_owner" class="form-control" required>
+                    </div>
+                `;
+            } else if (method === 'bank_transfer') {
+                let accountOptions = '<option value="">اختر حساب بنكي</option>';
+                bankAccounts.forEach(acc => {
+                    accountOptions += `<option value="${acc.id}">${acc.account_number} - ${acc.bank.name}</option>`;
+                });
+
+                html = `
+                    <h5 class="text-info">تفاصيل التحويل البنكي</h5>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>الحساب المرسل <span class="text-danger">*</span></label>
+                            <select name="sender_bank_account_id" class="form-control" required>
+                                ${accountOptions}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>الحساب المستقبل <span class="text-danger">*</span></label>
+                            <select name="receiver_bank_account_id" class="form-control" required>
+                                ${accountOptions}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>مرجع التحويل</label>
+                        <input type="text" name="transaction_reference" class="form-control">
+                    </div>
+                `;
+            }
+
+            container.html(html);
+        }
+
+        $('#method').on('change', function() {
+            renderPaymentDetails($(this).val());
+        });
+
+        // تشغيل عند التحميل الافتراضي (نقدي)
+        renderPaymentDetails($('#method').val());
+    });
+</script>
+@endpush

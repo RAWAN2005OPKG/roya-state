@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Investor;
 use App\Models\Payment;
-use App\Models\Bank; // افترضنا وجود هذا الموديل
-use App\Models\BankAccount; // افترضنا وجود هذا الموديل
+use App\Models\Bank;
+use App\Models\BankAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
