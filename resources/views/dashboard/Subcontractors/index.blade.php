@@ -1,4 +1,3 @@
-{{-- قائمة المقاولين والموردين --}}
 @extends('layouts.container')
 @section('title', 'قائمة المقاولين والموردين')
 
@@ -9,23 +8,32 @@
 @section('content' )
 <div class="card card-custom gutter-b">
     <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-hard-hat text-danger mr-2"></i> قائمة المقاولين والموردين</h3>
+        <h3 class="card-title"><i class="fas fa-hard-hat text-dark mr-2"></i> قائمة المقاولين والموردين</h3>
         <div class="card-toolbar">
-            <a href="{{ route('dashboard.subcontractors.create') }}" class="btn btn-danger"><i class="la la-plus"></i> إضافة مقاول/مورد</a>
+            <a href="{{ route('dashboard.subcontractors.create') }}" class="btn btn-dark"><i class="la la-plus"></i> إضافة مقاول/مورد</a>
         </div>
     </div>
     <div class="card-body">
+        <form method="GET" action="{{ route('dashboard.subcontractors.index') }}" class="mb-8 p-4 bg-light rounded">
+            <div class="row">
+                <div class="col-md-4 form-group"><label class="font-weight-bold">بحث بالرقم التعريفي (ID)</label><input type="text" name="search_id" class="form-control" placeholder="أدخل الرقم التعريفي" value="{{ request('search_id') }}"></div>
+                <div class="col-md-4 form-group"><label class="font-weight-bold">بحث برقم الهوية/الشركة</label><input type="text" name="search_id_number" class="form-control" placeholder="أدخل رقم الهوية" value="{{ request('search_id_number') }}"></div>
+                <div class="col-md-4 align-self-end"><button type="submit" class="btn btn-success"><i class="la la-search"></i> بحث</button><a href="{{ route('dashboard.subcontractors.index') }}" class="btn btn-secondary"><i class="la la-close"></i> إلغاء</a></div>
+            </div>
+        </form>
+
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover" id="subcontractorsTable">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>اسم المقاول/الشركة</th>
-                        <th>شخص الاتصال</th>
-                        <th>رقم السجل</th>
-                        <th>المستحق له</th>
-                        <th>المدفوع له</th>
-                        <th>المتبقي</th>
+                        <th>الاسم</th>
+                        <th>التخصص</th>
+                        <th>رقم الهوية</th>
+                        <th>الجوال</th>
+                        <th>إجمالي العقود (ILS)</th>
+                        <th>المدفوع له (ILS)</th>
+                        <th>الرصيد (ILS)</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -34,18 +42,18 @@
                     <tr>
                         <td>{{ $subcontractor->unique_id }}</td>
                         <td>{{ $subcontractor->name }}</td>
-                        <td>{{ $subcontractor->contact_person ?? '-' }}</td>
+                        <td>{{ $subcontractor->specialization }}</td>
                         <td>{{ $subcontractor->id_number ?? '-' }}</td>
-                        <td><span class="text-info font-weight-bold">{{ number_format($subcontractor->total_due, 2) }}</span></td>
-                        <td><span class="text-danger font-weight-bold">{{ number_format($subcontractor->total_paid, 2) }}</span></td>
-                        <td><span class="text-success font-weight-bold">{{ number_format($subcontractor->remaining_balance, 2) }}</span></td>
+                        <td>{{ $subcontractor->phone ?? '-' }}</td>
+                        <td><span class="text-info font-weight-bold">{{ number_format($subcontractor->total_contracts_value, 2) }}</span></td>
+                        <td><span class="text-success font-weight-bold">{{ number_format($subcontractor->total_paid, 2) }}</span></td>
+                        <td><span class="text-danger font-weight-bold">{{ number_format($subcontractor->remaining_balance, 2) }}</span></td>
                         <td>
-                            <a href="{{ route('dashboard.subcontractors.show', $subcontractor->id) }}" class="btn btn-sm btn-icon btn-info" title="عرض"><i class="la la-eye"></i></a>
-                            {{-- ... أزرار التعديل والحذف --}}
+                            {{-- <a href="{{ route('dashboard.subcontractors.show', $subcontractor->id) }}" class="btn btn-sm btn-icon btn-info" title="عرض"><i class="la la-eye"></i></a> --}}
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" class="text-center">لا يوجد مقاولون/موردون مسجلون.</td></tr>
+                    <tr><td colspan="9" class="text-center">لا يوجد مقاولون مطابقون لنتائج البحث.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -60,9 +68,8 @@
 <script>
     $(document ).ready(function() {
         $('#subcontractorsTable').DataTable({
+            "searching": false,
             "language": {"url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json"},
-            "lengthMenu": [ [10, 20, 30, -1], [10, 20, 30, "الكل"] ],
-            "pageLength": 10
         });
     });
 </script>

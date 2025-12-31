@@ -1,4 +1,3 @@
-{{-- قائمة المستثمرين --}}
 @extends('layouts.container')
 @section('title', 'قائمة المستثمرين')
 
@@ -15,17 +14,37 @@
         </div>
     </div>
     <div class="card-body">
+        <!-- === بداية قسم البحث === -->
+        <form method="GET" action="{{ route('dashboard.investors.index') }}" class="mb-8 p-4 bg-light rounded">
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="font-weight-bold">بحث بالرقم التعريفي (ID)</label>
+                    <input type="text" name="search_id" class="form-control" placeholder="أدخل الرقم التعريفي" value="{{ request('search_id') }}">
+                </div>
+                <div class="col-md-4 form-group">
+                    <label class="font-weight-bold">بحث برقم الهوية</label>
+                    <input type="text" name="search_id_number" class="form-control" placeholder="أدخل رقم الهوية" value="{{ request('search_id_number') }}">
+                </div>
+                <div class="col-md-4 align-self-end">
+                    <button type="submit" class="btn btn-success"> <i class="la la-search"></i> بحث</button>
+                    <a href="{{ route('dashboard.investors.index') }}" class="btn btn-secondary"> <i class="la la-close"></i> إلغاء</a>
+                </div>
+            </div>
+        </form>
+        <!-- === نهاية قسم البحث === -->
+
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover" id="investorsTable">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>الاسم</th>
-                        <th>الشركة</th>
+                        <th>رقم الهوية</th>
                         <th>الجوال</th>
-                        <th>إجمالي الاستثمار</th>
-                        <th>المصروف له</th>
-                        <th>المتبقي</th>
+                        <th>المشاريع المستثمر بها</th>
+                        <th>إجمالي الاستثمار (ILS)</th>
+                        <th>المصروف له (ILS)</th>
+                        <th>الرصيد (ILS)</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -34,18 +53,30 @@
                     <tr>
                         <td>{{ $investor->unique_id }}</td>
                         <td>{{ $investor->name }}</td>
-                        <td>{{ $investor->company ?? '-' }}</td>
+                        <td>{{ $investor->id_number ?? '-' }}</td>
                         <td>{{ $investor->phone ?? '-' }}</td>
+                        <td>
+                            @forelse($investor->projects as $project)
+                                <div class="mb-2 p-2 border rounded" style="border-right: 3px solid #FFA800 !important;">
+                                    <p class="mb-0 font-weight-bold text-warning">{{ $project->name }}</p>
+                                    <small class="text-muted">
+                                        المبلغ: {{ number_format($project->pivot->invested_amount, 2) }} {{ $project->pivot->currency }}
+                                        <span class="text-dark">(يعادل {{ number_format($project->pivot->invested_amount_ils, 2) }} ILS)</span>
+                                    </small>
+                                </div>
+                            @empty
+                                <span class="text-muted">لم يستثمر في مشاريع.</span>
+                            @endforelse
+                        </td>
                         <td><span class="text-info font-weight-bold">{{ number_format($investor->total_invested, 2) }}</span></td>
                         <td><span class="text-danger font-weight-bold">{{ number_format($investor->total_paid, 2) }}</span></td>
                         <td><span class="text-success font-weight-bold">{{ number_format($investor->remaining_investment, 2) }}</span></td>
                         <td>
-                            <a href="{{ route('dashboard.investors.show', $investor->id) }}" class="btn btn-sm btn-icon btn-info" title="عرض"><i class="la la-eye"></i></a>
-                            {{-- ... أزرار التعديل والحذف --}}
+                            {{-- <a href="{{ route('dashboard.investors.show', $investor->id) }}" class="btn btn-sm btn-icon btn-info" title="عرض"><i class="la la-eye"></i></a> --}}
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" class="text-center">لا يوجد مستثمرون مسجلون.</td></tr>
+                    <tr><td colspan="9" class="text-center">لا يوجد مستثمرون مطابقون لنتائج البحث.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -59,7 +90,9 @@
 <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
 <script>
     $(document ).ready(function() {
+        // عطّل بحث DataTables المدمج لأننا نستخدم بحث الخادم
         $('#investorsTable').DataTable({
+            "searching": false,
             "language": {"url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json"},
             "lengthMenu": [ [10, 20, 30, -1], [10, 20, 30, "الكل"] ],
             "pageLength": 10

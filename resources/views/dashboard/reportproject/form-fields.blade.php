@@ -89,7 +89,7 @@ h3, label, input, textarea {
         <div class="section-header"><i class="fas fa-info-circle"></i><h3>المعلومات الأساسية</h3></div>
         <div class="form-grid">
             <div class="form-group"><label>اسم المشروع</label><input type="text" name="project_name"></div>
-            <div class="form-group"><label>رقم الأرض</label><input type="text" name="land_number"></div>
+            <div class="form-group"><label>رقم الحوض</label><input type="text" name="land_number"></div>
             <div class="form-group"><label>موقع المشروع</label><input type="text" name="project_location"></div>
             <div class="form-group"><label>نوع العمل</label><input type="text" name="project_type"></div>
             <div class="form-group"><label> عدد الشقق المقترحة </label><textarea name="apartment_details"></textarea></div>

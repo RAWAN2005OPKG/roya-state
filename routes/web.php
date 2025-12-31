@@ -183,7 +183,12 @@ Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController:
         Route::get('/', [App\Http\Controllers\Dashboard\PaymentController::class, 'index'])->name('index');
         Route::get('/create', [App\Http\Controllers\Dashboard\PaymentController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('store');
-    });
+
+});    Route::resource('payments', App\Http\Controllers\Dashboard\PaymentController::class)->only(['index', 'create', 'store']);
+    Route::get('get-payable-details', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayableDetails'])->name('getPayableDetails');
+      Route::get('get-payables', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayables'])->name('getPayables');
+
+    Route::resource('clients', App\Http\Controllers\Dashboard\ClientController::class);
 
 Route::prefix('clients')->name('clients.')->group(function () {
     Route::get('/', [App\Http\Controllers\Dashboard\ClientController::class, 'index'])->name('index');

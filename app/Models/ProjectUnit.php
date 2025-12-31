@@ -33,4 +33,10 @@ class ProjectUnit extends Model
     {
         return $this->belongsTo(Project::class);
     }
-}
+ /**
+     * العلاقة مع العملاء الذين اشتروا هذه الوحدة
+     */
+    public function clients()
+    {
+        return $this->belongsToMany(Client::class, 'client_project_unit');
+    }}

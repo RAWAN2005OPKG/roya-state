@@ -31,9 +31,10 @@ class Payment extends Model
         'notes',
     ];
 
+    // خاصية لتحويل أنواع البيانات تلقائياً
     protected $casts = [
         'payment_date' => 'date',
-        'due_date' => 'date',
+        'due_date' => 'date', // تأكد من أن اسم الحقل في قاعدة البيانات هو due_date
         'amount' => 'float',
         'exchange_rate' => 'float',
         'amount_ils' => 'float',
@@ -47,14 +48,21 @@ class Payment extends Model
         return $this->morphTo();
     }
 
-    // علاقات البنوك (إذا كانت موجودة لديك)
+    /**
+     * علاقة لجلب بيانات حساب البنك المرسل (إذا كان لديك مودل BankAccount)
+     */
     public function senderAccount()
     {
+        // افترض أن لديك مودل BankAccount
         return $this->belongsTo(BankAccount::class, 'sender_bank_account_id');
     }
 
+    /**
+     * علاقة لجلب بيانات حساب البنك المستقبل (إذا كان لديك مودل BankAccount)
+     */
     public function receiverAccount()
     {
+        // افترض أن لديك مودل BankAccount
         return $this->belongsTo(BankAccount::class, 'receiver_bank_account_id');
     }
 }
