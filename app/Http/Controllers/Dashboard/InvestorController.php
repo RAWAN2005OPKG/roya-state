@@ -16,8 +16,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
 
-use Illuminate\Support\Facades\DB; 
-use Throwable;                     
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class InvestorController extends Controller
 {
@@ -26,7 +26,7 @@ class InvestorController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Investor::query()->with(['projects', 'payments']); // <-- جلب كل البيانات المطلوبة
+        $query = Investor::query()->with(['projects', 'payments']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -192,11 +192,11 @@ class InvestorController extends Controller
     /**
      * عرض سلة المحذوفات.
      */
-    public function trash()
-    {
-        $trashedInvestors = Investor::onlyTrashed()->latest()->paginate(10);
-        return view('dashboard.investors.trash', compact('trashedInvestors'));
-    }
+ public function trash()
+{
+    $trashedInvestors = Investor::onlyTrashed()->latest()->paginate(10);
+    return view('dashboard.investors.trash', compact('trashedInvestors'));
+}
 
     /**
      * استعادة مستثمر محذوف.
