@@ -5,86 +5,85 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany; // استيراد النوع
 
 class Investor extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    /**
-     * الحقول المسموح بتعبئتها
-     * لقد أضفت الحقول من الكود الذي أرسلته وقمت بتنظيفها
-     */
     protected $fillable = [
         'name',
+        'unique_id',
+        'company',
         'id_number',
         'phone',
-        'jobs',
-        'address',
         'notes',
-        'unique_id',
     ];
 
     /**
-     * إنشاء رقم تعريفي فريد تلقائياً
+     * Boot the model.
      */
     protected static function boot()
     {
         parent::boot();
         static::creating(function ($model) {
             if (empty($model->unique_id)) {
-                // INV-1, INV-2, etc.
-                $model->unique_id = 'INV-' . (self::query()->max('id') + 1);
+                $model->unique_id = 'INV-' . (self::max('id') + 1);
             }
         });
     }
 
     /**
-     * العلاقة الصحيحة: المشاريع التي يستثمر فيها المستثمر
-     * هذه هي العلاقة التي تمثل "الاستثمارات"
-     * تأكد من أن اسم الجدول الوسيط هو 'investor_project' كما اتفقنا
+     * علاقة: المستثمر يمكن أن يستثمر في عدة مشاريع
      */
-    public function projects(): BelongsToMany
+    public function projects()
     {
-        return $this->belongsToMany(Project::class, 'investor_project')
-            ->withPivot('investment_percentage', 'invested_amount', 'currency',  'exchange_rate',
-                    'invested_amount_ils', 'notes')
+        return $this->belongsToMany(Project::class, 'project_investor')
+            ->withPivot('investment_percentage', 'invested_amount', 'invested_amount_ils', 'currency', 'exchange_rate', 'notes')
             ->withTimestamps();
     }
 
     /**
-     * علاقة الدفعات (ممتازة)
-     */
-    public function payments()
-    {
-        return $this->morphMany(Payment::class, 'payable');
-    }
-
-    /**
-     * علاقة العقود (ممتازة)
+     * علاقة: المستثمر يمكن أن يكون له عدة عقود
      */
     public function contracts()
     {
         return $this->morphMany(Contract::class, 'contractable');
     }
 
-    // --- Accessors لحساب القيم تلقائياً ---
-
-    public function getTotalInvestedAttribute()
+    /**
+     * علاقة: المستثمر يمكن أن يكون له عدة دفعات (قيود)
+     */
+    public function payments()
     {
-        // ملاحظة: هذا يفترض أن كل المبالغ في pivot table بنفس العملة أو تم تحويلها
-        return $this->projects->sum('pivot.invested_amount');
+        return $this->morphMany(Payment::class, 'payable');
     }
 
-    public function getTotalPaidAttribute()
+    // --- دوال الحسابات المالية التلقائية (Accessors) ---
+
+    /**
+     * [Accessor] حساب إجمالي المبالغ المستثمرة من هذا المستثمر بالشيكل
+     */
+    public function getTotalInvestedAttribute(): float
     {
-        // إجمالي المبالغ التي صرفت للمستثمر
-        return $this->payments()->where('type', 'out')->sum('amount_ils');
+        // يجمع كل المبالغ المستثمرة بالشيكل من الجدول الوسيط
+        return (float) $this->projects()->sum('invested_amount_ils');
     }
 
-    public function getRemainingInvestmentAttribute()
+    /**
+     * [Accessor] حساب إجمالي المبالغ المدفوعة (المصروفة) لهذا المستثمر بالشيكل
+     */
+    public function getTotalPaidAttribute(): float
     {
-        // المتبقي = إجمالي الاستثمار - إجمالي ما تم صرفه له
+        // يجمع كل الدفعات من نوع "صرف" (out)
+        return (float) $this->payments()->where('type', 'out')->sum('amount_ils');
+    }
+
+    /**
+     * [Accessor] حساب الرصيد المتبقي للمستثمر بالشيكل
+     */
+    public function getRemainingBalanceAttribute(): float
+    {
+        // إجمالي الاستثمار - إجمالي ما تم صرفه له
         return $this->total_invested - $this->total_paid;
     }
 }

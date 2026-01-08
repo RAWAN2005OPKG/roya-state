@@ -2,10 +2,11 @@
 @section('title', 'إضافة عقد جديد')
 
 @push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
     .form-section { background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef; }
-    .form-section-title { font-size: 1.3rem; color: #4f46e5; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #4f46e5; }
-    .hidden-section { display: none; }
+    .form-section-title { font-size: 1.3rem; color: #4f46e5; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb; }
+    .select2-container .select2-selection--single { height: calc(1.5em + 1.3rem + 2px  ) !important; display: flex; align-items: center; }
 </style>
 @endpush
 
@@ -20,81 +21,54 @@
 
             <form action="{{ route('dashboard.contracts.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="contractable_type" id="contractable_type_hidden">
+
                 <div class="form-section">
                     <h4 class="form-section-title">1. تحديد صاحب العقد</h4>
                     <div class="row">
                         <div class="col-md-6 form-group mb-3">
-                            <label for="contract_type">نوع العقد *</label>
-                            <select name="contract_type" id="contract_type" class="form-control" required>
-                                <option value="">-- اختر نوع العقد --</option>
-                                <option value="customer" @selected(old('contract_type') == 'customer')>عقد بيع (عميل)</option>
-                                <option value="investor" @selected(old('contract_type') == 'investor')>عقد استثمار</option>
-                                <option value="subcontractor" @selected(old('contract_type') == 'subcontractor')>عقد مقاولة/خدمة</option>
+                            <label for="entity_type_selector">نوع الكيان <span class="text-danger">*</span></label>
+                            <select id="entity_type_selector" class="form-control" required>
+                                <option value="">-- اختر نوع الكيان --</option>
+                                <option value="Client" @selected(old('contractable_type') == 'Client')>عميل</option>
+                                <option value="Investor" @selected(old('contractable_type') == 'Investor')>مستثمر</option>
+                                <option value="Subcontractor" @selected(old('contractable_type') == 'Subcontractor')>مقاول / مورد</option>
                             </select>
                         </div>
                         <div class="col-md-6 form-group mb-3">
-                            <div id="contractable_selector">
-                            </div>
+                            <label for="contractable_id">ابحث عن الكيان <span class="text-danger">*</span></label>
+                            <select name="contractable_id" id="contractable_id" class="form-control" required disabled></select>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <h4 class="form-section-title">2. تفاصيل العقد الأساسية</h4>
+                    <h4 class="form-section-title">2. تفاصيل العقد</h4>
                     <div class="row">
-                        <div class="col-md-6 form-group mb-3"><label>رقم العقد *</label><input type="text" name="contract_id" class="form-control" value="{{ old('contract_id') }}" required></div>
-                        <div class="col-md-6 form-group mb-3"><label>تاريخ التوقيع *</label><input type="date" name="signing_date" class="form-control" value="{{ old('signing_date', date('Y-m-d')) }}" required></div>
-                        <div class="col-md-6 form-group mb-3"><label>قيمة العقد الإجمالية *</label><input type="number" name="investment_amount" class="form-control" value="{{ old('investment_amount') }}" step="0.01" required></div>
-                        <div class="col-md-6 form-group mb-3"><label>العملة *</label><select name="currency" class="form-control" required><option value="ILS">شيكل</option><option value="USD">دولار</option><option value="JOD">دينار</option></select></div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label>المشروع المرتبط (اختياري)</label>
+                        <div class="col-md-6 form-group mb-3"><label>تاريخ العقد <span class="text-danger">*</span></label><input type="date" name="contract_date" class="form-control" value="{{ old('contract_date', date('Y-m-d')) }}" required></div>
+                        <div class="col-md-6 form-group mb-3"><label>المشروع المرتبط</label>
                             <select name="project_id" class="form-control">
                                 <option value="">-- لا يوجد --</option>
                                 @foreach($projects as $project)
-                                    <option value="{{ $project->id }}" @selected(old('project_id') == $project->id)>{{ $project->project_name }}</option>
+                                    <option value="{{ $project->id }}" @selected(old('project_id') == $project->id)>{{ $project->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                         <div class="col-md-6 form-group mb-3">
-                            <label>الحالة *</label>
-                            <select name="status" class="form-control" required>
-                                <option value="active" @selected(old('status', 'active') == 'active')>نشط</option>
-                                <option value="draft" @selected(old('status') == 'draft')>مسودة</option>
-                                <option value="completed">مكتمل</option>
-                                <option value="cancelled">ملغي</option>
+                <div class="col-md-6 form-group mb-3">
+                    <label>قيمة العقد <span class="text-danger">*</span></label>
+                    {{-- 1. الحقل الذي يراه المستخدم (مع الفواصل) --}}
+                    <input type="text" id="investment_amount_formatted" class="form-control" value="{{ old('investment_amount') }}" required>
+                    {{-- 2. الحقل المخفي الذي يتم إرساله (بدون فواصل) --}}
+                    <input type="hidden" name="investment_amount" id="investment_amount" value="{{ old('investment_amount') }}">
+                </div>                        <div class="col-md-6 form-group mb-3"><label>العملة <span class="text-danger">*</span></label>
+                            <select name="currency" class="form-control" required>
+                                <option value="ILS" @selected(old('currency') == 'ILS')>شيكل</option>
+                                <option value="USD" @selected(old('currency') == 'USD')>دولار</option>
+                                <option value="JOD" @selected(old('currency') == 'JOD')>دينار</option>
                             </select>
                         </div>
-                    </div>
-                </div>
-
-                <div id="customer-fields" class="form-section hidden-section">
-                    <h4 class="form-section-title">3. تفاصيل عقد البيع</h4>
-                    <div class="row">
-                        <div class="col-md-6 form-group mb-3"><label>رقم الشقة/الوحدة</label><input type="text" name="customer_unit_number" class="form-control" value="{{ old('customer_unit_number') }}"></div>
-                        <div class="col-md-6 form-group mb-3"><label>تاريخ التسليم المتوقع</label><input type="date" name="customer_delivery_date" class="form-control" value="{{ old('customer_delivery_date') }}"></div>
-                    </div>
-                </div>
-
-                <div id="investor-fields" class="form-section hidden-section">
-                    <h4 class="form-section-title">4. تفاصيل عقد الاستثمار</h4>
-                    <div class="row">
-                        <div class="col-md-6 form-group mb-3"><label>نسبة الربح المتوقعة (%)</label><input type="number" name="investor_profit_percentage" class="form-control" value="{{ old('investor_profit_percentage') }}" step="0.01"></div>
-                        <div class="col-md-6 form-group mb-3"><label>مدة الاستثمار (بالأشهر)</label><input type="number" name="investor_duration" class="form-control" value="{{ old('investor_duration') }}"></div>
-                    </div>
-                </div>
-
-                <div id="subcontractor-fields" class="form-section hidden-section">
-                    <h4 class="form-section-title">5. تفاصيل عقد المقاولة</h4>
-                    <div class="row">
-                        <div class="col-md-12 form-group mb-3"><label>وصف نطاق العمل</label><textarea name="subcontractor_scope" class="form-control" rows="3">{{ old('subcontractor_scope') }}</textarea></div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h4 class="form-section-title">6. الشروط والمرفقات</h4>
-                    <div class="row">
-                        <div class="col-12 form-group mb-3"><label>شروط وأحكام العقد</label><textarea name="terms" class="form-control" rows="4">{{ old('terms') }}</textarea></div>
-                        <div class="col-12 form-group mb-3"><label>إرفاق ملف العقد (PDF, JPG, PNG)</label><input type="file" name="attachment" class="form-control"></div>
+                        <div class="col-12 form-group mb-3"><label>تفاصيل العقد</label><textarea name="contract_details" class="form-control" rows="3">{{ old('contract_details') }}</textarea></div>
+                        <div class="col-12 form-group mb-3"><label>إرفاق ملف العقد</label><input type="file" name="attachment" class="form-control"></div>
                     </div>
                 </div>
 
@@ -105,54 +79,61 @@
 </main>
 @endsection
 
-@section('script')
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const contractTypeSelect = document.getElementById('contract_type');
-    const contractableSelectorDiv = document.getElementById('contractable_selector');
-    const customerFields = document.getElementById('customer-fields');
-    const investorFields = document.getElementById('investor-fields');
-    const subcontractorFields = document.getElementById('subcontractor-fields');
+$(document ).ready(function() {
+    const entityTypeSelector = $('#entity_type_selector');
+    const contractableTypeHidden = $('#contractable_type_hidden');
+    const contractableIdSelect = $('#contractable_id');
 
-    const templates = {
-        customer: `
-            <label for="contractable_id">اختر العميل *</label>
-            <select name="contractable_id" class="form-control" required>
-                <option value="">-- يرجى اختيار العميل --</option>
-                @foreach($customers as $customer)
-                    <option value="{{ $customer->id }}" @selected(old('contractable_id') == $customer->id && old('contract_type') == 'customer')>{{ $customer->name }}</option>
-                @endforeach
-            </select>
-        `,
-        investor: `
-            <label for="contractable_id">اختر المستثمر *</label>
-            <select name="contractable_id" class="form-control" required>
-                <option value="">-- يرجى اختيار المستثمر --</option>
-                @foreach($investors as $investor)
-                    <option value="{{ $investor->id }}" @selected(old('contractable_id') == $investor->id && old('contract_type') == 'investor')>{{ $investor->name }}</option>
-                @endforeach
-            </select>
-        `,
-        subcontractor: `
-            <label for="contractable_id">اختر المقاول *</label>
-            <select name="contractable_id" class="form-control" required>
-                <option value="">-- يرجى اختيار المقاول --</option>
-                @foreach($subcontractors as $subcontractor)
-                    <option value="{{ $subcontractor->id }}" @selected(old('contractable_id') == $subcontractor->id && old('contract_type') == 'subcontractor')>{{ $subcontractor->name }}</option>
-                @endforeach
-            </select>
-        `,
-    };
-
-    function updateForm() {
-        const selectedType = contractTypeSelect.value;
-        contractableSelectorDiv.innerHTML = templates[selectedType] || '';
-        customerFields.style.display = selectedType === 'customer' ? 'block' : 'none';
-        investorFields.style.display = selectedType === 'investor' ? 'block' : 'none';
-        subcontractorFields.style.display = selectedType === 'subcontractor' ? 'block' : 'none';
+    function setupSelect2(entityType) {
+        contractableIdSelect.prop('disabled', false).select2({
+            placeholder: `ابحث بالاسم أو ID...`,
+            allowClear: true,
+            ajax: {
+                url: "{{ route('dashboard.getContractables') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { q: params.term, type: entityType };
+                },
+                processResults: function (data) {
+                    return { results: data.items };
+                },
+                cache: true
+            }
+        });
     }
-    updateForm();
-    contractTypeSelect.addEventListener('change', updateForm);
-});
+
+    entityTypeSelector.on('change', function() {
+        const selectedType = $(this).val();
+        contractableTypeHidden.val(selectedType);
+        contractableIdSelect.empty().val(null).trigger('change');
+
+        if (selectedType) {
+            setupSelect2(selectedType);
+        } else {
+            contractableIdSelect.prop('disabled', true);
+        }
+    });
+
+    // تشغيل عند تحميل الصفحة إذا كان هناك قيمة قديمة (في حالة فشل التحقق)
+    if (entityTypeSelector.val()) {
+        entityTypeSelector.trigger('change');
+    }
+});var cleave = new Cleave('#investment_amount_formatted', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand'
+    });
+
+    // 3. ربط الحقلين معاً عند إرسال النموذج
+    $('#contract-form').on('submit', function() {
+        // قبل الإرسال، قم بنسخ القيمة الرقمية الصافية من الحقل المنسق إلى الحقل المخفي
+        $('#investment_amount').val(cleave.getRawValue());
+        return true; // استمر في عملية الإرسال
+    });
 </script>
-@endsection
+@endpush

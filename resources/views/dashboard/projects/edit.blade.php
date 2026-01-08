@@ -1,123 +1,87 @@
-
 @extends('layouts.container')
-@section('title', 'تعديل المشروع: ' . $project->name)
+@section('title', 'تعديل بيانات المستثمر: ' . $investor->name)
+
+@push('styles')
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<style>
+    .investment-item {
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        border-right: 4px solid #FFA800;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05 );
+    }
+    .select2-container .select2-selection--single {
+        height: calc(1.5em + 1.3rem + 2px) !important;
+        display: flex;
+        align-items: center;
+    }
+</style>
+@endpush
 
 @section('content')
-<div class="card card-custom">
+<div class="card card-custom gutter-b">
     <div class="card-header">
         <h3 class="card-title">
             <i class="fas fa-edit text-warning mr-2"></i>
-            تعديل المشروع: {{ $project->name }}
+            تعديل بيانات المستثمر: {{ $investor->name }}
         </h3>
     </div>
-    <form action="{{ route('dashboard.projects.update', $project->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('dashboard.investors.update', $investor->id) }}" method="POST" id="investor-form">
         @csrf
-        @method('PUT') {{-- مهم جداً لتحديد طريقة التحديث --}}
+        @method('PUT')
         <div class="card-body">
-
-            {{-- رسائل التنبيه --}}
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            @if(session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
-            @endif
             @if ($errors->any())
                 <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                    <strong>يرجى تصحيح الأخطاء التالية:</strong>
+                    <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
                 </div>
             @endif
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
 
-            {{-- 1. تفاصيل المشروع الأساسية --}}
-            <h4 class="mb-5 text-primary">1. البيانات الأساسية للمشروع</h4>
+            <h4 class="mb-5 text-primary">1. البيانات الأساسية للمستثمر</h4>
             <div class="row">
                 <div class="col-md-6 form-group">
-                    <label for="name">اسم المشروع <span class="text-danger">*</span></label>
-                    <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $project->name) }}" required>
+                    <label>اسم المستثمر <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" value="{{ old('name', $investor->name) }}" required>
                 </div>
                 <div class="col-md-6 form-group">
-                    <label for="location">الموقع</label>
-                    <input type="text" name="location" id="location" class="form-control" value="{{ old('location', $project->location) }}">
+                    <label>الشركة</label>
+                    <input type="text" name="company" class="form-control" value="{{ old('company', $investor->company) }}">
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-4 form-group">
-                    <label for="start_date">تاريخ البدء <span class="text-danger">*</span></label>
-                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date', $project->start_date->format('Y-m-d')) }}" required>
+                <div class="col-md-6 form-group">
+                    <label>رقم الهوية</label>
+                    <input type="text" name="id_number" class="form-control" value="{{ old('id_number', $investor->id_number) }}">
                 </div>
-                <div class="col-md-4 form-group">
-                    <label for="estimated_end_date">تاريخ الانتهاء المتوقع</label>
-                    <input type="date" name="estimated_end_date" id="estimated_end_date" class="form-control" value="{{ old('estimated_end_date', $project->estimated_end_date ? $project->estimated_end_date->format('Y-m-d') : '') }}">
-                </div>
-                <div class="col-md-4 form-group">
-                    <label for="duration_months">مدة البناء (بالشهور)</label>
-                    <input type="number" name="duration_months" id="duration_months" class="form-control" value="{{ old('duration_months', $project->duration_months) }}">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4 form-group">
-                    <label for="main_contractor">المقاول الرئيسي</label>
-                    <input type="text" name="main_contractor" id="main_contractor" class="form-control" value="{{ old('main_contractor', $project->main_contractor) }}">
-                </div>
-                <div class="col-md-4 form-group">
-                    <label for="architect">المهندس المعماري</label>
-                    <input type="text" name="architect" id="architect" class="form-control" value="{{ old('architect', $project->architect) }}">
-                </div>
-                <div class="col-md-4 form-group">
-                    <label for="estimated_cost_usd">التكلفة المتوقعة ($)</label>
-                    <input type="number" name="estimated_cost_usd" id="estimated_cost_usd" class="form-control" value="{{ old('estimated_cost_usd', $project->estimated_cost_usd) }}" step="0.01">
+                <div class="col-md-6 form-group">
+                    <label>رقم الجوال</label>
+                    <input type="text" name="phone" class="form-control" value="{{ old('phone', $investor->phone) }}">
                 </div>
             </div>
             <div class="form-group">
-                <label for="description">وصف المشروع</label>
-                <textarea name="description" id="description" class="form-control" rows="3">{{ old('description', $project->description) }}</textarea>
-            </div>
-            <div class="form-group">
-                <label for="notes">ملاحظات إضافية</label>
-                <textarea name="notes" id="notes" class="form-control" rows="2">{{ old('notes', $project->notes) }}</textarea>
-            </div>
-            <div class="form-group">
-                <label for="attachments">مرفقات المشروع (يمكن إضافة مرفقات جديدة)</label>
-                <input type="file" name="attachments[]" id="attachments" class="form-control-file" multiple>
-                @if($project->attachments)
-                    <p class="mt-2">المرفقات الحالية:
-                        @foreach($project->attachments as $attachment)
-                            <span class="badge badge-light-primary">{{ basename($attachment) }}</span>
-                        @endforeach
-                    </p>
-                @endif
+                <label>ملاحظات</label>
+                <textarea name="notes" class="form-control" rows="2">{{ old('notes', $investor->notes) }}</textarea>
             </div>
 
             <hr class="my-10">
 
-            {{-- 2. الوحدات العقارية --}}
-            <h4 class="mb-5 text-primary">2. الوحدات العقارية <small class="text-muted">(سيتم استبدال الوحدات القديمة بالجديدة)</small></h4>
-            <div id="units-container">
-                {{-- سيتم ملء الحقول بواسطة JavaScript --}}
+            <h4 class="mb-5 text-primary">2. المشاريع المستثمر فيها</h4>
+            <div id="investments-container">
+                {{-- سيتم ملء حقول الاستثمار هنا بواسطة JavaScript --}}
             </div>
-            <button type="button" id="add-unit-btn" class="btn btn-success btn-sm mt-3">
-                <i class="fas fa-plus"></i> إضافة وحدة جديدة
+            <button type="button" id="add-investment-btn" class="btn btn-warning btn-sm mt-3">
+                <i class="fas fa-plus"></i> إضافة استثمار جديد
             </button>
-
-            <hr class="my-10">
-
-            {{-- 3. المستثمرون --}}
-            <h4 class="mb-5 text-primary">3. المستثمرون <small class="text-muted">(سيتم مزامنة المستثمرين)</small></h4>
-            <div id="investors-container">
-                {{-- سيتم ملء الحقول بواسطة JavaScript --}}
-            </div>
-            <button type="button" id="add-investor-btn" class="btn btn-info btn-sm mt-3">
-                <i class="fas fa-user-plus"></i> إضافة مستثمر
-            </button>
-
         </div>
         <div class="card-footer text-left">
             <button type="submit" class="btn btn-primary mr-2">حفظ التعديلات</button>
-            <a href="{{ route('dashboard.projects.show', $project->id) }}" class="btn btn-secondary">إلغاء</a>
+            <a href="{{ route('dashboard.investors.show', $investor->id) }}" class="btn btn-secondary">إلغاء</a>
         </div>
     </form>
 </div>
@@ -125,142 +89,142 @@
 
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
     $(document ).ready(function() {
-        let unitIndex = 0;
-        let investorIndex = 0;
-        const investorsList = @json($investors);
-        const projectUnits = @json($projectUnits);
-        const projectInvestors = @json($projectInvestors);
+        let investmentIndex = 0;
+        const projectsList = @json($projects);
+        const exchangeRates = { 'USD': 3.75, 'JOD': 5.20, 'ILS': 1 };
+        let cleaveInstances = {};
 
-        // دالة إضافة وحدة جديدة
-        function addUnitField(unit = null) {
-            const unitHtml = `
-                <div class="unit-item border p-4 mb-4 rounded" data-index="${unitIndex}">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="text-warning">تفاصيل الوحدة #${unitIndex + 1}</h5>
-                        <button type="button" class="btn btn-danger btn-sm remove-unit-btn">
-                            <i class="fas fa-trash"></i> حذف
-                        </button>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3 form-group">
-                            <label>رقم الوحدة <span class="text-danger">*</span></label>
-                            <input type="text" name="units[${unitIndex}][unit_number]" class="form-control" value="${unit ? unit.unit_number : ''}" required>
-                        </div>
-                        <div class="col-md-3 form-group">
-                            <label>نوع الوحدة <span class="text-danger">*</span></label>
-                            <select name="units[${unitIndex}][unit_type]" class="form-control" required>
-                                <option value="apartment" ${unit && unit.unit_type === 'apartment' ? 'selected' : ''}>شقة</option>
-                                <option value="villa" ${unit && unit.unit_type === 'villa' ? 'selected' : ''}>فيلا</option>
-                                <option value="office" ${unit && unit.unit_type === 'office' ? 'selected' : ''}>مكتب</option>
-                                <option value="land" ${unit && unit.unit_type === 'land' ? 'selected' : ''}>أرض</option>
-                                <option value="commercial" ${unit && unit.unit_type === 'commercial' ? 'selected' : ''}>تجاري</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 form-group">
-                            <label>المساحة (م²)<span class="text-danger">*</span></label>
-                            <input type="number" name="units[${unitIndex}][area_sqm]" class="form-control" step="0.01" value="${unit ? unit.area_sqm : ''}" required>
-                        </div>
-                        <div class="col-md-3 form-group">
-                            <label>السعر المتوقع ($)<span class="text-danger">*</span></label>
-                            <input type="number" name="units[${unitIndex}][expected_price_usd]" class="form-control" step="0.01" value="${unit ? unit.expected_price_usd : ''}" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 form-group">
-                            <label>الطابق</label>
-                            <input type="number" name="units[${unitIndex}][floor_number]" class="form-control" value="${unit ? unit.floor_number : ''}">
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>الحالة</label>
-                            <select name="units[${unitIndex}][status]" class="form-control">
-                                <option value="available" ${unit && unit.status === 'available' ? 'selected' : ''}>متاحة</option>
-                                <option value="reserved" ${unit && unit.status === 'reserved' ? 'selected' : ''}>محجوزة</option>
-                                <option value="sold" ${unit && unit.status === 'sold' ? 'selected' : ''}>مباعة</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>المواصفات</label>
-                        <textarea name="units[${unitIndex}][specifications]" class="form-control" rows="2">${unit ? unit.specifications : ''}</textarea>
-                    </div>
-                </div>
-            `;
-            $('#units-container').append(unitHtml);
-            unitIndex++;
+        function applyCleave(selector, index) {
+            cleaveInstances[index] = new Cleave(selector, {
+                numeral: true,
+                numeralThousandsGroupStyle: 'thousand'
+            });
         }
 
-        // دالة إضافة مستثمر جديد
-        function addInvestorField(investor = null) {
-            let options = '<option value="">اختر مستثمر...</option>';
-            investorsList.forEach(inv => {
-                const selected = investor && investor.id === inv.id ? 'selected' : '';
-                options += `<option value="${inv.id}" ${selected}>${inv.name} (${inv.company || 'لا توجد شركة'})</option>`;
+        function calculateILS(index) {
+            const cleave = cleaveInstances[index];
+            if (!cleave) return;
+            const amount = parseFloat(cleave.getRawValue()) || 0;
+            const currency = $(`#currency_${index}`).val();
+            const exchangeRateInput = $(`#exchange_rate_${index}`);
+
+            if (currency === 'ILS') {
+                exchangeRateInput.val(1).closest('.form-group').hide();
+            } else {
+                exchangeRateInput.closest('.form-group').show();
+                // إذا لم يكن هناك قيمة مسبقة، ضع القيمة الافتراضية
+                if (!exchangeRateInput.val() || parseFloat(exchangeRateInput.val()) === 1) {
+                    exchangeRateInput.val(exchangeRates[currency] || 1);
+                }
+            }
+            const rate = parseFloat(exchangeRateInput.val()) || 1;
+            $(`#amount_ils_display_${index}`).text((amount * rate).toFixed(2) + ' ILS');
+        }
+
+        function addInvestmentField(investment = {}) {
+            const currentIndex = investmentIndex;
+            let projectOptions = '<option value="">اختر مشروع...</option>';
+            projectsList.forEach(p => {
+                // التحقق من أن المشروع المختار هو المشروع الحالي في الحلقة
+                const isSelected = investment.project_id == p.id ? 'selected' : '';
+                projectOptions += `<option value="${p.id}" ${isSelected}>${p.name}</option>`;
             });
 
-            const investorHtml = `
-                <div class="investor-item border p-4 mb-4 rounded" data-index="${investorIndex}">
+            const investmentHtml = `
+                <div class="investment-item" data-index="${currentIndex}">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="text-warning">تفاصيل المستثمر #${investorIndex + 1}</h5>
-                        <button type="button" class="btn btn-danger btn-sm remove-investor-btn">
-                            <i class="fas fa-trash"></i> حذف
-                        </button>
+                        <h5>تفاصيل الاستثمار #${currentIndex + 1}</h5>
+                        <button type="button" class="btn btn-danger btn-sm remove-investment-btn"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>المشروع <span class="text-danger">*</span></label>
+                            <select name="projects[${currentIndex}][project_id]" class="form-control project-select" required>${projectOptions}</select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>نسبة الاستثمار (%)</label>
+                            <input type="number" name="projects[${currentIndex}][investment_percentage]" class="form-control" step="0.01" value="${investment.investment_percentage || ''}">
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4 form-group">
-                            <label>اختيار المستثمر <span class="text-danger">*</span></label>
-                            <select name="investors[${investorIndex}][investor_id]" class="form-control" required>
-                                ${options}
+                            <label>المبلغ المستثمر <span class="text-danger">*</span></label>
+                            <input type="text" id="invested_amount_formatted_${currentIndex}" class="form-control" value="${investment.invested_amount || ''}" required>
+                            <input type="hidden" name="projects[${currentIndex}][invested_amount]" id="invested_amount_${currentIndex}">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>العملة <span class="text-danger">*</span></label>
+                            <select name="projects[${currentIndex}][currency]" id="currency_${currentIndex}" class="form-control currency-select" data-index="${currentIndex}" required>
+                                <option value="USD" ${investment.currency === 'USD' ? 'selected' : ''}>دولار (USD)</option>
+                                <option value="JOD" ${investment.currency === 'JOD' ? 'selected' : ''}>دينار (JOD)</option>
+                                <option value="ILS" ${investment.currency === 'ILS' ? 'selected' : ''}>شيكل (ILS)</option>
                             </select>
                         </div>
                         <div class="col-md-4 form-group">
-                            <label>نسبة الاستثمار (%) <span class="text-danger">*</span></label>
-                            <input type="number" name="investors[${investorIndex}][investment_percentage]" class="form-control" step="0.01" min="0.01" max="100" value="${investor ? investor.pivot.investment_percentage : ''}" required>
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <label>المبلغ المستثمر فعلياً ($)</label>
-                            <input type="number" name="investors[${investorIndex}][invested_amount]" class="form-control" step="0.01" value="${investor ? investor.pivot.invested_amount : 0}">
+                            <label>سعر الصرف</label>
+                            <input type="number" name="projects[${currentIndex}][exchange_rate]" id="exchange_rate_${currentIndex}" class="form-control exchange-rate" data-index="${currentIndex}" step="0.0001" value="${investment.exchange_rate || '1'}">
+                            <small class="form-text text-muted">القيمة بالشيكل: <strong id="amount_ils_display_${currentIndex}">0.00 ILS</strong></small>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>ملاحظات خاصة بالمستثمر في هذا المشروع</label>
-                        <textarea name="investors[${investorIndex}][notes]" class="form-control" rows="1">${investor ? investor.pivot.notes : ''}</textarea>
-                    </div>
-                </div>
-            `;
-            $('#investors-container').append(investorHtml);
-            investorIndex++;
+                </div>`;
+            $('#investments-container').append(investmentHtml);
+
+            // تفعيل Select2 على الحقل الجديد
+            $(`select[name="projects[${currentIndex}][project_id]"]`).select2({ placeholder: "اختر مشروعاً..." });
+
+            applyCleave($(`#invested_amount_formatted_${currentIndex}`)[0], currentIndex);
+            calculateILS(currentIndex);
+            investmentIndex++;
         }
 
-        // ملء حقول الوحدات الموجودة
-        if (projectUnits.length > 0) {
-            projectUnits.forEach(unit => addUnitField(unit));
-        } else {
-            addUnitField(); // إضافة حقل فارغ إذا لم توجد وحدات
-        }
-
-        // ملء حقول المستثمرين الموجودين
-        if (projectInvestors.length > 0) {
-            projectInvestors.forEach(investor => addInvestorField(investor));
-        } else {
-            addInvestorField(); // إضافة حقل فارغ إذا لم يوجد مستثمرون
-        }
-
-        // عند النقر على زر إضافة وحدة
-        $('#add-unit-btn').on('click', () => addUnitField());
-
-        // عند النقر على زر إضافة مستثمر
-        $('#add-investor-btn').on('click', () => addInvestorField());
-
-        // عند النقر على زر حذف وحدة
-        $(document).on('click', '.remove-unit-btn', function() {
-            $(this).closest('.unit-item').remove();
+        $('#add-investment-btn').on('click', () => addInvestmentField());
+        $(document).on('click', '.remove-investment-btn', function() {
+            if (confirm('هل أنت متأكد من حذف هذا الاستثمار؟')) {
+                $(this).closest('.investment-item').remove();
+            }
         });
 
-        // عند النقر على زر حذف مستثمر
-        $(document).on('click', '.remove-investor-btn', function() {
-            $(this).closest('.investor-item').remove();
+        $(document).on('input change', '.currency-select, .exchange-rate', function() {
+            calculateILS($(this).closest('.investment-item').data('index'));
+        });
+        $(document).on('input', 'input[id^="invested_amount_formatted_"]', function() {
+            calculateILS($(this).closest('.investment-item').data('index'));
+        });
+
+        // --- [الأهم] جلب البيانات الحالية أو القديمة ---
+        const oldProjects = @json(old('projects'));
+        const currentInvestments = @json($investor->projects->map(function($p) {
+            return [
+                'project_id' => $p->id,
+                'investment_percentage' => $p->pivot->investment_percentage,
+                'invested_amount' => $p->pivot->invested_amount,
+                'currency' => $p->pivot->currency,
+                'exchange_rate' => $p->pivot->exchange_rate,
+            ];
+        }));
+
+        // إذا كان هناك بيانات قديمة (بسبب خطأ تحقق)، استخدمها. وإلا، استخدم البيانات الحالية من قاعدة البيانات.
+        const dataToLoad = oldProjects || currentInvestments;
+
+        if (dataToLoad && dataToLoad.length > 0) {
+            dataToLoad.forEach(inv => addInvestmentField(inv));
+        } else {
+            addInvestmentField(); // إضافة حقل فارغ إذا لم يكن هناك أي استثمارات
+        }
+
+        $('#investor-form').on('submit', function() {
+            $('.investment-item').each(function() {
+                const index = $(this).data('index');
+                const cleave = cleaveInstances[index];
+                if (cleave) {
+                    $(`#invested_amount_${index}`).val(cleave.getRawValue());
+                }
+            });
+            return true;
         });
     });
 </script>

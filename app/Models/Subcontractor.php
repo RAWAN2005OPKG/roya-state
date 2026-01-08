@@ -55,7 +55,6 @@ class Subcontractor extends Model
         return $this->morphMany(Payment::class, 'payable');
     }
 
-    // --- Accessors لحساب القيم المالية ---
 
     /**
      * إجمالي قيمة عقود المقاول (بالشيكل)

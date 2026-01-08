@@ -4,115 +4,77 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\Contract;
 use App\Models\ProjectUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-use Throwable; //  لاستقبال كل أنواع الأخطاء
+use Throwable;
 
 class ClientController extends Controller
 {
     public function index()
     {
-        $clients = Client::with(['units.project'])->orderBy('created_at', 'desc')->get();
+        $clients = Client::withCount('contracts')->latest()->paginate(15);
         return view('dashboard.clients.index', compact('clients'));
-       if ($request->filled('search_id')) {
-        $query->where('unique_id', 'like', '%' . $request->search_id . '%');
     }
-    if ($request->filled('search_id_number')) {
-        $query->where('id_number', 'like', '%' . $request->search_id_number . '%');
-    }
-    // --- نهاية منطق البحث ---
-
-    // نفذ الاستعلام بعد إضافة شروط البحث
-    $clients = $query->orderBy('created_at', 'desc')->get();
-
-    return view('dashboard.clients.index', compact('clients'));
-}
-
 
     public function create()
     {
-        $availableUnits = ProjectUnit::where('status', 'available')->with('project')->get();
+        // جلب الوحدات المتاحة مع تفاصيل المشروع المرتبط بها
+        $availableUnits = ProjectUnit::where('status', 'available')
+                                     ->with('project:id,name')
+                                     ->select('id', 'project_id', 'unit_number', 'floor', 'has_parking', 'finish_type')
+                                     ->get();
         return view('dashboard.clients.create', compact('availableUnits'));
     }
 
     public function store(Request $request)
     {
-        // التحقق من أن الوحدات المرسلة متاحة بالفعل (حماية إضافية)
-        $unitIds = collect($request->input('units', []))->pluck('unit_id')->filter();
-        if ($unitIds->isNotEmpty()) {
-            $unavailableUnits = ProjectUnit::whereIn('id', $unitIds)->where('status', '!=', 'available')->pluck('unit_number')->implode(', ');
-            if ($unavailableUnits) {
-                return back()->withInput()->with('error', "خطأ: الوحدات التالية لم تعد متاحة: {$unavailableUnits}");
-            }
-        }
-
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'id_number' => ['nullable', 'string', 'max:50', Rule::unique('clients', 'id_number')],
-            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string',
+            'id_number' => 'nullable|string|unique:clients,id_number',
+            'address' => 'nullable|string',
             'notes' => 'nullable|string',
-
             'units' => 'required|array|min:1',
-            'units.*.unit_id' => 'required|distinct|exists:project_units,id',
-            'units.*.sale_price' => 'required|numeric|min:0',
-            'units.*.currency' => 'required|in:ILS,USD,JOD',
+            'units.*.unit_id' => 'required|exists:project_units,id',
             'units.*.sale_date' => 'required|date',
+            'units.*.sale_price' => 'required|numeric|min:0',
+            'units.*.currency' => 'required|string|in:ILS,USD,JOD',
+            'units.*.exchange_rate' => 'required|numeric|min:0',
             'units.*.contract_details' => 'nullable|string',
-            'units.*.exchange_rate' => ['required_if:units.*.currency,USD', 'required_if:units.*.currency,JOD', 'nullable', 'numeric', 'min:0'],
         ]);
 
         try {
-            // استخدام Transaction لضمان تنفيذ كل العمليات معاً أو لا شيء
-            $client = DB::transaction(function () use ($validatedData) {
-                // 1. إنشاء العميل
-                $client = Client::create([
-                    'name' => $validatedData['name'],
-                    'phone' => $validatedData['phone'],
-                    'id_number' => $validatedData['id_number'],
-                    'address' => $validatedData['address'],
-                    'notes' => $validatedData['notes'],
-                    'unique_id' => 'CL-' . time()
-                  ]);
+            DB::transaction(function () use ($validatedData) {
+                $client = Client::create(collect($validatedData)->only(['name', 'phone', 'id_number', 'address', 'notes'])->toArray());
 
-                if (!$client) {
-                    throw new \Exception("فشل إنشاء العميل.");
-                }
-
-                // 2. تجهيز بيانات الوحدات وربطها
-                $unitsToAttach = [];
                 foreach ($validatedData['units'] as $unitSale) {
-                    $currency = $unitSale['currency'];
-                    $exchangeRate = ($currency === 'ILS') ? 1 : ($unitSale['exchange_rate'] ?? 1);
-                    $salePrice = $unitSale['sale_price'];
+                    $unit = ProjectUnit::findOrFail($unitSale['unit_id']);
+                    if ($unit->status !== 'available') {
+                        throw new \Exception("الوحدة رقم '{$unit->unit_number}' لم تعد متاحة.");
+                    }
 
-                    $unitsToAttach[$unitSale['unit_id']] = [
-                        'sale_price' => $salePrice,
-                        'currency' => $currency,
-                        'exchange_rate' => $exchangeRate,
-                        'sale_price_ils' => $salePrice * $exchangeRate,
-                        'sale_date' => $unitSale['sale_date'],
-                        'contract_details' => $unitSale['contract_details'] ?? null,
-                    ];
+                    $amountILS = $unitSale['sale_price'] * $unitSale['exchange_rate'];
+
+                    // إنشاء العقد وربطه بالعميل والوحدة
+                    $client->contracts()->create([
+                        'project_id' => $unit->project_id,
+                        'project_unit_id' => $unit->id, // <-- ربط العقد بالوحدة
+                        'contract_date' => $unitSale['sale_date'],
+                        'contract_details' => $unitSale['contract_details'],
+                        'investment_amount' => $unitSale['sale_price'],
+                        'currency' => $unitSale['currency'],
+                        'exchange_rate' => $unitSale['exchange_rate'],
+                        'investment_amount_ils' => $amountILS,
+                    ]);
+
+                    $unit->update(['status' => 'sold']);
                 }
-
-                $client->units()->attach($unitsToAttach);
-
-                // 3. تحديث حالة الوحدات المباعة
-                $unitIdsToUpdate = array_keys($unitsToAttach);
-                ProjectUnit::whereIn('id', $unitIdsToUpdate)->update(['status' => 'sold']);
-
-                return $client;
             });
-
-            return redirect()->route('dashboard.clients.index')
-                ->with('success', "تم حفظ العميل '{$client->name}' بنجاح.");
-
+            return redirect()->route('dashboard.clients.index')->with('success', 'تم حفظ العميل والعقود بنجاح.');
         } catch (Throwable $e) {
-            // في حال حدوث أي خطأ، سيتم التراجع عن كل شيء وعرض رسالة خطأ مفصلة
-            return back()->withInput()->with('error', 'فشل الحفظ. خطأ تقني: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'فشل الحفظ: ' . $e->getMessage());
         }
     }
 }

@@ -10,7 +10,7 @@ class Payment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'payable_id',
+       'contract_id', 'payable_id',
         'payable_type',
         'type',
         'payment_date',
@@ -47,7 +47,10 @@ class Payment extends Model
     {
         return $this->morphTo();
     }
-
+  public function contract()
+    {
+        return $this->belongsTo(Contract::class);
+    }
     /**
      * علاقة لجلب بيانات حساب البنك المرسل (إذا كان لديك مودل BankAccount)
      */

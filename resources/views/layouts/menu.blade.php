@@ -127,9 +127,7 @@
     </div>
 </li>
 
-    {{-- =================================================== --}}
     {{-- 2. القائمة المالية --}}
-    {{-- =================================================== --}}
 
     <li class="menu-item menu-item-submenu {{ request()->is('dashboard/accounts*') || request()->is('dashboard/journal-entries*') || request()->is('dashboard/expenses*') || request()->is('dashboard/cash-safes*') || request()->is('dashboard/bank-accounts*') || request()->is('dashboard/fund-transfers*') || request()->is('dashboard/project-transfers*') ? 'menu-item-open' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
         <a href="javascript:;" class="menu-link menu-toggle">
@@ -166,7 +164,7 @@
                 <li class="menu-item {{ request()->routeIs('dashboard.expenses.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.expenses.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                        <span class="menu-text">المصروفات</span>
+                        <span class="menu-text">دراسة تحليل المشروع</span>
                     </a>
                 </li>
 
@@ -194,12 +192,7 @@
         <span class="menu-text">الحركات البنكية</span>
     </a>
 </li>
-<li class="menu-item" aria-haspopup="true">
-    <a href="{{ route('dashboard.bank-transactions.trash') }}" class="menu-link">
-        <span class="svg-icon menu-icon"><i class="fas fa-trash-alt"></i></span>
-        <span class="menu-text">سلة محذوفات البنوك</span>
-    </a>
-</li>
+
                 <li class="menu-item {{ request()->routeIs('dashboard.checks.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.checks.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
@@ -261,7 +254,7 @@
     </div>
 </li>
 
-                    <!-- بداية قائمة المبيعات -->
+                    <!-- بداية قائمة المبيعات
 <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
         <span class="svg-icon menu-icon">
@@ -312,9 +305,6 @@
         </ul>
     </div>
 </li>
-<!-- نهاية قائمة المبيعات -->
-
-<!-- بداية قائمة المنتجات والمخزون-->
 <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
         <span class="svg-icon menu-icon">
@@ -369,11 +359,11 @@
 
         </ul>
     </div>
-</li>
+</li>-->
               <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
         <a href="javascript:;" class="menu-link menu-toggle">
             <i class="menu-icon fas fa-users"></i>
-            <span class="menu-text">إدارة الأطراف</span>
+            <span class="menu-text"> دائرة العمل</span>
             <i class="menu-arrow"></i>
         </a>
         <div class="menu-submenu">

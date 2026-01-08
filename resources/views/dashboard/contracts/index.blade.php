@@ -1,124 +1,43 @@
 @extends('layouts.container')
 @section('title', 'إدارة العقود')
-
-@push('styles')
-<style>
-    :root {
-        --primary-color: #4f46e5; --primary-hover: #3730a3; --light-bg: #f8fafc;
-        --white-bg: #ffffff; --text-color: #1f2937; --text-muted: #6b7280;
-        --border-color: #e5e7eb; --success-color: #10b981; --danger-color: #ef4444;
-        --warning-color: #f59e0b; --info-color: #3b82f6;
-        --shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
-    }
-    body { background-color: var(--light-bg); color: var(--text-color); direction: rtl; font-family: 'Cairo', sans-serif; }
-    .main-content { max-width: 1600px; margin: 40px auto; padding: 0 20px; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .page-header h1 { font-size: 2.5rem; font-weight: 700; }
-    .header-actions { display: flex; gap: 15px; }
-    .btn { padding: 12px 25px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-primary { background-color: var(--primary-color); color: #ffffff; }
-    .btn-danger { background-color: var(--danger-color); color: #ffffff; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-    .kpi-card { background-color: var(--white-bg); padding: 25px; border-radius: 12px; box-shadow: var(--shadow); }
-    .kpi-card .label { color: var(--text-muted); margin-bottom: 10px; }
-    .kpi-card .value { font-size: 2rem; font-weight: 700; }
-    .table-container { background-color: var(--white-bg); padding: 30px; border-radius: 12px; box-shadow: var(--shadow); }
-    .table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-    .search-form input { padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 8px; min-width: 300px; }
-    .table-wrapper { overflow-x: auto; }
-    .data-table { width: 100%; border-collapse: collapse; }
-    .data-table th, .data-table td { padding: 15px; text-align: right; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
-    .data-table th { font-weight: 600; color: var(--text-muted); }
-    .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
-    .badge-customer { background-color: #e0e7ff; color: #3730a3; }
-    .badge-investor { background-color: #d1fae5; color: #065f46; }
-    .badge-subcontractor { background-color: #fef3c7; color: #92400e; } /* تم تغيير الاسم ليكون أوضح */
-    .action-buttons a, .action-buttons button { color: var(--text-muted); background: none; border: none; padding: 5px; font-size: 1.1rem; cursor: pointer; }
-</style>
-@endpush
-
 @section('content')
-<main class="main-content">
-    <div class="page-header">
-        <h1><i class="fas fa-file-signature"></i> إدارة العقود</h1>
-        <div class="header-actions">
-            <a href="{{ route('dashboard.contracts.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة عقد جديد</a>
-            {{-- هذا المسار يجب أن يكون معرّفًا في routes/web.php --}}
-            <a href="{{ route('dashboard.contracts.trash') }}" class="btn btn-danger"><i class="fas fa-trash"></i> سلة المحذوفات</a>
-        </div>
+<main class="main-content" style="max-width: 1600px; margin: 40px auto; padding: 0 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1><i class="fas fa-file-signature text-primary"></i> إدارة العقود</h1>
+        <a href="{{ route('dashboard.contracts.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة عقد جديد</a>
     </div>
-
-    {{-- تم إضافة تحقق للتأكد من وجود المتغيرات قبل عرضها --}}
-    @if(isset($totalContracts) && isset($totalValue))
-    <div class="kpi-grid">
-        <div class="kpi-card"><div class="label">إجمالي العقود</div><div class="value">{{ $totalContracts }}</div></div>
-        <div class="kpi-card"><div class="label">إجمالي قيمة العقود</div><div class="value">{{ number_format($totalValue, 2) }} <small>ILS</small></div></div>
-    </div>
-    @endif
-
-    <div class="table-container">
-        <div class="table-controls">
-            <form action="{{ route('dashboard.contracts.index') }}" method="GET" class="search-form">
-                <input type="text" name="search" placeholder="ابحث برقم العقد, اسم المالك, المشروع..." value="{{ $search ?? '' }}">
-                <button type="submit" class="btn btn-primary">بحث</button>
+    <div class="table-container" style="background-color: #ffffff; padding: 20px; border-radius: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <form action="{{ route('dashboard.contracts.index') }}" method="GET">
+                <input type="text" name="search" placeholder="ابحث..." value="{{ $request->search ?? '' }}" class="form-control" style="min-width: 300px; display: inline-block; width: auto;">
+                <button type="submit" class="btn btn-primary btn-sm">بحث</button>
             </form>
         </div>
-
-        <div class="table-wrapper">
-            <table class="data-table">
+        <div class="table-responsive">
+            <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>رقم العقد</th>
-                        <th>صاحب العقد</th>
-                        <th>نوع العقد</th>
-                        <th>المشروع</th>
-                        <th>قيمة العقد</th>
-                        <th>تاريخ التوقيع</th>
-                        <th>الحالة</th>
-                        <th class="no-print">تحكم</th>
+                        <th>#</th><th>صاحب العقد</th><th>نوعه</th><th>المشروع</th><th>قيمة العقد</th><th>تاريخه</th><th>الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($contracts as $contract)
                         <tr>
-                            <td><strong>{{ $contract->contract_id }}</strong></td>
-                            {{-- التحقق من وجود العلاقة قبل محاولة الوصول إليها --}}
-                            <td>{{ $contract->contractable->name ?? 'غير محدد' }}</td>
-                            <td>
-                                @if($contract->contractable_type == \App\Models\Customer::class)
-                                    <span class="badge badge-customer">عقد عميل</span>
-                                @elseif($contract->contractable_type == \App\Models\Investor::class)
-                                    <span class="badge badge-investor">عقد استثمار</span>
-                                @elseif($contract->contractable_type == \App\Models\Subcontractor::class) {{-- تم التصحيح --}}
-                                    <span class="badge badge-subcontractor">عقد مقاول</span>
-                                @endif
-                            </td>
-                            {{-- التحقق من وجود العلاقة قبل محاولة الوصول إليها --}}
-                            <td>{{ $contract->project->project_name ?? '-' }}</td>
+                            <td>{{ $contract->id }}</td>
+                            <td>{{ $contract->contractable->name ?? 'N/A' }}</td>
+                            <td><span class="badge badge-light-primary">{{ str_replace('App\\Models\\', '', $contract->contractable_type) }}</span></td>
+                            <td>{{ $contract->project->name ?? '-' }}</td>
                             <td>{{ number_format($contract->investment_amount, 2) }} {{ $contract->currency }}</td>
-                            <td>{{ $contract->signing_date ? $contract->signing_date->format('Y-m-d') : '-' }}</td>
-                            <td>{{ $contract->status }}</td>
-                            <td class="action-buttons">
-                                <a href="{{ route('dashboard.contracts.show', $contract->id) }}" title="عرض"><i class="fas fa-eye"></i></a>
-                                <a href="{{ route('dashboard.contracts.edit', $contract->id) }}" title="تعديل"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('dashboard.contracts.destroy', $contract->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟ سيتم نقل العقد إلى سلة المحذوفات.')" style="display: inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" title="حذف"><i class="fas fa-trash"></i></button>
-                                </form>
-                            </td>
+                            <td>{{ $contract->contract_date->format('Y-m-d') }}</td>
+                            <td><a href="{{ route('dashboard.contracts.show', $contract->id) }}" class="btn btn-sm btn-icon btn-info" title="عرض"><i class="la la-eye"></i></a><a href="{{ route('dashboard.contracts.edit', $contract->id) }}" class="btn btn-sm btn-icon btn-success" title="تعديل"><i class="la la-edit"></i></a></td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="text-center" style="padding: 2rem;">لا توجد عقود لعرضها.</td></tr>
+                        <tr><td colspan="7" class="text-center py-5">لا توجد عقود لعرضها.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-
-        {{-- إضافة التحقق من وجود المتغير قبل استخدامه --}}
-        @if(isset($contracts))
-            <div class="mt-4">{{ $contracts->appends(request()->query())->links() }}</div>
-        @endif
+        <div class="mt-4">{{ $contracts->appends($request->query())->links() }}</div>
     </div>
 </main>
 @endsection

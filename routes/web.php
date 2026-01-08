@@ -177,8 +177,9 @@ Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController:
     Route::get('contracts/trash', [App\Http\Controllers\Dashboard\ContractController::class, 'trash'])->name('contracts.trash');
     Route::post('contracts/{id}/restore', [App\Http\Controllers\Dashboard\ContractController::class, 'restore'])->name('contracts.restore');
     Route::delete('contracts/{id}/force-delete', [App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('contracts.forceDelete');
-
-
+  // --- مسار AJAX الجديد لجلب الكيانات في صفحة العقود ---
+ Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::class);
+    Route::get('get-contractables', [App\Http\Controllers\Dashboard\ContractController::class, 'getContractables'])->name('getContractables');
  Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [App\Http\Controllers\Dashboard\PaymentController::class, 'index'])->name('index');
         Route::get('/create', [App\Http\Controllers\Dashboard\PaymentController::class, 'create'])->name('create');

@@ -15,7 +15,7 @@ class Client extends Model
         'id_number',
         'address',
         'notes',
-        'unique_id' // <--- تأكد من وجوده هنا
+        'unique_id'
     ];
 
     /**
@@ -41,5 +41,43 @@ class Client extends Model
                         'sale_date', 'contract_details'
                     ])
                     ->withTimestamps();
+    }
+// علاقة: العميل يمكن أن يكون له عدة عقود
+    public function contracts()
+    {
+        return $this->morphMany(Contract::class, 'contractable');
+    }
+
+    // علاقة: العميل يمكن أن يكون له عدة دفعات
+    public function payments()
+    {
+        return $this->morphMany(Payment::class, 'payable');
+    }
+
+
+    /**
+     * حساب تلقائي: إجمالي قيمة العقود (المستحق) بالشيكل
+     */
+    public function getTotalDueAttribute()
+    {
+        // يجمع قيمة كل العقود المرتبطة بهذا العميل
+        return $this->contracts()->sum('investment_amount_ils');
+    }
+
+    /**
+     * حساب تلقائي: إجمالي المبالغ المدفوعة من هذا العميل بالشيكل
+     */
+    public function getTotalPaidAttribute()
+    {
+        // يجمع كل الدفعات من نوع "قبض" (in) المرتبطة بهذا العميل
+        return $this->payments()->where('type', 'in')->sum('amount_ils');
+    }
+
+    /**
+     * حساب تلقائي: الرصيد المتبقي على العميل
+     */
+    public function getRemainingBalanceAttribute()
+    {
+        return $this->total_due - $this->total_paid;
     }
 }
