@@ -1,69 +1,62 @@
 @extends('layouts.container')
-@section('title', 'سلة المحذوفات - المستثمرون')
-
-@push('styles')
-    <style>
-        .table-container { background-color: #fff; padding: 30px; border-radius: 16px; max-width: 1200px; margin: 40px auto; }
-        .container-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e5e7eb; }
-        .container-title { font-size: 1.8rem; color: #4f46e5; margin: 0; }
-        .btn-back { background-color: #e0e7ff; color: #3730a3; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 700; }
-        .data-table { width: 100%; border-collapse: collapse; text-align: right; }
-        .data-table th, .data-table td { padding: 14px 18px; border-bottom: 1px solid #e5e7eb; }
-        .actions-cell { display: flex; gap: 15px; }
-        .action-btn { background: none; border: none; cursor: pointer; font-weight: 700; font-family: inherit; font-size: 1rem; }
-        .btn-restore { color: #16a34a; }
-        .btn-delete-force { color: #dc2626; }
-    </style>
-@endpush
+@section('title', 'سلة محذوفات المستثمرين')
 
 @section('content')
-<main class="main-content">
-    <div class="table-container">
-        <div class="container-header">
-            <h2 class="container-title"><i class="fas fa-trash-alt"></i> سلة محذوفات المستثمرين</h2>
-            <a href="{{ route('dashboard.investors.index') }}" class="btn-back">
-                <i class="fas fa-arrow-right"></i> العودة للمستثمرين
+<div class="card card-custom gutter-b">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-trash-alt text-danger mr-2"></i> سلة محذوفات المستثمرين</h3>
+        <div class="card-toolbar">
+            <a href="{{ route('dashboard.investors.index') }}" class="btn btn-primary btn-sm">
+                <i class="la la-list"></i> العودة لقائمة المستثمرين
             </a>
         </div>
-
-        @if(session('success'))
-            <div style="padding: 15px; background-color: #d1fae5; color: #065f46; border-radius: 8px; margin-bottom: 20px;">{{ session('success') }}</div>
-        @endif
-
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>الاسم</th>
-                    <th>تاريخ الحذف</th>
-                    <th>إجراءات</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($investors as $investor)
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
                     <tr>
+                        <th>ID</th>
+                        <th>الاسم</th>
+                        <th>رقم الهوية</th>
+                        <th>تاريخ الحذف</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($trashedInvestors as $investor)
+                    <tr>
+                        <td>{{ $investor->unique_id }}</td>
                         <td>{{ $investor->name }}</td>
+                        <td>{{ $investor->id_number ?? '-' }}</td>
                         <td>{{ $investor->deleted_at->format('Y-m-d H:i') }}</td>
-                        <td class="actions-cell">
-                            <form action="{{ route('dashboard.investors.trash.restore', $investor->id) }}" method="POST">
+                        <td>
+                            {{-- زر الاستعادة --}}
+                            <form action="{{ route('dashboard.investors.restore', $investor->id) }}" method="POST" style="display: inline;">
                                 @csrf
                                 @method('PUT')
-                                <button type="submit" class="action-btn btn-restore">استعادة</button>
+                                <button type="submit" class="btn btn-sm btn-icon btn-success" title="استعادة">
+                                    <i class="la la-undo"></i>
+                                </button>
                             </form>
 
-                            <form action="{{ route('dashboard.investors.trash.forceDelete', $investor->id) }}" method="POST" onsubmit="return confirm('تحذير! سيتم حذف هذا العنصر نهائياً. هل أنت متأكد؟');">
+                            {{-- زر الحذف النهائي --}}
+                            <form action="{{ route('dashboard.investors.forceDelete', $investor->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟ سيتم حذف هذا المستثمر بشكل نهائي ولا يمكن استعادته.');" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="action-btn btn-delete-force">حذف نهائي</button>
+                                <button type="submit" class="btn btn-sm btn-icon btn-danger" title="حذف نهائي">
+                                    <i class="la la-trash"></i>
+                                </button>
                             </form>
                         </td>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="3" style="padding: 40px; text-align: center; color: #6b7280;">سلة المحذوفات فارغة.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                    @empty
+                    <tr><td colspan="5" class="text-center">سلة المحذوفات فارغة.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4">{{ $trashedInvestors->links() }}</div>
     </div>
-</main>
+</div>
 @endsection

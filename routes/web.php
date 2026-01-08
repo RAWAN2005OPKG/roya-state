@@ -150,14 +150,15 @@ Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryCo
     Route::resource('expenses',  App\Http\Controllers\Dashboard\ExpenseController::class);
 
     // 3. المستثمرون (Investors)
-    Route::get('/investors/export/excel', [ App\Http\Controllers\Dashboard\InvestorController::class, 'exportExcel'])->name('investors.export.excel');
-    Route::prefix('investors/trash')->name('investors.trash.')->controller( App\Http\Controllers\Dashboard\InvestorController::class)->group(function () {
-        Route::get('/', 'trash')->name('index');
-        Route::put('/{id}/restore', 'restore')->name('restore');
-        Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
-    });
-    Route::resource('investors',  App\Http\Controllers\Dashboard\InvestorController::class)->except(['show']);
+  Route::resource('investors', App\Http\Controllers\Dashboard\InvestorController::class);
 
+    Route::prefix('investors')->name('investors.')->group(function () {
+        Route::get('/trash', [App\Http\Controllers\Dashboard\InvestorController::class, 'trash'])->name('trash');
+        Route::put('/{id}/restore', [App\Http\Controllers\Dashboard\InvestorController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\InvestorController::class, 'forceDelete'])->name('forceDelete');
+        Route::get('/export/excel', [App\Http\Controllers\Dashboard\InvestorController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/{investor}/export/word', [App\Http\Controllers\Dashboard\InvestorController::class, 'exportWord'])->name('export.word');
+    });
     Route::get('/reportproject/export/excel', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'exportExcel'])->name('dashboard.reportproject.export.excel');
 
    Route::name('reportproject.')->group(function () {

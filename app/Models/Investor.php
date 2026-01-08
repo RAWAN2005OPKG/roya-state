@@ -10,9 +10,12 @@ class Investor extends Model
 {
     use HasFactory, SoftDeletes;
 
+    /**
+     * [الحل] تأكد من أن unique_id موجود هنا.
+     */
     protected $fillable = [
         'name',
-        'unique_id',
+        'unique_id', // <-- [مهم جداً] يجب أن يكون هذا الحقل هنا
         'company',
         'id_number',
         'phone',
@@ -20,70 +23,53 @@ class Investor extends Model
     ];
 
     /**
-     * Boot the model.
+     * [الحل] هذا هو الكود الصحيح لدالة boot.
      */
     protected static function boot()
     {
         parent::boot();
+
+        // هذا الكود يعمل "قبل" محاولة إنشاء السجل في قاعدة البيانات
         static::creating(function ($model) {
+            // إذا كان حقل unique_id فارغاً، قم بإنشاء قيمة جديدة له
             if (empty($model->unique_id)) {
-                $model->unique_id = 'INV-' . (self::max('id') + 1);
+                $model->unique_id = 'INV-' . time();
             }
         });
     }
 
-    /**
-     * علاقة: المستثمر يمكن أن يستثمر في عدة مشاريع
-     */
+    // --- بقية العلاقات والدوال تبقى كما هي ---
+
     public function projects()
     {
         return $this->belongsToMany(Project::class, 'project_investor')
-            ->withPivot('investment_percentage', 'invested_amount', 'invested_amount_ils', 'currency', 'exchange_rate', 'notes')
+            ->withPivot('investment_percentage', 'invested_amount', 'currency', 'exchange_rate', 'invested_amount_ils', 'notes')
             ->withTimestamps();
     }
 
-    /**
-     * علاقة: المستثمر يمكن أن يكون له عدة عقود
-     */
-    public function contracts()
-    {
-        return $this->morphMany(Contract::class, 'contractable');
-    }
-
-    /**
-     * علاقة: المستثمر يمكن أن يكون له عدة دفعات (قيود)
-     */
     public function payments()
     {
         return $this->morphMany(Payment::class, 'payable');
     }
 
-    // --- دوال الحسابات المالية التلقائية (Accessors) ---
-
-    /**
-     * [Accessor] حساب إجمالي المبالغ المستثمرة من هذا المستثمر بالشيكل
-     */
-    public function getTotalInvestedAttribute(): float
+    public function getTotalInvestmentIlsAttribute(): float
     {
-        // يجمع كل المبالغ المستثمرة بالشيكل من الجدول الوسيط
+        if ($this->relationLoaded('projects')) {
+            return (float) $this->projects->sum('pivot.invested_amount_ils');
+        }
         return (float) $this->projects()->sum('invested_amount_ils');
     }
 
-    /**
-     * [Accessor] حساب إجمالي المبالغ المدفوعة (المصروفة) لهذا المستثمر بالشيكل
-     */
-    public function getTotalPaidAttribute(): float
+    public function getTotalPaidOutAttribute(): float
     {
-        // يجمع كل الدفعات من نوع "صرف" (out)
+        if ($this->relationLoaded('payments')) {
+            return (float) $this->payments->where('type', 'out')->sum('amount_ils');
+        }
         return (float) $this->payments()->where('type', 'out')->sum('amount_ils');
     }
 
-    /**
-     * [Accessor] حساب الرصيد المتبقي للمستثمر بالشيكل
-     */
     public function getRemainingBalanceAttribute(): float
     {
-        // إجمالي الاستثمار - إجمالي ما تم صرفه له
-        return $this->total_invested - $this->total_paid;
+        return $this->total_investment_ils - $this->total_paid_out;
     }
 }

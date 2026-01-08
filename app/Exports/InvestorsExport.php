@@ -9,49 +9,37 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class InvestorsExport implements FromCollection, WithHeadings, WithMapping
 {
-    /**
-    * @return \Illuminate\Support\Collection
-    */
     public function collection()
     {
-
-        return Investor::all();
+        // جلب المستثمرين مع علاقاتهم
+        return Investor::with('projects')->get();
     }
 
-    /**
-     * تحديد الأعمدة التي سيتم تصديرها لكل صف.
-     *
-     * @param mixed $investor
-     * @return array
-     */
-    public function map($investor): array
-    {
-        return [
-            $investor->name,
-            $investor->id_number,
-            $investor->phone,
-            $investor->email,
-            $investor->address,
-            $investor->notes,
-            $investor->created_at->format('Y-m-d'), // تنسيق تاريخ الإنشاء
-        ];
-    }
-
-    /**
-     * تحديد عناوين الأعمدة في ملف الإكسل.
-     *
-     * @return array
-     */
     public function headings(): array
     {
+        // عناوين الأعمدة في ملف Excel
         return [
+            'ID',
             'الاسم',
             'رقم الهوية',
             'الجوال',
-            'البريد الإلكتروني',
-            'العنوان',
-            'ملاحظات',
-            'تاريخ الإضافة',
+            'إجمالي الاستثمار (ILS)',
+            'المصروف له (ILS)',
+            'الرصيد (ILS)',
+        ];
+    }
+
+    public function map($investor): array
+    {
+        // تحديد البيانات التي ستوضع في كل صف
+        return [
+            $investor->unique_id,
+            $investor->name,
+            $investor->id_number,
+            $investor->phone,
+            $investor->total_investment_ils,
+            $investor->total_paid_out,
+            $investor->remaining_balance,
         ];
     }
 }

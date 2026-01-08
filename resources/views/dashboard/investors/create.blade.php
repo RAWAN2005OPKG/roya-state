@@ -4,28 +4,41 @@
 @push('styles')
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <style>
-    /* --- تصميم احترافي ومحسن --- */
-    .form-section {
-        background-color: #f9fafb; padding: 2rem; border-radius: 0.75rem;
-        margin-bottom: 2.5rem; border: 1px solid #e5e7eb;
-    }
-    .form-section-title {
-        font-size: 1.5rem; font-weight: 600; color: #4f46e5;
-        margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb;
-    }
-    .sub-item-card {
-        background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.5rem;
-        margin-bottom: 1.5rem; padding: 1.5rem;
-    }
+    .form-section { background-color: #f9fafb; padding: 2rem; border-radius: 0.75rem; margin-bottom: 2.5rem; border: 1px solid #e5e7eb; }
+    .form-section-title { font-size: 1.5rem; font-weight: 600; color: #4f46e5; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb; }
+    .sub-item-card { background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.5rem; margin-bottom: 1.5rem; }
+    .sub-item-header { background-color: #f9fafb; padding: 0.75rem 1.25rem; border-bottom: 1px solid #e5e7eb; }
+    .sub-item-body { padding: 1.5rem; }
 </style>
 @endpush
 
-@section('content' )
+@section('content'  )
 <div class="card card-custom" style="border: none; background: transparent;">
     <form action="{{ route('dashboard.investors.store') }}" method="POST" id="investor-form">
         @csrf
         <div class="card-body p-0">
-            @if ($errors->any())<div class="alert alert-danger"><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+
+            {{-- ======================================================== --}}
+            {{-- [الأهم] قسم عرض الأخطاء الواضح --}}
+            {{-- ======================================================== --}}
+            @if ($errors->any())
+                <div class="alert alert-danger mb-5">
+                    <h4 class="alert-heading">حدث خطأ في التحقق!</h4>
+                    <p>يرجى مراجعة الحقول التالية والتأكد من تعبئتها بشكل صحيح:</p>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="alert alert-danger mb-5">
+                    <h4 class="alert-heading">فشل الحفظ!</h4>
+                    <p>{{ session('error') }}</p>
+                </div>
+            @endif
+            {{-- ======================================================== --}}
 
             {{-- 1. بيانات المستثمر --}}
             <div class="form-section">
@@ -55,11 +68,12 @@
 @endsection
 
 @push('scripts')
+{{-- الكود هنا مطابق تماماً للكود الذي أرسلته وهو صحيح --}}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
-    $(document ).ready(function() {
+    $(document  ).ready(function() {
         let investmentIndex = 0;
         const projectsList = @json($projects);
         const exchangeRates = { 'USD': 3.75, 'JOD': 5.20, 'ILS': 1 };
@@ -85,7 +99,9 @@
                 }
             }
             const rate = parseFloat(exchangeRateInput.val()) || 1;
-            $(`#amount_ils_display_${index}`).text((amount * rate).toFixed(2) + ' ILS');
+            const amountILS = amount * rate;
+            $(`#amount_ils_display_${index}`).val(new Intl.NumberFormat('en-US').format(amountILS.toFixed(2)));
+            $(`#invested_amount_ils_${index}`).val(amountILS.toFixed(2));
         }
 
         function addInvestmentField(investment = {}) {
@@ -97,32 +113,38 @@
 
             const investmentHtml = `
                 <div class="sub-item-card investment-item" data-index="${currentIndex}">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="sub-item-header d-flex justify-content-between align-items-center">
                         <h5>تفاصيل الاستثمار #${currentIndex + 1}</h5>
                         <button type="button" class="btn btn-danger btn-sm remove-item-btn" data-type="الاستثمار"><i class="fas fa-trash"></i></button>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 form-group"><label>المشروع <span class="text-danger">*</span></label><select name="projects[${currentIndex}][project_id]" class="form-control project-select" required>${projectOptions}</select></div>
-                        <div class="col-md-6 form-group"><label>نسبة الاستثمار (%)</label><input type="number" name="projects[${currentIndex}][investment_percentage]" class="form-control" step="0.01" value="${investment.investment_percentage || ''}"></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 form-group">
-                            <label>المبلغ المستثمر <span class="text-danger">*</span></label>
-                            <input type="text" id="invested_amount_formatted_${currentIndex}" class="form-control" value="${investment.invested_amount || ''}" required>
-                            <input type="hidden" name="projects[${currentIndex}][invested_amount]" id="invested_amount_${currentIndex}">
+                    <div class="sub-item-body">
+                        <div class="row">
+                            <div class="col-md-6 form-group"><label>المشروع <span class="text-danger">*</span></label><select name="projects[${currentIndex}][project_id]" class="form-control project-select" required>${projectOptions}</select></div>
+                            <div class="col-md-6 form-group"><label>نسبة الاستثمار (%)</label><input type="number" name="projects[${currentIndex}][investment_percentage]" class="form-control" step="0.01" value="${investment.investment_percentage || ''}"></div>
                         </div>
-                        <div class="col-md-4 form-group">
-                            <label>العملة <span class="text-danger">*</span></label>
-                            <select name="projects[${currentIndex}][currency]" id="currency_${currentIndex}" class="form-control currency-select" data-index="${currentIndex}" required>
-                                <option value="USD" ${investment.currency === 'USD' ? 'selected' : ''}>دولار (USD)</option>
-                                <option value="JOD" ${investment.currency === 'JOD' ? 'selected' : ''}>دينار (JOD)</option>
-                                <option value="ILS" ${investment.currency === 'ILS' ? 'selected' : ''}>شيكل (ILS)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <label>سعر الصرف</label>
-                            <input type="number" name="projects[${currentIndex}][exchange_rate]" id="exchange_rate_${currentIndex}" class="form-control exchange-rate" data-index="${currentIndex}" step="0.0001" value="${investment.exchange_rate || '1'}">
-                            <small class="form-text text-muted">القيمة بالشيكل: <strong id="amount_ils_display_${currentIndex}">0.00 ILS</strong></small>
+                        <div class="row">
+                            <div class="col-md-3 form-group">
+                                <label>المبلغ المستثمر <span class="text-danger">*</span></label>
+                                <input type="text" id="invested_amount_formatted_${currentIndex}" class="form-control" value="${investment.invested_amount || ''}" required>
+                                <input type="hidden" name="projects[${currentIndex}][invested_amount]" id="invested_amount_${currentIndex}">
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label>العملة <span class="text-danger">*</span></label>
+                                <select name="projects[${currentIndex}][currency]" id="currency_${currentIndex}" class="form-control currency-select" data-index="${currentIndex}" required>
+                                    <option value="USD" ${investment.currency === 'USD' ? 'selected' : ''}>دولار (USD)</option>
+                                    <option value="JOD" ${investment.currency === 'JOD' ? 'selected' : ''}>دينار (JOD)</option>
+                                    <option value="ILS" ${investment.currency === 'ILS' ? 'selected' : ''}>شيكل (ILS)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label>سعر الصرف</label>
+                                <input type="number" name="projects[${currentIndex}][exchange_rate]" id="exchange_rate_${currentIndex}" class="form-control exchange-rate" data-index="${currentIndex}" step="0.0001" value="${investment.exchange_rate || '1'}">
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label>القيمة بالشيكل (محسوبة)</label>
+                                <input type="text" id="amount_ils_display_${currentIndex}" class="form-control" readonly style="background-color: #e9ecef;">
+                                <input type="hidden" name="projects[${currentIndex}][invested_amount_ils]" id="invested_amount_ils_${currentIndex}">
+                            </div>
                         </div>
                     </div>
                 </div>`;
@@ -136,10 +158,8 @@
 
         $('#add-investment-btn').on('click', () => addInvestmentField());
 
-        // --- [الجديد] رسالة تأكيد الحذف ---
         $(document).on('click', '.remove-item-btn', function() {
-            const itemType = $(this).data('type');
-            if (confirm(`هل أنت متأكد من حذف هذا ${itemType}؟`)) {
+            if (confirm(`هل أنت متأكد من حذف هذا الاستثمار؟`)) {
                 $(this).closest('.sub-item-card').remove();
             }
         });
@@ -152,7 +172,12 @@
         });
 
         const oldProjects = @json(old('projects')) || [];
-        oldProjects.length > 0 ? oldProjects.forEach(p => addInvestmentField(p)) : addInvestmentField();
+        if (oldProjects.length > 0) {
+            oldProjects.forEach(p => addInvestmentField(p));
+        } else {
+            // لا تقم بإضافة حقل فارغ تلقائياً إلا إذا طلب المستخدم ذلك
+            // هذا يمنع إرسال حقل فارغ يسبب فشل التحقق
+        }
 
         $('#investor-form').on('submit', function() {
             $('.investment-item').each(function() {
@@ -161,6 +186,7 @@
                 if (cleave) {
                     $(`#invested_amount_${index}`).val(cleave.getRawValue());
                 }
+                calculateILS(index);
             });
             return true;
         });

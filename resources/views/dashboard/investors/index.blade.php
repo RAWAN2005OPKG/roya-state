@@ -1,40 +1,27 @@
 @extends('layouts.container')
-@section('title', 'قائمة المستثمرين')
+@section('title', 'إدارة المستثمرين')
 
-@push('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
-@endpush
-
-@section('content' )
+@section('content')
 <div class="card card-custom gutter-b">
     <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-handshake text-warning mr-2"></i> قائمة المستثمرين</h3>
+        <h3 class="card-title"><i class="fas fa-users text-warning mr-2"></i> قائمة المستثمرين</h3>
         <div class="card-toolbar">
-            <a href="{{ route('dashboard.investors.create') }}" class="btn btn-warning"><i class="la la-plus"></i> إضافة مستثمر</a>
+            <a href="{{ route('dashboard.investors.create') }}" class="btn btn-primary btn-sm mr-2">إضافة مستثمر</a>
+            <a href="{{ route('dashboard.investors.export.excel') }}" class="btn btn-success btn-sm mr-2">تصدير Excel</a>
+            <a href="{{ route('dashboard.investors.trash') }}" class="btn btn-danger btn-sm">سلة المحذوفات</a>
         </div>
     </div>
     <div class="card-body">
-        <!-- === بداية قسم البحث === -->
-        <form method="GET" action="{{ route('dashboard.investors.index') }}" class="mb-8 p-4 bg-light rounded">
-            <div class="row">
-                <div class="col-md-4 form-group">
-                    <label class="font-weight-bold">بحث بالرقم التعريفي (ID)</label>
-                    <input type="text" name="search_id" class="form-control" placeholder="أدخل الرقم التعريفي" value="{{ request('search_id') }}">
-                </div>
-                <div class="col-md-4 form-group">
-                    <label class="font-weight-bold">بحث برقم الهوية</label>
-                    <input type="text" name="search_id_number" class="form-control" placeholder="أدخل رقم الهوية" value="{{ request('search_id_number') }}">
-                </div>
-                <div class="col-md-4 align-self-end">
-                    <button type="submit" class="btn btn-success"> <i class="la la-search"></i> بحث</button>
-                    <a href="{{ route('dashboard.investors.index') }}" class="btn btn-secondary"> <i class="la la-close"></i> إلغاء</a>
+        <form action="{{ route('dashboard.investors.index') }}" method="GET" class="mb-5">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="ابحث بالاسم, ID, أو رقم الهوية..." value="{{ request('search') }}">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">بحث</button>
                 </div>
             </div>
         </form>
-        <!-- === نهاية قسم البحث === -->
-
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover" id="investorsTable">
+            <table class="table table-striped table-bordered table-hover">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -52,51 +39,37 @@
                     @forelse($investors as $investor)
                     <tr>
                         <td>{{ $investor->unique_id }}</td>
-                        <td>{{ $investor->name }}</td>
+                        <td>
+                            <a href="{{ route('dashboard.investors.show', $investor->id) }}" class="text-dark-75 font-weight-bolder">{{ $investor->name }}</a>
+                        </td>
                         <td>{{ $investor->id_number ?? '-' }}</td>
                         <td>{{ $investor->phone ?? '-' }}</td>
                         <td>
                             @forelse($investor->projects as $project)
-                                <div class="mb-2 p-2 border rounded" style="border-right: 3px solid #FFA800 !important;">
-                                    <p class="mb-0 font-weight-bold text-warning">{{ $project->name }}</p>
-                                    <small class="text-muted">
-                                        المبلغ: {{ number_format($project->pivot->invested_amount, 2) }} {{ $project->pivot->currency }}
-                                        <span class="text-dark">(يعادل {{ number_format($project->pivot->invested_amount_ils, 2) }} ILS)</span>
-                                    </small>
-                                </div>
+                                <span class="badge badge-light-info mb-1">{{ $project->name }}</span>
                             @empty
-                                <span class="text-muted">لم يستثمر في مشاريع.</span>
+                                <span class="text-muted">-</span>
                             @endforelse
                         </td>
-                        <td><span class="text-info font-weight-bold">{{ number_format($investor->total_invested, 2) }}</span></td>
-                        <td><span class="text-danger font-weight-bold">{{ number_format($investor->total_paid, 2) }}</span></td>
-                        <td><span class="text-success font-weight-bold">{{ number_format($investor->remaining_investment, 2) }}</span></td>
+                        <td><span class="font-weight-bold text-primary">{{ number_format($investor->total_investment_ils, 2) }}</span></td>
+                        <td><span class="font-weight-bold text-success">{{ number_format($investor->total_paid_out, 2) }}</span></td>
+                        <td><span class="font-weight-bold text-danger">{{ number_format($investor->remaining_balance, 2) }}</span></td>
                         <td>
-                            {{-- <a href="{{ route('dashboard.investors.show', $investor->id) }}" class="btn btn-sm btn-icon btn-info" title="عرض"><i class="la la-eye"></i></a> --}}
+                            <a href="{{ route('dashboard.investors.edit', $investor->id) }}" class="btn btn-sm btn-icon btn-warning" title="تعديل"><i class="la la-edit"></i></a>
+                            <form action="{{ route('dashboard.investors.destroy', $investor->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من نقل هذا المستثمر إلى سلة المحذوفات؟');" style="display: inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-icon btn-danger" title="حذف"><i class="la la-trash"></i></button>
+                            </form>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="9" class="text-center">لا يوجد مستثمرون مطابقون لنتائج البحث.</td></tr>
+                    <tr><td colspan="9" class="text-center">لا يوجد مستثمرون لعرضهم.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        <div class="mt-4">{{ $investors->links() }}</div>
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
-<script>
-    $(document ).ready(function() {
-        // عطّل بحث DataTables المدمج لأننا نستخدم بحث الخادم
-        $('#investorsTable').DataTable({
-            "searching": false,
-            "language": {"url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json"},
-            "lengthMenu": [ [10, 20, 30, -1], [10, 20, 30, "الكل"] ],
-            "pageLength": 10
-        });
-    });
-</script>
-@endpush
