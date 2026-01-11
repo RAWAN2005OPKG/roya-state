@@ -1,5 +1,5 @@
 @extends('layouts.container')
-@section('title', 'إضافة عميل جديد')
+@section('title', 'تعديل بيانات العميل: ' . $client->name)
 @push('styles')
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <style>
@@ -10,21 +10,22 @@
 @endpush
 @section('content')
 <div class="card card-custom gutter-b">
-    <div class="card-header"><h3 class="card-title">إضافة عميل جديد وعقود البيع</h3></div>
-    <form action="{{ route('dashboard.clients.store') }}" method="POST" id="client-form">
+    <div class="card-header"><h3 class="card-title">تعديل بيانات العميل وعقوده</h3></div>
+    <form action="{{ route('dashboard.clients.update', $client->id) }}" method="POST" id="client-form">
         @csrf
+        @method('PUT')
         <div class="card-body">
             @if ($errors->any())<div class="alert alert-danger"><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
             @if (session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
             <h4 class="mb-5 text-primary">1. بيانات العميل</h4>
             <div class="row">
-                <div class="col-md-6 form-group"><label>اسم العميل <span class="text-danger">*</span></label><input type="text" name="name" class="form-control" value="{{ old('name') }}" required></div>
-                <div class="col-md-6 form-group"><label>رقم الجوال</label><input type="text" name="phone" class="form-control" value="{{ old('phone') }}"></div>
+                <div class="col-md-6 form-group"><label>اسم العميل <span class="text-danger">*</span></label><input type="text" name="name" class="form-control" value="{{ old('name', $client->name) }}" required></div>
+                <div class="col-md-6 form-group"><label>رقم الجوال</label><input type="text" name="phone" class="form-control" value="{{ old('phone', $client->phone) }}"></div>
             </div>
             <div class="row">
-                <div class="col-md-6 form-group"><label>رقم الهوية</label><input type="text" name="id_number" class="form-control" value="{{ old('id_number') }}"></div>
-                <div class="col-md-6 form-group"><label>العنوان</label><input type="text" name="address" class="form-control" value="{{ old('address') }}"></div>
+                <div class="col-md-6 form-group"><label>رقم الهوية</label><input type="text" name="id_number" class="form-control" value="{{ old('id_number', $client->id_number) }}"></div>
+                <div class="col-md-6 form-group"><label>العنوان</label><input type="text" name="address" class="form-control" value="{{ old('address', $client->address) }}"></div>
             </div>
 
             <hr class="my-10">
@@ -34,7 +35,8 @@
             <button type="button" id="add-contract-btn" class="btn btn-success btn-sm mt-3"><i class="fas fa-plus"></i> إضافة عقد بيع</button>
         </div>
         <div class="card-footer text-left">
-            <button type="submit" class="btn btn-primary mr-2">حفظ البيانات</button>
+            <button type="submit" class="btn btn-primary mr-2">حفظ التعديلات</button>
+            <a href="{{ route('dashboard.clients.index') }}" class="btn btn-secondary">إلغاء</a>
         </div>
     </form>
 </div>
@@ -92,18 +94,19 @@
             const currentIndex = contractIndex;
             let unitOptions = '<option value="">اختر وحدة...</option>';
             availableUnits.forEach(unit => {
-                unitOptions += `<option value="${unit.id}" ${contract.unit_id == unit.id ? 'selected' : ''}>[${unit.project.name}] - ${unit.unit_number}</option>`;
+                unitOptions += `<option value="${unit.id}" ${contract.project_unit_id == unit.id ? 'selected' : ''}>[${unit.project.name}] - ${unit.unit_number}</option>`;
             });
 
             const contractHtml = `
                 <div class="unit-sale-item" data-index="${currentIndex}">
+                    <input type="hidden" name="contracts[${currentIndex}][id]" value="${contract.id || ''}">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5>تفاصيل العقد #${currentIndex + 1}</h5>
                         <button type="button" class="btn btn-danger btn-sm remove-item-btn"><i class="fas fa-trash"></i></button>
                     </div>
                     <div class="row">
                         <div class="col-md-6 form-group"><label>الوحدة المشتراة <span class="text-danger">*</span></label><select name="contracts[${currentIndex}][unit_id]" class="form-control unit-select" required>${unitOptions}</select></div>
-                        <div class="col-md-6 form-group"><label>تاريخ البيع <span class="text-danger">*</span></label><input type="date" name="contracts[${currentIndex}][sale_date]" class="form-control" value="${contract.sale_date || new Date().toISOString().slice(0, 10)}" required></div>
+                        <div class="col-md-6 form-group"><label>تاريخ البيع <span class="text-danger">*</span></label><input type="date" name="contracts[${currentIndex}][sale_date]" class="form-control" value="${contract.contract_date ? contract.contract_date.slice(0,10) : new Date().toISOString().slice(0, 10)}" required></div>
                     </div>
                     <div class="details-grid unit-details-display" style="display: none;"></div>
                     <div class="row mt-3">
@@ -112,7 +115,6 @@
                         <div class="col-md-3 form-group"><label>سعر الصرف</label><input type="number" name="contracts[${currentIndex}][exchange_rate]" id="exchange_rate_${currentIndex}" class="form-control exchange-rate" data-index="${currentIndex}" step="0.0001" value="${contract.exchange_rate || '3.75'}"></div>
                         <div class="col-md-3 form-group"><label>القيمة بالشيكل</label><input type="text" id="total_amount_ils_display_${currentIndex}" class="form-control" readonly><input type="hidden" name="contracts[${currentIndex}][total_amount_ils]" id="total_amount_ils_${currentIndex}"></div>
                     </div>
-                    <div class="row"><div class="col-md-4 form-group"><label>دفعة مقدمة (بنفس العملة)</label><input type="number" name="contracts[${currentIndex}][down_payment]" class="form-control" value="${contract.down_payment || '0'}" step="0.01"></div></div>
                 </div>`;
             $('#contracts-container').append(contractHtml);
             const newSelect = $(`select[name="contracts[${currentIndex}][unit_id]"]`);
@@ -129,8 +131,8 @@
         $(document).on('input', 'input[id^="total_amount_formatted_"]', function() { calculateILS($(this).closest('.unit-sale-item').data('index')); });
         $(document).on('change', '.unit-select', function() { showUnitDetails(this); });
 
-        const oldContracts = @json(old('contracts')) || [];
-        oldContracts.length > 0 ? oldContracts.forEach(c => addContractField(c)) : addContractField();
+        const dataToLoad = @json(old('contracts') ?? $client->contracts);
+        dataToLoad.length > 0 ? dataToLoad.forEach(c => addContractField(c)) : addContractField();
 
         $('#client-form').on('submit', function() {
             $('.unit-sale-item').each(function() {

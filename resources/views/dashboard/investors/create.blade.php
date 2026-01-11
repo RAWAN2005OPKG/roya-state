@@ -68,7 +68,6 @@
 @endsection
 
 @push('scripts')
-{{-- الكود هنا مطابق تماماً للكود الذي أرسلته وهو صحيح --}}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>

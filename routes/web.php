@@ -184,11 +184,16 @@ Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController:
     Route::resource('payments', App\Http\Controllers\Dashboard\PaymentController::class)->only(['index', 'create', 'store']);
     Route::resource('clients', App\Http\Controllers\Dashboard\ClientController::class);
 
-Route::prefix('clients')->name('clients.')->group(function () {
-    Route::get('/', [App\Http\Controllers\Dashboard\ClientController::class, 'index'])->name('index');
-    Route::get('/create', [App\Http\Controllers\Dashboard\ClientController::class, 'create'])->name('create');
-    Route::post('/', [App\Http\Controllers\Dashboard\ClientController::class, 'store'])->name('store');
-});
+  // --- 1. العملاء (Clients) ---
+    Route::prefix('clients')->name('clients.')->group(function () {
+        Route::get('/trash', [App\Http\Controllers\Dashboard\ClientController::class, 'trash'])->name('trash');
+        Route::put('/{id}/restore', [App\Http\Controllers\Dashboard\ClientController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\ClientController::class, 'forceDelete'])->name('forceDelete');
+        Route::get('/export/excel', [App\Http\Controllers\Dashboard\ClientController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/{client}/export/word', [App\Http\Controllers\Dashboard\ClientController::class, 'exportWord'])->name('export.word');
+    });
+    Route::resource('clients', App\Http\Controllers\Dashboard\ClientController::class);
+
    // 7. الموظفون (Employees)
     Route::get('/employees/export/excel', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'exportExcel'])->name('employees.export.excel');
     Route::get('/employees/{employee}/pay', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'showPayForm'])->name('employees.pay.form');

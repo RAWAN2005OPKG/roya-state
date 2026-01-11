@@ -4,80 +4,68 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name',
-        'phone',
-        'id_number',
-        'address',
-        'notes',
-        'unique_id'
+        'name', 'unique_id', 'id_number', 'phone', 'address', 'notes',
     ];
 
     /**
-     * هذا هو الجزء الجديد والمهم.
-     * سيتم تشغيل هذا الكود تلقائياً قبل إنشاء أي عميل جديد.
+     * دالة Boot لإنشاء ID فريد تلقائياً.
      */
     protected static function boot()
     {
         parent::boot();
-
-        static::creating(function ($client) {
-            // أنشئ رقماً تعريفياً فريداً يعتمد على الوقت الحالي وجزء عشوائي
-            // مثال: CL-1672482187-A3F
-            $client->unique_id = 'CL-' . time() . '-' . strtoupper(substr(md5(uniqid()), 0, 3));
+        static::creating(function ($model) {
+            if (empty($model->unique_id)) {
+                $model->unique_id = 'CLT-' . time() . '-' . random_int(100, 999);
+            }
         });
     }
 
-    public function units()
-    {
-        return $this->belongsToMany(ProjectUnit::class, 'client_project_unit')
-                    ->withPivot([
-                        'sale_price', 'currency', 'exchange_rate', 'sale_price_ils',
-                        'sale_date', 'contract_details'
-                    ])
-                    ->withTimestamps();
-    }
-// علاقة: العميل يمكن أن يكون له عدة عقود
+    /**
+     * علاقة: العميل يمكن أن يشتري عدة وحدات (عقود بيع).
+     */
     public function contracts()
     {
-        return $this->morphMany(Contract::class, 'contractable');
+        return $this->hasMany(Contract::class);
     }
 
-    // علاقة: العميل يمكن أن يكون له عدة دفعات
+    /**
+     * علاقة: العميل يمكن أن يكون له عدة دفعات (قيود).
+     */
     public function payments()
     {
         return $this->morphMany(Payment::class, 'payable');
     }
 
+    // --- دوال الحسابات المالية التلقائية (Accessors) ---
 
     /**
-     * حساب تلقائي: إجمالي قيمة العقود (المستحق) بالشيكل
+     * [Accessor] حساب إجمالي قيمة العقود المستحقة على العميل بالشيكل.
      */
-    public function getTotalDueAttribute()
+    public function getTotalDueIlsAttribute(): float
     {
-        // يجمع قيمة كل العقود المرتبطة بهذا العميل
-        return $this->contracts()->sum('investment_amount_ils');
+        return (float) $this->contracts()->sum('total_amount_ils');
     }
 
     /**
-     * حساب تلقائي: إجمالي المبالغ المدفوعة من هذا العميل بالشيكل
+     * [Accessor] حساب إجمالي المبالغ التي دفعها العميل بالشيكل.
      */
-    public function getTotalPaidAttribute()
+    public function getTotalPaidIlsAttribute(): float
     {
-        // يجمع كل الدفعات من نوع "قبض" (in) المرتبطة بهذا العميل
-        return $this->payments()->where('type', 'in')->sum('amount_ils');
+        return (float) $this->payments()->where('type', 'in')->sum('amount_ils');
     }
 
     /**
-     * حساب تلقائي: الرصيد المتبقي على العميل
+     * [Accessor] حساب الرصيد المتبقي على العميل بالشيكل.
      */
-    public function getRemainingBalanceAttribute()
+    public function getRemainingBalanceAttribute(): float
     {
-        return $this->total_due - $this->total_paid;
+        return $this->total_due_ils - $this->total_paid_ils;
     }
 }
