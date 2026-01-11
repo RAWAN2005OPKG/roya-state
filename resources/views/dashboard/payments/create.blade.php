@@ -51,14 +51,12 @@
             {{-- ================== 1. تحديد الكيان ================== --}}
             <h4 class="mb-5 text-primary">1. تحديد الكيان</h4>
             <div class="row">
-                <div class="col-md-6 form-group">
-                    <label>الكيان المستهدف <span class="text-danger">*</span></label>
-                    <select name="payable_type" id="payable_type" class="form-control" required>
-                        <option value="">اختر نوع الكيان...</option>
-                        <option value="Client">عميل</option>
-                        <option value="Investor">مستثمر</option>
-                        <option value="Subcontractor">مقاول / مورد</option>
-                    </select>
+              <div class="col-md-4 form-group">
+             <label>العقد المرتبط <span class="text-danger">*</span></label>
+             <select name="contract_id" id="contract_id" class="form-control" required>
+            <option value="">اختر العقد أولاً</option>
+         </select>
+        </div>
                 </div>
                 <div class="col-md-6 form-group">
                     <label>اسم الكيان <span class="text-danger">*</span></label>
@@ -174,36 +172,46 @@ $(document ).ready(function() {
     // ====================================================================
     // 2. منطق جلب تفاصيل الكيان عند اختياره
     // ====================================================================
-    $('#payable_id').on('change', function() {
-        const id = $(this).val();
-        const type = $('#payable_type').val();
-        const infoBox = $('#payable-info');
+   $('#payable_id').on('change', function() {
+    const selectedOption = $(this).find('option:selected');
+    const payableId = $(this).val();
+    const payableType = $('#payable_type').val();
+    const contractSelect = $('#contract_id');
 
-        if (!id) {
-            infoBox.addClass('d-none');
-            return;
-        }
+    contractSelect.empty().append('<option value="">جاري التحميل...</option>');
 
+    if (payableId) {
+        // عرض معلومات الكيان
+        $('#info-name').text(selectedOption.data('name'));
+        $('#payable-info').removeClass('d-none');
+
+        // جلب العقود المرتبطة بهذا الكيان عبر AJAX
         $.ajax({
-            url: "{{ route('dashboard.getPayableDetails') }}",
-            data: { type: type, id: id },
-            success: function(details) {
-                const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                $('#info-name').text(details.name);
-                $('#info-id_number').text(details.id_number || '-');
-                $('#info-phone').text(details.phone || '-');
-                $('#info-total_due').text(formatter.format(details.total_due));
-                $('#info-total_paid').text(formatter.format(details.total_paid));
-                $('#info-remaining_balance').text(formatter.format(details.remaining_balance));
-                infoBox.removeClass('d-none');
+            url: "{{ route('dashboard.getPayableContracts') }}",
+            type: 'GET',
+            data: {
+                payable_id: payableId,
+                payable_type: payableType
+            },
+            success: function(data) {
+                contractSelect.empty().append('<option value="">اختر العقد</option>');
+                if (data.contracts.length > 0) {
+                    data.contracts.forEach(contract => {
+                        contractSelect.append(`<option value="${contract.id}">العقد رقم: ${contract.id} - القيمة: ${contract.investment_amount}</option>`);
+                    });
+                } else {
+                    contractSelect.empty().append('<option value="">لا توجد عقود لهذا الكيان</option>');
+                }
             },
             error: function() {
-                infoBox.addClass('d-none');
-                alert('حدث خطأ أثناء جلب تفاصيل الكيان.');
+                contractSelect.empty().append('<option value="">فشل تحميل العقود</option>');
             }
         });
-    });
-
+    } else {
+        $('#payable-info').addClass('d-none');
+        contractSelect.empty().append('<option value="">اختر الكيان أولاً</option>');
+    }
+});
     // ====================================================================
     // 3. منطق حساب العملة
     // ====================================================================
@@ -229,9 +237,7 @@ $(document ).ready(function() {
     $('#amount, #currency, #exchange_rate').on('input change', calculateILS);
     calculateILS();
 
-    // ====================================================================
     // 4. منطق رسم تفاصيل طريقة الدفع
-    // ====================================================================
     function renderPaymentDetails(method) {
         const container = $('#payment-details-container');
         container.empty();
@@ -251,9 +257,6 @@ $(document ).ready(function() {
     $('#method').on('change', function() { renderPaymentDetails($(this).val()); });
     renderPaymentDetails($('#method').val());
 
-    // ====================================================================
-    // 5. منطق تنظيف حقل المبلغ قبل إرسال النموذج
-    // ====================================================================
     $('#payment-form').on('submit', function() {
         const rawValue = cleaveAmount.getRawValue();
         // تعيين القيمة الخام إلى حقل الإدخال المخفي أو مباشرة

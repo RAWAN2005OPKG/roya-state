@@ -149,17 +149,13 @@ Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryCo
     });
     Route::resource('expenses',  App\Http\Controllers\Dashboard\ExpenseController::class);
 
-    // 3. المستثمرون (Investors)
-  Route::resource('investors', App\Http\Controllers\Dashboard\InvestorController::class);
-
-    Route::prefix('investors')->name('investors.')->group(function () {
-        Route::get('/trash', [App\Http\Controllers\Dashboard\InvestorController::class, 'trash'])->name('trash');
-        Route::put('/{id}/restore', [App\Http\Controllers\Dashboard\InvestorController::class, 'restore'])->name('restore');
-        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\InvestorController::class, 'forceDelete'])->name('forceDelete');
-        Route::get('/export/excel', [App\Http\Controllers\Dashboard\InvestorController::class, 'exportExcel'])->name('export.excel');
-        Route::get('/{investor}/export/word', [App\Http\Controllers\Dashboard\InvestorController::class, 'exportWord'])->name('export.word');
-    });
-    Route::get('/reportproject/export/excel', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'exportExcel'])->name('dashboard.reportproject.export.excel');
+   // --- قسم المستثمرين (Investors) ---
+    Route::get('investors/trash', [App\Http\Controllers\Dashboard\InvestorController::class, 'trash'])->name('investors.trash');
+    Route::put('investors/trash/{id}/restore', [App\Http\Controllers\Dashboard\InvestorController::class, 'restore'])->name('investors.restore');
+    Route::delete('investors/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\InvestorController::class, 'forceDelete'])->name('investors.forceDelete');
+    Route::get('investors/export/excel', [App\Http\Controllers\Dashboard\InvestorController::class, 'exportExcel'])->name('investors.export.excel');
+    Route::get('investors/{investor}/export/word', [App\Http\Controllers\Dashboard\InvestorController::class, 'export.word'])->name('investors.export.word');
+    Route::resource('investors', App\Http\Controllers\Dashboard\InvestorController::class);
 
    Route::name('reportproject.')->group(function () {
         Route::get('reportproject/trash', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'trash'])->name('trash.index');
@@ -181,15 +177,11 @@ Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController:
   // --- مسار AJAX الجديد لجلب الكيانات في صفحة العقود ---
  Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::class);
     Route::get('get-contractables', [App\Http\Controllers\Dashboard\ContractController::class, 'getContractables'])->name('getContractables');
- Route::prefix('payments')->name('payments.')->group(function () {
-        Route::get('/', [App\Http\Controllers\Dashboard\PaymentController::class, 'index'])->name('index');
-        Route::get('/create', [App\Http\Controllers\Dashboard\PaymentController::class, 'create'])->name('create');
-        Route::post('/', [App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('store');
 
-});    Route::resource('payments', App\Http\Controllers\Dashboard\PaymentController::class)->only(['index', 'create', 'store']);
-    Route::get('get-payable-details', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayableDetails'])->name('getPayableDetails');
-      Route::get('get-payables', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayables'])->name('getPayables');
-
+    // --- قسم القيود (Payments) ---
+    Route::get('get-payables', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayables'])->name('getPayables');
+    Route::get('get-payable-contracts', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayableContracts'])->name('getPayableContracts'); // <-- [مهم] هذا هو المسار الصحيح
+    Route::resource('payments', App\Http\Controllers\Dashboard\PaymentController::class)->only(['index', 'create', 'store']);
     Route::resource('clients', App\Http\Controllers\Dashboard\ClientController::class);
 
 Route::prefix('clients')->name('clients.')->group(function () {

@@ -68,4 +68,9 @@ class Payment extends Model
         // افترض أن لديك مودل BankAccount
         return $this->belongsTo(BankAccount::class, 'receiver_bank_account_id');
     }
+    public function contracts()
+{
+    return $this->morphMany(Contract::class, 'contractable');
+}
+
 }

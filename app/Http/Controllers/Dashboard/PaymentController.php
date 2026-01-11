@@ -116,29 +116,28 @@ class PaymentController extends Controller
     /**
      * [AJAX] دالة لجلب تفاصيل كيان معين
      */
-    public function getPayableDetails(Request $request)
-    {
-        $type = $request->query('type');
-        $id = $request->query('id');
-        if (!in_array($type, ['Client', 'Investor', 'Subcontractor']) || !$id) {
-            return response()->json(['error' => 'Invalid data'], 400);
-        }
-        $modelClass = "App\\Models\\" . $type;
-        $entity = $modelClass::find($id);
-        if (!$entity) { return response()->json(['error' => 'Entity not found'], 404); }
+   public function getPayableContracts(Request $request)
+{
+    $request->validate([
+        'payable_id' => 'required|integer',
+        'payable_type' => 'required|string',
+    ]);
 
-        $total_due = 0;
-        if ($type === 'Client') $total_due = $entity->total_due;
-        elseif ($type === 'Investor') $total_due = $entity->total_invested;
-        elseif ($type === 'Subcontractor') $total_due = $entity->total_contracts_value;
+    $modelName = "App\\Models\\" . $request->payable_type;
 
-        return response()->json([
-            'name' => $entity->name,
-            'id_number' => $entity->id_number,
-            'phone' => $entity->phone,
-            'total_due' => $total_due,
-            'total_paid' => $entity->total_paid,
-            'remaining_balance' => $entity->remaining_balance,
-        ]);
+    if (!class_exists($modelName)) {
+        return response()->json(['contracts' => []]);
     }
+
+    $payable = $modelName::find($request->payable_id);
+
+    if (!$payable) {
+        return response()->json(['contracts' => []]);
+    }
+
+    // جلب العقود المرتبطة بالكيان
+    $contracts = $payable->contracts()->select('id', 'investment_amount')->get();
+
+    return response()->json(['contracts' => $contracts]);
+}
 }

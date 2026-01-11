@@ -12,7 +12,7 @@
 </style>
 @endpush
 
-@section('content' )
+@section('content'  )
 <div class="card card-custom" style="border: none; background: transparent;">
     <form action="{{ route('dashboard.investors.update', $investor->id) }}" method="POST" id="investor-form">
         @csrf
@@ -149,7 +149,7 @@
             calculateILS($(this).closest('.investment-item').data('index'));
         });
 
-        // --- [الأهم] جلب البيانات الحالية أو القديمة ---
+        // --- [الكود المصحح 100%] ---
         const oldProjects = @json(old('projects'));
         const currentInvestments = @json($investor->projects->map(function($p) {
             return [
@@ -161,13 +161,12 @@
             ];
         }));
 
-        // إذا كان هناك بيانات قديمة (بسبب خطأ تحقق)، استخدمها. وإلا، استخدم البيانات الحالية من قاعدة البيانات.
-        const dataToLoad = oldProjects || currentInvestments;
+        const dataToLoad = (oldProjects && oldProjects.length > 0) ? oldProjects : currentInvestments;
 
         if (dataToLoad && dataToLoad.length > 0) {
             dataToLoad.forEach(inv => addInvestmentField(inv));
         } else {
-            addInvestmentField(); // إضافة حقل فارغ إذا لم يكن هناك أي استثمارات
+            addInvestmentField();
         }
 
         $('#investor-form').on('submit', function() {
@@ -177,7 +176,7 @@
                 if (cleave) {
                     $(`#invested_amount_${index}`).val(cleave.getRawValue());
                 }
-                calculateILS(index); // التأكد من حساب القيمة النهائية قبل الإرسال
+                calculateILS(index);
             });
             return true;
         });
