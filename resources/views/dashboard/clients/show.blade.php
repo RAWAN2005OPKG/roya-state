@@ -1,18 +1,36 @@
 @extends('layouts.container')
 @section('title', 'ملف العميل: ' . $client->name)
+
 @push('styles')
 <style>
     .kpi-card { background-color: #f3f6f9; padding: 1.5rem; border-radius: 0.75rem; text-align: center; }
     .kpi-card .label { color: #6c757d; font-weight: 500; }
     .kpi-card .value { font-size: 2rem; font-weight: 700; }
+    .header-actions .btn { margin-left: 0.5rem; }
 </style>
 @endpush
+
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-5">
+<div class="d-flex justify-content-between align-items-center mb-5 flex-wrap">
     <h1 class="h2">ملف العميل: {{ $client->name }}</h1>
-    <div>
-        <a href="{{ route('dashboard.clients.export.word', $client->id) }}" class="btn btn-info btn-sm">تصدير Word</a>
-        <button onclick="window.print()" class="btn btn-light-primary btn-sm">طباعة</button>
+    <div class="header-actions">
+
+        <a href="{{ route('dashboard.clients.index') }}" class="btn btn-secondary btn-sm">
+            <i class="la la-list"></i> العودة للقائمة
+        </a>
+
+        <a href="{{ route('dashboard.clients.edit', $client->id) }}" class="btn btn-warning btn-sm">
+            <i class="la la-edit"></i> تعديل
+        </a>
+        <a href="{{ route('dashboard.clients.export.excel', ['client_id' => $client->id]) }}" class="btn btn-success btn-sm">
+            <i class="la la-file-excel"></i> تصدير Excel
+        </a>
+        <a href="{{ route('dashboard.clients.export.word', $client->id) }}" class="btn btn-info btn-sm">
+            <i class="la la-file-word"></i> تصدير Word
+        </a>
+        <button onclick="window.print()" class="btn btn-light-primary btn-sm">
+            <i class="la la-print"></i> طباعة
+        </button>
     </div>
 </div>
 

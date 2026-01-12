@@ -182,19 +182,15 @@ Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController:
     Route::get('get-payables', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayables'])->name('getPayables');
     Route::get('get-payable-contracts', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayableContracts'])->name('getPayableContracts'); // <-- [مهم] هذا هو المسار الصحيح
     Route::resource('payments', App\Http\Controllers\Dashboard\PaymentController::class)->only(['index', 'create', 'store']);
-    Route::resource('clients', App\Http\Controllers\Dashboard\ClientController::class);
 
   // --- 1. العملاء (Clients) ---
-    Route::prefix('clients')->name('clients.')->group(function () {
-        Route::get('/trash', [App\Http\Controllers\Dashboard\ClientController::class, 'trash'])->name('trash');
-        Route::put('/{id}/restore', [App\Http\Controllers\Dashboard\ClientController::class, 'restore'])->name('restore');
-        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\ClientController::class, 'forceDelete'])->name('forceDelete');
-        Route::get('/export/excel', [App\Http\Controllers\Dashboard\ClientController::class, 'exportExcel'])->name('export.excel');
-        Route::get('/{client}/export/word', [App\Http\Controllers\Dashboard\ClientController::class, 'exportWord'])->name('export.word');
-    });
+ Route::get('clients/trash', [App\Http\Controllers\Dashboard\ClientController::class, 'trash'])->name('clients.trash');
+    Route::put('clients/{id}/restore', [App\Http\Controllers\Dashboard\ClientController::class, 'restore'])->name('clients.restore');
+    Route::delete('clients/{id}/force-delete', [App\Http\Controllers\Dashboard\ClientController::class, 'forceDelete'])->name('clients.forceDelete');
+    Route::get('clients/export/excel', [App\Http\Controllers\Dashboard\ClientController::class, 'exportExcel'])->name('clients.export.excel');
+    Route::get('clients/{client}/export/word', [App\Http\Controllers\Dashboard\ClientController::class, 'exportWord'])->name('clients.export.word');
     Route::resource('clients', App\Http\Controllers\Dashboard\ClientController::class);
 
-   // 7. الموظفون (Employees)
     Route::get('/employees/export/excel', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'exportExcel'])->name('employees.export.excel');
     Route::get('/employees/{employee}/pay', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'showPayForm'])->name('employees.pay.form');
     Route::post('/employees/pay', [ App\Http\Controllers\Dashboard\EmployeeController::class, 'storePayment'])->name('employees.pay.store');

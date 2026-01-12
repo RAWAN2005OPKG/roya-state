@@ -6,7 +6,7 @@
     <div class="card-header">
         <h3 class="card-title"><i class="fas fa-users text-warning mr-2"></i> قائمة المستثمرين</h3>
         <div class="card-toolbar">
-            <a href="{{ route('dashboard.investors.create') }}" class="btn btn-primary btn-sm mr-2">إضافة مستثمر</a>
+            <a href="{{ route('dashboard.investors.create') }}" class="fas fa-users text-warning mr-2" style="color: rgb(250, 186, 8)5, 217, 0)">إضافة مستثمر</a>
             <a href="{{ route('dashboard.investors.export.excel') }}" class="btn btn-success btn-sm mr-2">تصدير Excel</a>
             <a href="{{ route('dashboard.investors.trash') }}" class="btn btn-danger btn-sm">سلة المحذوفات</a>
         </div>

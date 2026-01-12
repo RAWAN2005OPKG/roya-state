@@ -15,63 +15,37 @@ class Contract extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'contractable_id',
-        'contractable_type',
-        'project_id',
-        'project_unit_id', // مهم جداً لربط العقد بالوحدة
-        'contract_date',
-        'contract_details',
-        'investment_amount',
-        'currency',
-        'exchange_rate',
-        'investment_amount_ils',
+     protected $fillable = [
+        'client_id', 'project_unit_id', 'contract_date', 'status',
+        'total_amount', 'currency', 'exchange_rate', 'total_amount_ils',
+        'notes', 'attachment'
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'contract_date' => 'date',
-        'investment_amount' => 'decimal:2',
-        'investment_amount_ils' => 'decimal:2',
     ];
 
-    /**
-     * علاقة Polymorphic: صاحب العقد (عميل، مستثمر، الخ)
-     */
     public function contractable()
     {
         return $this->morphTo();
     }
 
-    /**
-     * علاقة: العقد يتبع لمشروع واحد
-     */
     public function project()
     {
         return $this->belongsTo(Project::class);
     }
 
-    /**
-     * علاقة: العقد مرتبط بوحدة سكنية واحدة
-     */
     public function projectUnit()
     {
         return $this->belongsTo(ProjectUnit::class);
     }
 
-    /**
-     * علاقة: العقد الواحد له عدة دفعات
-     */
+
     public function payments()
     {
         return $this->hasMany(Payment::class);
     }
 
-    // --- دوال الحسابات المالية التلقائية (Accessors) ---
 
     /**
      * [Accessor] حساب إجمالي المبالغ المدفوعة لهذا العقد بالشيكل

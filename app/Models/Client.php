@@ -11,60 +11,41 @@ class Client extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name', 'unique_id', 'id_number', 'phone', 'address', 'notes',
+        'name', 'unique_id', 'id_number', 'phone', 'address', 'notes'
     ];
 
-    /**
-     * دالة Boot لإنشاء ID فريد تلقائياً.
-     */
     protected static function boot()
     {
         parent::boot();
         static::creating(function ($model) {
             if (empty($model->unique_id)) {
-                $model->unique_id = 'CLT-' . time() . '-' . random_int(100, 999);
+                $model->unique_id = 'CLT-' . time();
             }
         });
     }
 
-    /**
-     * علاقة: العميل يمكن أن يشتري عدة وحدات (عقود بيع).
-     */
     public function contracts()
     {
         return $this->hasMany(Contract::class);
     }
 
-    /**
-     * علاقة: العميل يمكن أن يكون له عدة دفعات (قيود).
-     */
     public function payments()
     {
         return $this->morphMany(Payment::class, 'payable');
     }
 
-    // --- دوال الحسابات المالية التلقائية (Accessors) ---
-
-    /**
-     * [Accessor] حساب إجمالي قيمة العقود المستحقة على العميل بالشيكل.
-     */
-    public function getTotalDueIlsAttribute(): float
+    // --- Accessors ---
+    public function getTotalDueIlsAttribute()
     {
-        return (float) $this->contracts()->sum('total_amount_ils');
+        return $this->contracts()->sum('total_amount_ils');
     }
 
-    /**
-     * [Accessor] حساب إجمالي المبالغ التي دفعها العميل بالشيكل.
-     */
-    public function getTotalPaidIlsAttribute(): float
+    public function getTotalPaidIlsAttribute()
     {
-        return (float) $this->payments()->where('type', 'in')->sum('amount_ils');
+        return $this->payments()->where('type', 'in')->sum('amount_ils');
     }
 
-    /**
-     * [Accessor] حساب الرصيد المتبقي على العميل بالشيكل.
-     */
-    public function getRemainingBalanceAttribute(): float
+    public function getRemainingBalanceAttribute()
     {
         return $this->total_due_ils - $this->total_paid_ils;
     }
