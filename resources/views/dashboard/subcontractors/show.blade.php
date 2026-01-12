@@ -1,77 +1,86 @@
 @extends('layouts.container')
-@section('title', 'تفاصيل المقاول: ' . $subcontractor->name)
+@section('title', 'ملف المورد: ' . $subcontractor->name)
 
-@section('styles')
+@push('styles')
 <style>
-    /* يمكنكِ إضافة هذه الأنماط في ملف CSS الرئيسي لتجنب التكرار */
-    .details-card { background-color: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .details-header { border-bottom: 1px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-    .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
-    .detail-item { background-color: #f8fafc; padding: 15px; border-radius: 8px; }
-    .detail-item strong { display: block; color: #4f46e5; margin-bottom: 5px; }
-    .detail-item span { color: #1f2937; font-size: 1.1rem; }
-    .contracts-section .card-title { font-size: 1.5rem; margin-bottom: 1rem; }
+    .kpi-card { background-color: #f3f6f9; padding: 1.5rem; border-radius: 0.75rem; text-align: center; }
+    .kpi-card .label { color: #6c757d; font-weight: 500; }
+    .kpi-card .value { font-size: 2rem; font-weight: 700; }
+    .header-actions .btn { margin-left: 0.5rem; }
 </style>
-@endsection
+@endpush
 
 @section('content')
-<main class="main-content" style="padding-top: 40px;">
-    <div class="details-card" style="max-width: 1200px; margin: auto;">
-        <div class="details-header">
-            <h2>تفاصيل المقاول: {{ $subcontractor->name }}</h2>
-            <a href="{{ route('dashboard.subcontractors.index') }}" class="btn btn-secondary">العودة للقائمة</a>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-5 flex-wrap">
+    <h1 class="h2">ملف المورد: {{ $subcontractor->name }} <span class="text-muted h4">({{ $subcontractor->specialization }})</span></h1>
+    <div class="header-actions">
+        <a href="{{ route('dashboard.subcontractors.index') }}" class="btn btn-secondary btn-sm"><i class="la la-list"></i> العودة للقائمة</a>
+        <a href="{{ route('dashboard.subcontractors.edit', $subcontractor->id) }}" class="btn btn-warning btn-sm"><i class="la la-edit"></i> تعديل</a>
+        <a href="#" class="btn btn-success btn-sm"><i class="la la-file-excel"></i> تصدير Excel</a>
+    </div>
+</div>
 
-        <!-- قسم بيانات المقاول الأساسية -->
-        <div class="details-grid">
-            <div class="detail-item"><strong>الاسم:</strong> <span>{{ $subcontractor->name }}</span></div>
-            <div class="detail-item"><strong>نوع الخدمة:</strong> <span>{{ $subcontractor->service_type }}</span></div>
-            <div class="detail-item"><strong>الهاتف:</strong> <span>{{ $subcontractor->phone ?? 'غير مسجل' }}</span></div>
-            <div class="detail-item"><strong>مسؤول التواصل:</strong> <span>{{ $subcontractor->contact_person ?? 'غير محدد' }}</span></div>
-        </div>
+{{-- بطاقات الملخص المالي --}}
+<div class="row mb-5">
+    <div class="col-md-4"><div class="kpi-card"><div class="label">إجمالي قيمة العقود</div><div class="value text-primary">{{ number_format($subcontractor->total_contracts_value, 2) }} ILS</div></div></div>
+    <div class="col-md-4"><div class="kpi-card"><div class="label">إجمالي المدفوع</div><div class="value text-success">{{ number_format($subcontractor->total_paid, 2) }} ILS</div></div></div>
+    <div class="col-md-4"><div class="kpi-card"><div class="label">الرصيد المتبقي</div><div class="value text-danger">{{ number_format($subcontractor->remaining_balance, 2) }} ILS</div></div></div>
+</div>
 
-        <!-- قسم عقود المقاول (هذا هو الجزء الجديد والمهم) -->
-        <div class="contracts-section mt-5">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="card-title">عقود المقاول ({{ $subcontractor->contracts->count() }})</h3>
-                {{-- يمكنك إضافة زر لإنشاء عقد جديد لهذا المقاول مباشرة --}}
-                <a href="{{ route('dashboard.contracts.create', ['type' => 'subcontractor', 'id' => $subcontractor->id]) }}" class="btn btn-primary btn-sm">إضافة عقد جديد لهذا المقاول</a>
+<div class="card card-custom gutter-b">
+    <div class="card-header card-header-tabs-line">
+        <div class="card-toolbar">
+            <ul class="nav nav-tabs nav-tabs-line">
+                <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#details">البيانات الأساسية</a></li>
+                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#contracts">العقود</a></li>
+                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#expenses">كشف الحساب (المصروفات)</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="tab-content">
+            {{-- تبويب البيانات الأساسية --}}
+            <div class="tab-pane active" id="details">
+                <p><strong>ID:</strong> {{ $subcontractor->unique_id }}</p>
+                <p><strong>رقم الهوية/الشركة:</strong> {{ $subcontractor->id_number ?? '-' }}</p>
+                <p><strong>الجوال:</strong> {{ $subcontractor->phone ?? '-' }}</p>
+                <p><strong>ملاحظات:</strong> {{ $subcontractor->notes ?? '-' }}</p>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>رقم العقد</th>
-                            <th>المشروع</th>
-                            <th>قيمة العقد</th>
-                            <th>تاريخ التوقيع</th>
-                            <th>الحالة</th>
-                            <th>تحكم</th>
-                        </tr>
-                    </thead>
+
+            {{-- تبويب العقود --}}
+            <div class="tab-pane" id="contracts">
+                @forelse($subcontractor->contracts as $contract)
+                    <div class="mb-3 p-3 border rounded">
+                        <h5>عقد لمشروع: {{ $contract->project->name }}</h5>
+                        <p>قيمة العقد: {{ number_format($contract->contract_value, 2) }} {{ $contract->currency }} (يعادل {{ number_format($contract->value_in_ils, 2) }} ILS)</p>
+                        <p>تاريخ العقد: {{ $contract->contract_date->format('Y-m-d') }}</p>
+                        <p>التفاصيل: {{ $contract->contract_details ?? 'لا يوجد' }}</p>
+                    </div>
+                @empty
+                    <p>لا توجد عقود مسجلة لهذا المورد.</p>
+                @endforelse
+            </div>
+
+            {{-- تبويب المصروفات (الدفعات) --}}
+            <div class="tab-pane" id="expenses">
+                {{-- سنضيف زر إضافة مصروف هنا لاحقاً عندما نبني قسم المصروفات --}}
+                {{-- <a href="#" class="btn btn-success btn-sm mb-4">إضافة دفعة جديدة</a> --}}
+                <table class="table">
+                    <thead><tr><th>التاريخ</th><th>المبلغ (ILS)</th><th>ملاحظات</th></tr></thead>
                     <tbody>
-                        @forelse($subcontractor->contracts as $contract)
-                            <tr>
-                                <td><strong>{{ $contract->contract_id }}</strong></td>
-                                <td>{{ $contract->project->project_name ?? '-' }}</td>
-                                <td>{{ number_format($contract->investment_amount, 2) }} {{ $contract->currency }}</td>
-                                <td>{{ $contract->signing_date->format('Y-m-d') }}</td>
-                                <td><span class="badge">{{ $contract->status }}</span></td>
-                                <td>
-                                    <a href="{{ route('dashboard.contracts.show', $contract->id) }}" title="عرض تفاصيل العقد">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                        @forelse($subcontractor->expenses as $expense)
+                        <tr>
+                            <td>{{ $expense->expense_date->format('Y-m-d') }}</td>
+                            <td>{{ number_format($expense->amount, 2) }} ILS</td>
+                            <td>{{ $expense->notes }}</td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="6" class="text-center" style="padding: 2rem;">لا توجد عقود مسجلة لهذا المقاول.</td>
-                            </tr>
+                        <tr><td colspan="3" class="text-center">لا توجد دفعات مسجلة لهذا المورد.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-</main>
+</div>
 @endsection

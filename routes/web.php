@@ -182,6 +182,8 @@ Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController:
     Route::get('get-payables', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayables'])->name('getPayables');
     Route::get('get-payable-contracts', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayableContracts'])->name('getPayableContracts'); // <-- [مهم] هذا هو المسار الصحيح
     Route::resource('payments', App\Http\Controllers\Dashboard\PaymentController::class)->only(['index', 'create', 'store']);
+// ---  مصروفات الموردين (Supplier Expenses) ---
+Route::resource('supplier-expenses', \App\Http\Controllers\Dashboard\SupplierExpenseController::class)->names('supplier_expenses')->except(['show']);
 
   // --- 1. العملاء (Clients) ---
  Route::get('clients/trash', [App\Http\Controllers\Dashboard\ClientController::class, 'trash'])->name('clients.trash');

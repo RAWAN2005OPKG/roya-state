@@ -168,7 +168,12 @@
                     </a>
                 </li>
 
-
+<li class="menu-item {{ request()->is('dashboard/supplier-expenses*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+                <a href="{{ route('dashboard.supplier_expenses.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">مصروفات المورّدين</span>
+                </a>
+            </li>
   <li class="menu-item {{ request()->routeIs('dashboard.cash-safes.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.cash-safes.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>

@@ -1,39 +1,55 @@
 @extends('layouts.container')
-@section('title', 'تعديل بيانات المقاول')
+@section('title', 'تعديل بيانات المورد: ' . $subcontractor->name)
 
 @section('content')
-<main class="main-content" style="padding-top: 40px;">
-    <div class="card card-custom" style="max-width: 800px; margin: auto;">
-        <div class="card-header"><h3 class="card-title">تعديل بيانات: {{ $subcontractor->name }}</h3></div>
+<div class="card card-custom gutter-b">
+    <div class="card-header">
+        <h3 class="card-title">تعديل بيانات: {{ $subcontractor->name }}</h3>
+    </div>
+    {{-- النموذج يشير إلى دالة update مع استخدام الطريقة PUT --}}
+    <form action="{{ route('dashboard.subcontractors.update', $subcontractor->id) }}" method="POST" id="subcontractor-form">
+        @csrf
+        @method('PUT')
         <div class="card-body">
             @if ($errors->any())
-                <div class="alert alert-danger"><ul>@foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach</ul></div>
+                <div class="alert alert-danger"><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
             @endif
 
-            <form action="{{ route('dashboard.subcontractors.update', $subcontractor->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="row">
-                    <div class="col-md-6 form-group mb-3">
-                        <label>اسم المقاول/الشركة *</label>
-                        <input type="text" name="name" class="form-control" value="{{ old('name', $subcontractor->name) }}" required>
-                    </div>
-                    <div class="col-md-6 form-group mb-3">
-                        <label>نوع الخدمة *</label>
-                        <input type="text" name="service_type" class="form-control" value="{{ old('service_type', $subcontractor->service_type) }}" required>
-                    </div>
-                    <div class="col-md-6 form-group mb-3">
-                        <label>رقم الهاتف</label>
-                        <input type="text" name="phone" class="form-control" value="{{ old('phone', $subcontractor->phone) }}">
-                    </div>
-                    <div class="col-md-6 form-group mb-3">
-                        <label>اسم مسؤول التواصل</label>
-                        <input type="text" name="contact_person" class="form-control" value="{{ old('contact_person', $subcontractor->contact_person) }}">
-                    </div>
+            <h4 class="mb-5 text-dark">1. بيانات المقاول/المورد الأساسية</h4>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>الاسم <span class="text-danger">*</span></label>
+                    {{-- عرض القيمة الحالية للمورد --}}
+                    <input type="text" name="name" class="form-control" value="{{ old('name', $subcontractor->name) }}" required>
                 </div>
-                <button type="submit" class="btn btn-primary mt-4">تحديث البيانات</button>
-            </form>
+                <div class="col-md-6 form-group">
+                    <label>التخصص <span class="text-danger">*</span></label>
+                    <input type="text" name="specialization" class="form-control" value="{{ old('specialization', $subcontractor->specialization) }}" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>رقم الهوية/الشركة</label>
+                    <input type="text" name="id_number" class="form-control" value="{{ old('id_number', $subcontractor->id_number) }}">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>رقم الجوال</label>
+                    <input type="text" name="phone" class="form-control" value="{{ old('phone', $subcontractor->phone) }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>ملاحظات</label>
+                <textarea name="notes" class="form-control" rows="2">{{ old('notes', $subcontractor->notes) }}</textarea>
+            </div>
+
+            {{-- ملاحظة: تعديل العقود أكثر تعقيداً وسنضيفه لاحقاً إذا احتجنا إليه --}}
+            {{-- حالياً، التركيز على تعديل البيانات الأساسية --}}
+
         </div>
-    </div>
-</main>
+        <div class="card-footer text-left">
+            <button type="submit" class="btn btn-success mr-2">حفظ التعديلات</button>
+            <a href="{{ route('dashboard.subcontractors.show', $subcontractor->id) }}" class="btn btn-secondary">إلغاء</a>
+        </div>
+    </form>
+</div>
 @endsection
