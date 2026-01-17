@@ -39,47 +39,40 @@
 @endsection
 
 @push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
-$(document ).ready(function() {
-    let contractIndex = 0;
-    const projectsList = @json($projects);
-    const exchangeRates = {'USD': 3.75, 'JOD': 5.20, 'ILS': 1};
-    let cleaveInstances = {};
+    $(document  ).ready(function() {
+        let investmentIndex = 0;
+        const projectsList = @json($projects);
+        const exchangeRates = { 'USD': 3.75, 'JOD': 5.20, 'ILS': 1 };
+        let cleaveInstances = {};
 
-    function applyCleave(selector) {
-        return new Cleave(selector, {
-            numeral: true,
-            numeralThousandsGroupStyle: 'thousand'
-        });
-    }
-
-    function calculateILS(index) {
-        const cleave = cleaveInstances[index];
-        if (!cleave) return;
-
-        const rawValue = parseFloat(cleave.getRawValue()) || 0;
-        const currency = $(`#currency_${index}`).val();
-        const exchangeRateInput = $(`#exchange_rate_${index}`);
-        const exchangeRateGroup = exchangeRateInput.closest('.form-group');
-
-        if (currency === 'ILS') {
-            exchangeRateInput.val(1);
-            exchangeRateGroup.hide();
-        } else {
-            exchangeRateGroup.show();
-            if (parseFloat(exchangeRateInput.val()) === 1 || exchangeRateInput.val() === '') {
-                exchangeRateInput.val(exchangeRates[currency] || 1);
-            }
+        function applyCleave(selector, index) {
+            cleaveInstances[index] = new Cleave(selector, { numeral: true, numeralThousandsGroupStyle: 'thousand' });
         }
 
-        const rate = parseFloat(exchangeRateInput.val()) || 1;
-        const amountILS = rawValue * rate;
+        function calculateILS(index) {
+            const cleave = cleaveInstances[index];
+            if (!cleave) return;
+            const amount = parseFloat(cleave.getRawValue()) || 0;
+            const currency = $(`#currency_${index}`).val();
+            const exchangeRateInput = $(`#exchange_rate_${index}`);
 
-        // عرض القيمة للمستخدم
-        $(`#amount_ils_display_${index}`).text(new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountILS));
-    }
+            if (currency === 'ILS') {
+                exchangeRateInput.val(1).closest('.form-group').hide();
+            } else {
+                exchangeRateInput.closest('.form-group').show();
+                if (parseFloat(exchangeRateInput.val()) === 1 || exchangeRateInput.val() === '') {
+                    exchangeRateInput.val(exchangeRates[currency] || 1);
+                }
+            }
+            const rate = parseFloat(exchangeRateInput.val()) || 1;
+            const amountILS = amount * rate;
+            $(`#amount_ils_display_${index}`).val(new Intl.NumberFormat('en-US').format(amountILS.toFixed(2)));
+            $(`#invested_amount_ils_${index}`).val(amountILS.toFixed(2));
+        }
 
     function addContractField() {
         const currentIndex = contractIndex;
