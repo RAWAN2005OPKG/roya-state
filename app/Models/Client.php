@@ -24,9 +24,13 @@ class Client extends Model
         });
     }
 
-    public function contracts()
+   public function contracts()
     {
         return $this->hasMany(Contract::class);
+    }
+public function investments()
+    {
+        return $this->hasMany(Investment::class);
     }
 
     public function payments()

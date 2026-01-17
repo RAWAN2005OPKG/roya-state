@@ -4,7 +4,6 @@
 
 @push('styles')
 <style>
-    /* تصميم عصري ومحسن للصفحة */
     .main-content { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
     .page-header h1 { font-size: 2.2rem; font-weight: 700; color: #1f2937; }
@@ -27,40 +26,56 @@
 <main class="main-content">
     <div class="page-header">
         <h1><i class="fas fa-file-contract text-primary"></i> تفاصيل العقد</h1>
-        {{-- لا حاجة لزر تعديل العقد هنا، يمكن إضافته لاحقاً --}}
     </div>
 
-    {{-- ملخص المبالغ المالية --}}
     @php
-            $payable = $contract->contractable;
+        // ===== الكود المصحح والنهائي =====
+        $payable = $contract->contractable;
+        $payments = collect(); // إنشاء مجموعة فارغة كقيمة افتراضية
 
+        if ($payable) {
+            // إذا كان صاحب العقد موجوداً، جلب دفعاته
+            $payments = $payable->payments()->latest('payment_date')->get();
+        } else {
+            // إذا كان صاحب العقد غير موجود (null)، نستخدم كائناً وهمياً
+            $payable = new class {
+                public $total_due = 0;
+                public $total_paid = 0;
+                public $remaining_balance = 0;
+                public $name = 'صاحب العقد محذوف أو غير موجود';
+                public $id_number = '-';
+                public $id = 0;
+                // هذه الدالة ستحل المشكلة مباشرة
+                public function getMorphClass() { return 'غير معروف'; }
+            };
+        }
     @endphp
 
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="label">إجمالي المستحق</div>
-                <div class="value text-info">{{ number_format($payable->total_due, 2) }} ILS</div>
-            </div>
-            <div class="kpi-card">
-                <div class="label">إجمالي المدفوع</div>
-                <div class="value text-success">{{ number_format($payable->total_paid, 2) }} ILS</div>
-            </div>
-            <div class="kpi-card">
-                <div class="label">الرصيد المتبقي</div>
-                <div class="value text-danger">{{ number_format($payable->remaining_balance, 2) }} ILS</div>
-            </div>
+    {{-- ملخص المبالغ المالية --}}
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="label">إجمالي المستحق</div>
+            <div class="value text-info">{{ number_format($payable->total_due ?? 0, 2) }} ILS</div>
         </div>
-
+        <div class="kpi-card">
+            <div class="label">إجمالي المدفوع</div>
+            <div class="value text-success">{{ number_format($payable->total_paid ?? 0, 2) }} ILS</div>
+        </div>
+        <div class="kpi-card">
+            <div class="label">الرصيد المتبقي</div>
+            <div class="value text-danger">{{ number_format($payable->remaining_balance ?? 0, 2) }} ILS</div>
+        </div>
+    </div>
 
     {{-- تفاصيل العقد الأساسية --}}
     <div class="card card-custom mb-4">
         <div class="card-header-custom"><h4>معلومات العقد الأساسية</h4></div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6 mb-3"><strong>صاحب العقد:</strong> {{ $payable->name ?? 'غير محدد' }} ({{ str_replace('App\\Models\\', '', $payable->getMorphClass()) }})</div>
-                <div class="col-md-6 mb-3"><strong>رقم الهوية:</strong> {{ $payable->id_number ?? '-' }}</div>
+                <div class="col-md-6 mb-3"><strong>صاحب العقد:</strong> {{ $payable->name }} ({{ str_replace('App\\Models\\', '', $payable->getMorphClass()) }})</div>
+                <div class="col-md-6 mb-3"><strong>رقم الهوية:</strong> {{ $payable->id_number }}</div>
                 <div class="col-md-6 mb-3"><strong>المشروع المرتبط:</strong> {{ $contract->project->name ?? '-' }}</div>
-                <div class="col-md-6 mb-3"><strong>تاريخ العقد:</strong> {{ $contract->contract_date->format('Y-m-d') ?? '-' }}</div>
+                <div class="col-md-6 mb-3"><strong>تاريخ العقد:</strong> {{ $contract->contract_date ? $contract->contract_date->format('Y-m-d') : '-' }}</div>
             </div>
             @if($contract->contract_details)
                 <hr><p><strong>تفاصيل العقد:</strong> {{ $contract->contract_details }}</p>
@@ -72,13 +87,11 @@
     <div class="card card-custom">
         <div class="card-header-custom">
             <h4 class="m-0">كشف حساب الكيان</h4>
-
-            <a href="{{ route('dashboard.payments.create', [
-                'payable_type' => str_replace('App\\Models\\', '', $payable->getMorphClass()),
-                'payable_id' => $payable->id,
-            ]) }}" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus"></i> إضافة قيد جديد
-            </a>
+            @if($payable->id > 0)
+                <a href="#" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> إضافة قيد جديد
+                </a>
+            @endif
         </div>
         <div class="card-body p-0">
             @if ($payments->isEmpty())

@@ -39,40 +39,49 @@
 @endsection
 
 @push('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 <script>
-    $(document  ).ready(function() {
-        let investmentIndex = 0;
-        const projectsList = @json($projects);
-        const exchangeRates = { 'USD': 3.75, 'JOD': 5.20, 'ILS': 1 };
-        let cleaveInstances = {};
+$(document ).ready(function() {
+    let contractIndex = 0;
+    const projectsList = @json($projects);
+    const exchangeRates = {'USD': 3.75, 'JOD': 5.20, 'ILS': 1};
+    let cleaveInstances = {};
 
-        function applyCleave(selector, index) {
-            cleaveInstances[index] = new Cleave(selector, { numeral: true, numeralThousandsGroupStyle: 'thousand' });
-        }
+    function applyCleave(selector) {
+        return new Cleave(selector, {
+            numeral: true,
+            numeralThousandsGroupStyle: 'thousand'
+        });
+    }
 
-        function calculateILS(index) {
-            const cleave = cleaveInstances[index];
-            if (!cleave) return;
-            const amount = parseFloat(cleave.getRawValue()) || 0;
-            const currency = $(`#currency_${index}`).val();
-            const exchangeRateInput = $(`#exchange_rate_${index}`);
+    // ===== 1. تم تعديل دالة الحساب لتناسب الحقول الجديدة =====
+    function calculateILS(index) {
+        const cleave = cleaveInstances[index];
+        if (!cleave) return;
 
-            if (currency === 'ILS') {
-                exchangeRateInput.val(1).closest('.form-group').hide();
-            } else {
-                exchangeRateInput.closest('.form-group').show();
-                if (parseFloat(exchangeRateInput.val()) === 1 || exchangeRateInput.val() === '') {
-                    exchangeRateInput.val(exchangeRates[currency] || 1);
-                }
+        const rawValue = parseFloat(cleave.getRawValue()) || 0;
+        const currency = $(`#currency_${index}`).val();
+        const exchangeRateInput = $(`#exchange_rate_${index}`);
+        const exchangeRateGroup = exchangeRateInput.closest('.form-group');
+
+        if (currency === 'ILS') {
+            exchangeRateInput.val(1);
+            exchangeRateGroup.hide(); // إخفاء حقل سعر الصرف للشيكل
+        } else {
+            exchangeRateGroup.show(); // إظهار حقل سعر الصرف للعملات الأخرى
+            if (parseFloat(exchangeRateInput.val()) === 1 || exchangeRateInput.val() === '') {
+                exchangeRateInput.val(exchangeRates[currency] || 1);
             }
-            const rate = parseFloat(exchangeRateInput.val()) || 1;
-            const amountILS = amount * rate;
-            $(`#amount_ils_display_${index}`).val(new Intl.NumberFormat('en-US').format(amountILS.toFixed(2)));
-            $(`#invested_amount_ils_${index}`).val(amountILS.toFixed(2));
         }
+
+        const rate = parseFloat(exchangeRateInput.val()) || 1;
+        const amountILS = rawValue * rate;
+
+        // تحديث قيمة الحقل المرئي للقراءة فقط
+        const formattedILS = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountILS);
+        $(`#amount_ils_display_${index}`).val(formattedILS + ' ILS');
+    }
 
     function addContractField() {
         const currentIndex = contractIndex;
@@ -81,6 +90,7 @@
             projectOptions += `<option value="${p.id}">${p.name}</option>`;
         });
 
+        // ===== 2. الكود المصحح والنهائي لقالب العقد (بالتصميم الذي طلبتِه) =====
         const contractHtml = `
             <div class="border p-4 mb-4 rounded shadow-sm contract-item" style="background-color: #f3f6f9;" data-index="${currentIndex}">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -92,16 +102,16 @@
                     <div class="col-md-6 form-group"><label>تاريخ العقد <span class="text-danger">*</span></label><input type="date" name="contracts[${currentIndex}][contract_date]" class="form-control" value="{{ now()->toDateString() }}" required></div>
                 </div>
                 <div class="row">
-                    <div class="col-md-4 form-group"><label>قيمة العقد <span class="text-danger">*</span></label><input type="text" id="contract_value_input_${currentIndex}" class="form-control contract-value-input" required></div>
-                    <div class="col-md-4 form-group"><label>العملة <span class="text-danger">*</span></label>
+                    <div class="col-md-3 form-group"><label>قيمة العقد <span class="text-danger">*</span></label><input type="text" id="contract_value_input_${currentIndex}" class="form-control contract-value-input" required></div>
+                    <div class="col-md-3 form-group"><label>العملة <span class="text-danger">*</span></label>
                         <select name="contracts[${currentIndex}][currency]" id="currency_${currentIndex}" class="form-control currency-select" required>
                             <option value="ILS">شيكل (ILS)</option><option value="USD">دولار (USD)</option><option value="JOD">دينار (JOD)</option>
                         </select>
                     </div>
-                    <div class="col-md-4 form-group" style="display: none;"><label>سعر الصرف</label><input type="number" name="contracts[${currentIndex}][exchange_rate]" id="exchange_rate_${currentIndex}" class="form-control exchange-rate" step="0.0001"></div>
+                    <div class="col-md-3 form-group"><label>سعر الصرف</label><input type="number" name="contracts[${currentIndex}][exchange_rate]" id="exchange_rate_${currentIndex}" class="form-control exchange-rate" step="0.0001" value="1"></div>
+                    <div class="col-md-3 form-group"><label>القيمة بالشيكل (محسوبة)</label><input type="text" id="amount_ils_display_${currentIndex}" class="form-control text-success font-weight-bold" readonly style="background-color: #e9ecef;"></div>
                 </div>
                 <div class="form-group"><label>تفاصيل العقد</label><textarea name="contracts[${currentIndex}][contract_details]" class="form-control" rows="1" placeholder="اكتب تفاصيل العمل المطلوب..."></textarea></div>
-                <div class="text-right"><small class="form-text text-muted">القيمة الإجمالية بالشيكل: <strong id="amount_ils_display_${currentIndex}" class="text-success">0.00</strong> ILS</small></div>
             </div>`;
         $('#contracts-container').append(contractHtml);
 
@@ -113,10 +123,24 @@
     $('#add-contract-btn').on('click', addContractField);
 
     $(document).on('click', '.remove-contract-btn', function() {
-        const item = $(this).closest('.contract-item');
-        const indexToRemove = item.data('index');
-        delete cleaveInstances[indexToRemove];
-        item.remove();
+        const button = $(this);
+        Swal.fire({
+            title: 'هل أنت متأكد؟',
+            text: "سيتم حذف هذا العقد من النموذج الحالي.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'نعم، احذفه!',
+            cancelButtonText: 'إلغاء'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const item = button.closest('.contract-item');
+                const indexToRemove = item.data('index');
+                delete cleaveInstances[indexToRemove];
+                item.remove();
+            }
+        });
     });
 
     $(document).on('input change', '.contract-value-input, .currency-select, .exchange-rate', function() {
@@ -125,16 +149,18 @@
     });
 
     $('#subcontractor-form').on('submit', function(e) {
-        for (const index in cleaveInstances) {
+        $('.contract-value-input').each(function() {
+            const index = $(this).closest('.contract-item').data('index');
             const cleave = cleaveInstances[index];
-            const rawValue = cleave.getRawValue();
-            // إنشاء حقل مخفي بالقيمة الصافية وإرساله
-            $(this).append(`<input type="hidden" name="contracts[${index}][contract_value]" value="${rawValue}">`);
-        }
+            if (cleave) {
+                const rawValue = cleave.getRawValue();
+                $(this).closest('form').append(`<input type="hidden" name="contracts[${index}][contract_value]" value="${rawValue}">`);
+            }
+        });
         return true;
     });
 
-    addContractField(); // إضافة حقل واحد عند تحميل الصفحة
+    addContractField();
 });
 </script>
 @endpush

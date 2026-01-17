@@ -168,6 +168,7 @@ Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryCo
     Route::resource('reportproject', App\Http\Controllers\Dashboard\ReportProjectController::class);
 
     // 6. العقود (Contracts)
+    Route::get('contracts/get-contractables', [App\Http\Controllers\Dashboard\ContractController::class, 'getContractables'])->name('contracts.getContractables');
 
 Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController::class);
 
@@ -220,13 +221,12 @@ Route::prefix('projects')->name('projects.')->group(function () {
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->except(['show']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->except(['show']);
     Route::resource('alerts', App\Http\Controllers\Dashboard\AlertController::class);
-
-     // 9. المقاولون والموردون (Subcontractors)
-  Route::resource('subcontractors', App\Http\Controllers\Dashboard\SubcontractorController::class);
-
+// --- 5. المقاولون والموردون (Subcontractors) ---
 Route::get('subcontractors/trash', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'trash'])->name('subcontractors.trash');
-Route::post('subcontractors/{id}/restore', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'restore'])->name('subcontractors.restore');
-Route::delete('subcontractors/{id}/force-delete', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'forceDelete'])->name('subcontractors.forceDelete');
+Route::put('subcontractors/{subcontractor}/restore', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'restore'])->name('subcontractors.restore');
+Route::delete('subcontractors/{subcontractor}/force-delete', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'forceDelete'])->name('subcontractors.forceDelete');
+Route::resource('subcontractors', App\Http\Controllers\Dashboard\SubcontractorController::class);
+
 Route::get('subcontractors/export/excel', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'exportExcel'])->name('subcontractors.exportExcel');
 //  المشتريات (Purchases)
 Route::prefix('purchases')->as('purchases.')->group(function () {

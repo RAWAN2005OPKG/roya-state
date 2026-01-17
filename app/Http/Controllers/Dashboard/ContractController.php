@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Contract;
+use App\Models\Contract; 
+use App\Models\SubcontractorContract; 
 use App\Models\Project;
 use App\Models\Client;
 use App\Models\Investor;
@@ -26,7 +27,7 @@ class ContractController extends Controller
             });
         }
         $totalContracts = (clone $query)->count();
-        $totalValueILS = (clone $query)->sum('investment_amount_ils');
+$totalValueILS = (clone $query)->sum('contract_value');
         $perPage = $request->query('per_page', 10);
         $contracts = $query->latest()->paginate($perPage);
         return view('dashboard.contracts.index', compact('contracts', 'totalContracts', 'totalValueILS', 'request'));
@@ -38,42 +39,62 @@ class ContractController extends Controller
         return view('dashboard.contracts.create', compact('projects'));
     }
 
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'contractable_type' => 'required|string|in:Client,Investor,Subcontractor',
-            'contractable_id' => 'required|integer|min:1',
-            'project_id' => 'nullable|exists:projects,id',
-            'contract_date' => 'required|date',
-            'investment_amount' => 'required|numeric|min:0',
-            'currency' => 'required|string|in:ILS,USD,JOD',
-            'contract_details' => 'nullable|string|max:5000',
-            'attachment' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120',
-        ]);
 
-        try {
-            DB::transaction(function () use ($validatedData, $request) {
-                $modelClass = "App\\Models\\" . $validatedData['contractable_type'];
-                if (! $modelClass::find($validatedData['contractable_id'])) {
-                    throw new \Exception("الكيان المختار غير موجود.");
-                }
-                $attachmentPath = $request->hasFile('attachment') ? $request->file('attachment')->store('contracts', 'public') : null;
-                $exchangeRates = ['ILS' => 1, 'USD' => 3.75, 'JOD' => 5.20];
-                $exchangeRate = $exchangeRates[$validatedData['currency']] ?? 1;
-                $amountILS = $validatedData['investment_amount'] * $exchangeRate;
+public function store(Request $request)
+{
+    $validatedData = $request->validate([
+        'contractable_type' => 'required|string|in:Client,Investor,Subcontractor',
+        'contractable_id' => 'required|integer|min:1',
+        'project_id' => 'nullable|exists:projects,id',
+        'contract_date' => 'required|date',
+        'contract_value' => 'required|numeric|min:0',
+        'currency' => 'required|string|in:ILS,USD,JOD',
+        'exchange_rate' => 'required|numeric|min:0',
+        'contract_details' => 'nullable|string',
+        'attachment' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120',
+    ]);
 
-                Contract::create(array_merge($validatedData, [
-                    'contractable_type' => $modelClass,
-                    'attachment' => $attachmentPath,
-                    'exchange_rate' => $exchangeRate,
-                    'investment_amount_ils' => $amountILS,
-                ]));
-            });
-            return redirect()->route('dashboard.contracts.index')->with('success', 'تم حفظ العقد بنجاح.');
-        } catch (Throwable $e) {
-            return back()->withInput()->with('error', 'فشل حفظ العقد: ' . $e->getMessage());
+    try {
+        $modelClass = "App\\Models\\" . $validatedData['contractable_type'];
+        if (!class_exists($modelClass) || !$modelClass::find($validatedData['contractable_id'])) {
+            throw new \Exception("الكيان المختار غير موجود أو النوع غير صالح.");
         }
+        
+        $attachmentPath = $request->hasFile('attachment') ? $request->file('attachment')->store('contracts_attachments', 'public') : null;
+
+        $dataToSave = [
+            'project_id' => $validatedData['project_id'],
+            'contract_date' => $validatedData['contract_date'],
+            'contract_value' => $validatedData['contract_value'],
+            'currency' => $validatedData['currency'],
+            'exchange_rate' => $validatedData['exchange_rate'],
+            'contract_details' => $validatedData['contract_details'],
+            'attachment' => $attachmentPath,
+        ];
+
+    
+        if ($validatedData['contractable_type'] === 'Client') {
+            // إذا كان عميل، احفظ في الجدول القديم (مع إضافة الحقول الإجبارية)
+            $dataToSave['client_id'] = $validatedData['contractable_id'];
+            // يجب إضافة project_unit_id هنا، سنفترض أنه 1 مؤقتاً
+            $dataToSave['project_unit_id'] = $request->project_unit_id ?? 1; // يجب تعديل الواجهة لتشمل هذا
+            Contract::create($dataToSave);
+        } else {
+            // إذا كان مستثمر أو مورد، احفظ في الجدول الجديد
+            $dataToSave['contractable_type'] = $modelClass;
+            $dataToSave['contractable_id'] = $validatedData['contractable_id'];
+            GeneralContract::create($dataToSave);
+        }
+
+        return redirect()->route('dashboard.contracts.index')->with('success', 'تم حفظ العقد بنجاح.');
+
+    } catch (Throwable $e) {
+        return back()->withInput()->with('error', 'فشل حفظ العقد: ' . $e->getMessage());
     }
+}
+
+
+
 
   public function show(Contract $contract)
     {
