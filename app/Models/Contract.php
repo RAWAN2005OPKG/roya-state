@@ -20,20 +20,23 @@ class Contract extends Model
         'exchange_rate',
         'contract_details',
         'attachment',
-        'client_id', 
+        'client_id',
     ];
 
     protected $casts = [
         'contract_date' => 'date',
     ];
 
-    // هذه هي العلاقة السحرية التي كنا نحتاجها
     public function contractable()
     {
         return $this->morphTo();
     }
 
     public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+     public function projectunit()
     {
         return $this->belongsTo(Project::class);
     }

@@ -1,160 +1,89 @@
 @extends('layouts.container')
-@section('title', 'لوحة التحكم')
+@section('title', 'لوحة التحكم الرئيسية')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+<style>
+    .kpi-card { background-color: #ffffff; border-radius: 0.75rem; padding: 25px; text-align: center; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); transition: all 0.3s ease; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+    .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.1); }
+    .kpi-card .kpi-title { font-size: 1rem; color: #858796; margin-bottom: 10px; font-weight: 600; }
+    .kpi-card .kpi-value { font-size: 2.2rem; font-weight: 700; color: #3a3b45; }
+    .kpi-value.positive { color: #1cc88a; }
+    .kpi-value.negative { color: #e74a3b; }
+    .quick-actions .btn { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 110px; font-size: 1rem; font-weight: 600; gap: 8px; border-radius: 0.75rem; }
+    .quick-actions .btn i { font-size: 1.8rem; }
+</style>
 @endpush
 
 @section('content')
-<main class="main-content">
-    {{-- رأس الصفحة --}}
-    <div class="page-header">
-        <h1><i class="fas fa-tachometer-alt"></i> لوحة التحكم</h1>
-        <div class="header-actions">
-            <a href="#" class="btn btn-primary"><i class="fas fa-plus"></i> إنشاء فاتورة</a>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="kpi-card">
+                <div class="kpi-title">الرصيد الافتتاحي</div>
+                <div class="kpi-value">{{ number_format($openingBalance, 2) }} ILS</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="kpi-card">
+                <div class="kpi-title">إجمالي الإيرادات</div>
+                <div class="kpi-value positive">+ {{ number_format($totalRevenue, 2) }} ILS</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="kpi-card">
+                <div class="kpi-title">إجمالي المصروفات</div>
+                <div class="kpi-value negative">- {{ number_format($totalExpenses, 2) }} ILS</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="kpi-card" style="border: 2px solid #4e73df;">
+                <div class="kpi-title">السيولة الحالية</div>
+                <div class="kpi-value {{ $currentCash >= 0 ? 'positive' : 'negative' }}">{{ number_format($currentCash, 2) }} ILS</div>
+            </div>
         </div>
     </div>
 
-    <div class="dashboard-grid">
-        {{-- بطاقة نظرة عامة والاشتراك --}}
-        <div class="dashboard-card col-span-12 subscription-card">
-            <div>
-                <h3 style="font-weight: 600;">نظرة عامة</h3>
-                <p class="text-muted">مرحباً بعودتك، إليك ملخص سريع لنشاطك المالي.</p>
-            </div>
-            <div class="text-center">
-                <h4 style="font-weight: 600;">خطة الاشتراك: مؤسسات</h4>
-                <span class="badge badge-success">نشط</span>
-                <a href="#" class="btn btn-sm btn-outline-primary mt-2">تجديد / ترقية</a>
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card card-custom h-100">
+                <div class="card-header"><h3 class="card-title">نظرة عامة (مثال)</h3></div>
+                <div class="card-body"><canvas id="revenueExpenseChart"></canvas></div>
             </div>
         </div>
-
-        {{-- بطاقات الإحصائيات الرئيسية --}}
-        <div class="kpi-card"><div class="label">إجمالي الإيرادات</div><div class="value text-success">{{ number_format($totalRevenue, 2) }}</div></div>
-        <div class="kpi-card"><div class="label">إجمالي المصروفات</div><div class="value text-danger">{{ number_format($totalExpenses, 2) }}</div></div>
-        <div class="kpi-card"><div class="label">صافي الربح / الخسارة</div><div class="value">{{ number_format($totalRevenue - $totalExpenses, 2) }}</div></div>
-        <div class="kpi-card"><div class="label">صافي التدفق النقدي</div><div class="value text-info">0.00</div></div>
-
-        {{-- الرسم البياني --}}
-        <div class="dashboard-card col-span-8">
-            <div class="card-header">
-                <h3 class="card-title">الإيرادات مقابل المصروفات (آخر 6 أشهر)</h3>
-            </div>
-            <canvas id="revenueChart"></canvas>
-        </div>
-
-        {{-- تصنيفات المصروفات --}}
-    @if($expenseCategories->isEmpty())
-    <div class="empty-state">
-        <i class="fas fa-chart-pie"></i>
-        <p>لا توجد بيانات لعرضها.</p>
-    </div>
-@else
-    <div class="table-wrapper">
-        <table class="data-table">
-            <thead><tr><th>التصنيف</th><th>المبلغ</th></tr></thead>
-            <tbody>
-                @foreach($expenseCategories as $exp)
-                    <tr>
-                        <td>{{ $exp->category->name ?? 'غير مصنف' }}</td>
-                        <td>{{ number_format($exp->total, 2) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-@endif
-
-
-        {{-- فواتير مبيعات متأخرة --}}
-        <div class="dashboard-card col-span-6">
-            <div class="card-header"><h3 class="card-title">فواتير مبيعات متأخرة</h3></div>
-            @if($overdueSales->isEmpty())
-                <div class="empty-state"><i class="fas fa-check-circle text-success"></i><p>لا توجد فواتير متأخرة. عمل رائع!</p></div>
-            @else
-                <div class="table-wrapper">
-                    <table class="data-table">
-                        <thead><tr><th>العميل</th><th>المبلغ</th><th>تاريخ الاستحقاق</th></tr></thead>
-                        <tbody>
-                            @foreach($overdueSales as $invoice)
-                                <tr><td>{{ $invoice->customer->name }}</td><td>{{ number_format($invoice->total_amount, 2) }}</td><td>{{ $invoice->due_date->format('Y-m-d') }}</td></tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+        <div class="col-lg-4 mb-4">
+            <div class="card card-custom h-100">
+                <div class="card-header"><h3 class="card-title">إجراءات سريعة</h3></div>
+                <div class="card-body">
+                    <div class="row quick-actions">
+                        <div class="col-6 mb-3"><a href="{{ route('dashboard.contracts.create') }}" class="btn btn-light-primary w-100"><i class="fas fa-file-signature"></i> عقد جديد</a></div>
+                        <div class="col-6 mb-3"><a href="{{ route('dashboard.supplier-expenses.create') }}" class="btn btn-light-danger w-100"><i class="fas fa-hand-holding-usd"></i> مصروف مورد</a></div>
+                        <div class="col-6"><a href="{{ route('dashboard.projects.create') }}" class="btn btn-light-success w-100"><i class="fas fa-building"></i> مشروع جديد</a></div>
+                        <div class="col-6"><a href="{{ route('dashboard.clients.create') }}" class="btn btn-light-info w-100"><i class="fas fa-user-plus"></i> عميل جديد</a></div>
+                    </div>
                 </div>
-            @endif
-        </div>
-
-        {{-- فواتير مشتريات مستحقة --}}
-      @if($duePurchases->isEmpty())
-    <div class="empty-state"><i class="fas fa-check-circle text-success"></i><p>لا توجد فواتير مشتريات مستحقة.</p></div>
-@else
-    <div class="table-wrapper">
-        <table class="data-table">
-            <thead><tr><th>المورد</th><th>المبلغ المستحق</th><th>تاريخ الاستحقاق</th></tr></thead>
-            <tbody>
-                @foreach($duePurchases as $invoice)
-                    <tr>
-                        <td>{{ $invoice->supplier->name ?? 'N/A' }}</td>
-                        <td>{{ number_format($invoice->total_amount - $invoice->paid_amount, 2) }}</td>
-                        <td>{{ $invoice->due_date->format('Y-m-d') }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-@endif
-
-
-        {{-- إجراءات سريعة --}}
-        <div class="dashboard-card col-span-12">
-            <div class="card-header"><h3 class="card-title">إجراءات سريعة</h3></div>
-            <div class="quick-actions-grid">
-                <a href="{{ route('dashboard.sales.create') }}" class="action-item"><i class="fas fa-file-invoice-dollar"></i><span>إنشاء فاتورة</span></a>
-                <a href="#" class="action-item"><i class="fas fa-receipt"></i><span>إضافة مصروف</span></a>
-                <a href="#" class="action-item"><i class="fas fa-users"></i><span>عميل جديد</span></a>
-                <a href="#" class="action-item"><i class="fas fa-box"></i><span>منتج جديد</span></a>
-                <a href="#" class="action-item"><i class="fas fa-file-alt"></i><span>عرض التقارير</span></a>
             </div>
         </div>
     </div>
-</main>
+</div>
+@endsection
 
 @push('scripts')
-{{-- مكتبة الرسوم البيانية --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function ( ) {
-        const ctx = document.getElementById('revenueChart').getContext('2d');
+    document.addEventListener("DOMContentLoaded", function( ) {
+        const ctx = document.getElementById('revenueExpenseChart').getContext('2d');
         new Chart(ctx, {
-            type: 'bar', // أو 'line'
+            type: 'bar',
             data: {
-                labels: {!! $chartData['labels'] !!},
-                datasets: [
-                    {
-                        label: 'الإيرادات',
-                        data: {!! $chartData['revenues'] !!},
-                        backgroundColor: 'rgba(0, 158, 247, 0.6)',
-                        borderColor: 'rgba(0, 158, 247, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'المصروفات',
-                        data: {!! $chartData['expenses'] !!},
-                        backgroundColor: 'rgba(241, 65, 108, 0.6)',
-                        borderColor: 'rgba(241, 65, 108, 1)',
-                        borderWidth: 1
-                    }
-                ]
+                labels: @json($months),
+                datasets: [{
+                    label: 'الإيرادات', data: @json($revenueData), backgroundColor: 'rgba(28, 200, 138, 0.5)', borderColor: 'rgba(28, 200, 138, 1)', borderWidth: 1
+                }, {
+                    label: 'المصروفات', data: @json($expenseData), backgroundColor: 'rgba(231, 74, 59, 0.5)', borderColor: 'rgba(231, 74, 59, 1)', borderWidth: 1
+                }]
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
         });
     });
 </script>
 @endpush
-@endsection

@@ -13,6 +13,7 @@ use App\Models\Cheque;
 class GeneralLedgerController extends Controller
 {
 
+
     public function index()
     {
         $cash_moves = CashTransaction::select(

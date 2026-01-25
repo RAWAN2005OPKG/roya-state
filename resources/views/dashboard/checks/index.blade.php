@@ -2,68 +2,62 @@
 @section('title', 'إدارة الشيكات')
 
 @section('content')
+{{-- قسم الملخص المالي --}}
+<div class="row">
+    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3>{{ number_format($stats['pending_inbound']) }}</h3><p>شيكات قبض قيد التحصيل</p></div><div class="icon"><i class="fas fa-hourglass-half"></i></div></div></div>
+    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3>{{ number_format($stats['pending_outbound']) }}</h3><p>شيكات صرف قيد الاستحقاق</p></div><div class="icon"><i class="fas fa-paper-plane"></i></div></div></div>
+    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3>{{ number_format($stats['collected_total']) }}</h3><p>إجمالي الشيكات المحصلة</p></div><div class="icon"><i class="fas fa-check-circle"></i></div></div></div>
+    <div class="col-lg-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3>{{ number_format($stats['bounced_total']) }}</h3><p>إجمالي الشيكات المرتجعة</p></div><div class="icon"><i class="fas fa-exclamation-triangle"></i></div></div></div>
+</div>
+
+{{-- جدول الشيكات --}}
 <div class="card card-custom">
-    <div class="card-header flex-wrap border-0 pt-6 pb-0">
-        <div class="card-title">
-            <h3 class="card-label">حافظة الشيكات
-                <span class="d-block text-muted pt-2 font-size-sm">عرض وإدارة جميع الشيكات</span>
-            </h3>
-        </div>
-        <div class="card-toolbar">
-            <a href="{{ route('dashboard.checks.create') }}" class="btn btn-primary font-weight-bolder">
-            <span class="svg-icon svg-icon-md"><i class="fas fa-plus"></i></span>إضافة شيك جديد</a>
-        </div>
-    </div>
+    <div class="card-header"><h3 class="card-title">قائمة الشيكات</h3><div class="card-toolbar"><a href="{{ route('dashboard.cheques.create') }}" class="btn btn-primary">إضافة شيك جديد</a></div></div>
     <div class="card-body">
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+        @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-striped">
                 <thead>
-                    <tr class="text-uppercase">
+                    <tr>
                         <th>رقم الشيك</th>
                         <th>النوع</th>
-                        <th>صاحب الشيك</th>
-                        <th>المبلغ</th>
+                        <th>القيمة</th>
                         <th>تاريخ الاستحقاق</th>
+                        <th>من / إلى</th>
                         <th>الحالة</th>
-                        <th>إجراءات</th>
+                        <th>الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($checks as $check)
-                    <tr>
-                        <td>{{ $check->check_number }}</td>
-                        <td>
-                            @if($check->type == 'incoming')<span class="label label-light-success label-inline">وارد</span>
-                            @else<span class="label label-light-danger label-inline">صادر</span>@endif
-                        </td>
-                        <td>{{ $check->holder_name }}</td>
-                        <td class="font-weight-bold">{{ number_format($check->amount, 2) }} {{ $check->currency }}</td>
-                        <td>{{ $check->due_date->format('Y-m-d') }}</td>
-                        <td>
-                            @if($check->status == 'cashed') <span class="label label-light-info label-inline">تم الصرف</span>
-                            @elseif($check->status == 'returned') <span class="label label-light-warning label-inline">مرتجع</span>
-                            @else <span class="label label-light-dark label-inline">في الحافظة</span>
-                            @endif
-                        </td>
-                        <td>
-                            <a href="{{ route('dashboard.checks.edit', $check->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل"><i class="la la-edit"></i></a>
-                            <form action="{{ route('dashboard.checks.destroy', $check->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف هذا الشيك؟');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-clean btn-icon" title="حذف"><i class="la la-trash"></i></button>
-                            </form>
-                        </td>
-                    </tr>
+                    @forelse ($cheques as $cheque)
+                        <tr>
+                            <td>{{ $cheque->cheque_number }}</td>
+                            <td>
+                                @if($cheque->type == 'inbound') <span class="badge badge-success">قبض</span>
+                                @else <span class="badge badge-danger">صرف</span> @endif
+                            </td>
+                            <td>{{ number_format($cheque->amount, 2) }}</td>
+                            <td>{{ $cheque->due_date->format('Y-m-d') }}</td>
+                            <td>{{ $cheque->payable->name ?? 'غير محدد' }}</td>
+                            <td>
+                                <form action="{{ route('dashboard.cheques.updateStatus', $cheque) }}" method="POST">
+                                    @csrf @method('PUT')
+                                    <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
+                                        <option value="pending" @selected($cheque->status == 'pending')>قيد الانتظار</option>
+                                        <option value="collected" @selected($cheque->status == 'collected')>محصّل</option>
+                                        <option value="bounced" @selected($cheque->status == 'bounced')>مرتجع</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td><a href="{{ route('dashboard.cheques.edit', $cheque) }}" class="btn btn-sm btn-icon btn-light-warning"><i class="la la-edit"></i></a></td>
+                        </tr>
                     @empty
-                    <tr><td colspan="7" class="text-center p-5 text-muted">لا توجد شيكات لعرضها.</td></tr>
+                        <tr><td colspan="7" class="text-center">لا توجد شيكات لعرضها.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="d-flex justify-content-center mt-3">{{ $checks->links() }}</div>
+        <div class="d-flex justify-content-center mt-4">{{ $cheques->links() }}</div>
     </div>
 </div>
 @endsection

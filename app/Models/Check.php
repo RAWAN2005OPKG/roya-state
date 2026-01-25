@@ -4,8 +4,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Check extends Model {
+class Cheque extends Model {
     use HasFactory, SoftDeletes;
-    protected $fillable = ['check_number', 'type', 'amount', 'currency', 'due_date', 'status', 'holder_name', 'bank_name', 'notes'];
-    protected $casts = ['due_date' => 'date'];
+    protected $guarded = [];
+    protected $casts = ['receipt_date' => 'date', 'due_date' => 'date'];
+
+    public function payable() {
+        return $this->morphTo();
+    }
 }

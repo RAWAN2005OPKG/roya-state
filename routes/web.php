@@ -32,8 +32,8 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
 
     // الصفحة الرئيسية للوحة التحكم
-    Route::get('/', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('home');
-    Route::get('/home', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('home');
+    Route::get('/', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('index');
+    Route::get('/index', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('index');
 Route::prefix('/khaleed-mohamed')->name('khaleed-mohamed.')->group(function () {
     Route::get('/trash', [App\Http\Controllers\Dashboard\KhaleedMohamedController::class, 'trash'])->name('trash');
     Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\KhaleedMohamedController::class, 'restore'])->name('restore');

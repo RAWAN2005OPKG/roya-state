@@ -426,6 +426,12 @@
         <span class="menu-text">التنبيهات</span>
     </a>
 </li>
+<li class="menu-item {{ request()->routeIs('dashboard.settings.*') ? 'menu-item-active' : '' }}">
+    <a href="{{ route('dashboard.settings.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-cogs"></i>
+        <span class="menu-text">الإعدادات</span>
+    </a>
+</li>
 
 <li class="menu-item" aria-haspopup="true">
         {{-- عند الضغط على هذا الرابط، سيتم تنفيذ الفورم المخفي لتسجيل الخروج --}}

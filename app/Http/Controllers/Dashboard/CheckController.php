@@ -1,96 +1,79 @@
 <?php
-
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Check;
+use App\Models\Cheque;
 use Illuminate\Http\Request;
+use Throwable;
 
-class CheckController extends Controller
+class ChequeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $query = Check::latest();
+        $query = Cheque::with('payable');
+        // يمكنك إضافة فلاتر بحث هنا لاحقاً
 
-        if ($request->filled('search')) {
-            $query->where('check_number', 'like', "%{$request->search}%")
-                  ->orWhere('holder_name', 'like', "%{$request->search}%");
-        }
+        $cheques = $query->latest('due_date')->paginate(20);
 
-        $checks = $query->paginate(15);
+        // حسابات الملخص المالي
+        $stats = [
+            'pending_inbound' => Cheque::where('type', 'inbound')->where('status', 'pending')->sum('amount'),
+            'pending_outbound' => Cheque::where('type', 'outbound')->where('status', 'pending')->sum('amount'),
+            'collected_total' => Cheque::where('type', 'inbound')->where('status', 'collected')->sum('amount'),
+            'bounced_total' => Cheque::where('type', 'inbound')->where('status', 'bounced')->sum('amount'),
+        ];
 
-        return view('dashboard.checks.index', compact('checks'));
+        return view('dashboard.cheques.index', compact('cheques', 'stats'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('dashboard.checks.create');
+        return view('dashboard.cheques.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'check_number' => 'required|string|unique:checks,check_number',
-            'type' => 'required|in:incoming,outgoing',
-            'amount' => 'required|numeric|min:0',
-            'currency' => 'required|string',
+        $validated = $request->validate([
+            'cheque_number' => 'required|string|unique:cheques,cheque_number',
+            'type' => 'required|in:inbound,outbound',
+            'receipt_date' => 'required|date',
             'due_date' => 'required|date',
-            'holder_name' => 'required|string|max:255',
-            'bank_name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'bank_name' => 'required|string',
+            'payable_type' => 'required|string|in:Client,Investor,Subcontractor',
+            'payable_id' => 'required|integer',
             'notes' => 'nullable|string',
-            'status' => 'required|in:in_wallet,cashed,returned',
         ]);
 
-        Check::create($validatedData);
-
-        return redirect()->route('dashboard.checks.index')->with('success', 'تمت إضافة الشيك بنجاح.');
+        try {
+            $modelClass = "App\\Models\\" . $validated['payable_type'];
+            if (!class_exists($modelClass) || !$modelClass::find($validated['payable_id'])) {
+                throw new \Exception("الكيان المرتبط غير موجود.");
+            }
+            $validated['payable_type'] = $modelClass;
+            Cheque::create($validated);
+            return redirect()->route('dashboard.cheques.index')->with('success', 'تم حفظ الشيك بنجاح.');
+        } catch (Throwable $e) {
+            return back()->withInput()->with('error', 'فشل حفظ الشيك: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Check $check)
+    public function edit(Cheque $cheque)
     {
-        return view('dashboard.checks.edit', compact('check'));
+        return view('dashboard.cheques.edit', compact('cheque'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Check $check)
+    public function update(Request $request, Cheque $cheque)
     {
-        $validatedData = $request->validate([
-            'check_number' => 'required|string|unique:checks,check_number,' . $check->id,
-            'type' => 'required|in:incoming,outgoing',
-            'amount' => 'required|numeric|min:0',
-            'currency' => 'required|string',
-            'due_date' => 'required|date',
-            'holder_name' => 'required|string|max:255',
-            'bank_name' => 'required|string|max:255',
-            'notes' => 'nullable|string',
-            'status' => 'required|in:in_wallet,cashed,returned',
-        ]);
-
-        $check->update($validatedData);
-
-        return redirect()->route('dashboard.checks.index')->with('success', 'تم تعديل الشيك بنجاح.');
+        // يمكنك إضافة منطق التحديث هنا
+        return redirect()->route('dashboard.cheques.index')->with('success', 'تم تحديث الشيك بنجاح.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Check $check)
+    // دالة لتغيير حالة الشيك (مثلاً، من قيد الانتظار إلى محصّل)
+    public function updateStatus(Request $request, Cheque $cheque)
     {
-        $check->delete();
-        return redirect()->route('dashboard.checks.index')->with('success', 'تم حذف الشيك بنجاح.');
+        $request->validate(['status' => 'required|in:pending,collected,bounced']);
+        $cheque->update(['status' => $request->status]);
+        return back()->with('success', 'تم تحديث حالة الشيك بنجاح.');
     }
 }
