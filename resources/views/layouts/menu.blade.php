@@ -132,7 +132,7 @@
     <li class="menu-item menu-item-submenu {{ request()->is('dashboard/accounts*') || request()->is('dashboard/journal-entries*') || request()->is('dashboard/expenses*') || request()->is('dashboard/cash-safes*') || request()->is('dashboard/bank-accounts*') || request()->is('dashboard/fund-transfers*') || request()->is('dashboard/project-transfers*') ? 'menu-item-open' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
         <a href="javascript:;" class="menu-link menu-toggle">
             <span class="svg-icon menu-icon"><i class="fas fa-wallet"></i></span>
-            <span class="menu-text">الإدارة المالية</span>
+            <span class="menu-text"> الخزينة العامة</span>
             <i class="menu-arrow"></i>
         </a>        <div class="menu-submenu">
         <ul class="menu-subnav">
@@ -148,6 +148,13 @@
                         <span class="menu-text">سجل القيود (الدفعات)</span>
                     </a>
                 </li>
+               <li class="menu-item {{ request()->routeIs('dashboard.cash.*') ? 'menu-item-active' : '' }}">
+                   <a href="{{ route('dashboard.cash.index') }}" class="menu-link">
+                   <i class="mmenu-bullet menu-bullet-dot"></i>
+                   <span class="menu-text">المحفظة النقدية</span>
+                 </a>
+               </li>
+
                  <li class="menu-item {{ request()->routeIs('dashboard.financial-accounts.index') ? 'menu-item-active' : '' }}" aria-haspopup="true">
                 <a href="{{ route('dashboard.financial-accounts.index') }}" class="menu-link">
                     <i class="menu-bullet menu-bullet-dot"><span></span></i>

@@ -8,16 +8,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Auth\LoginController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| هنا تسجل جميع الراوتات الخاصة بالويب لتطبيقك.
-| هذه الراوتات يتم تحميلها من RouteServiceProvider داخل مجموعة "web" ميدل وير.
-|
-*/
-
 
 Auth::routes();
 
@@ -32,8 +22,18 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
 
     // الصفحة الرئيسية للوحة التحكم
-    Route::get('/', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('index');
-    Route::get('/index', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('index');
+    Route::get('/', [App\Http\Controllers\Dashboard\DashboardController::class, 'index'])->name('home'); // كان اسمه 'index' أو بدون اسم
+
+ Route::get('settings', [App\Http\Controllers\Dashboard\SettingController::class, 'index'])->name('settings.index');
+    Route::post('settings', [App\Http\Controllers\Dashboard\SettingController::class, 'store'])->name('settings.store');
+
+   Route::prefix('cash')->name('cash.')->group(function () {
+    Route::get('/export', [App\Http\Controllers\Dashboard\CashTransactionController::class, 'export'])->name('export');
+    Route::get('/trash', [App\Http\Controllers\Dashboard\CashTransactionController::class, 'trash'])->name('trash');
+    Route::put('/restore/{id}', [App\Http\Controllers\Dashboard\CashTransactionController::class, 'restore'])->name('restore');
+    Route::delete('/force-delete/{id}', [App\Http\Controllers\Dashboard\CashTransactionController::class, 'forceDelete'])->name('forceDelete');
+});
+Route::resource('cash', App\Http\Controllers\Dashboard\CashTransactionController::class)->parameters(['cash' => 'cashTransaction']);
 Route::prefix('/khaleed-mohamed')->name('khaleed-mohamed.')->group(function () {
     Route::get('/trash', [App\Http\Controllers\Dashboard\KhaleedMohamedController::class, 'trash'])->name('trash');
     Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\KhaleedMohamedController::class, 'restore'])->name('restore');
@@ -303,8 +303,6 @@ Route::resource('stocktakes', App\Http\Controllers\Dashboard\StocktakeController
 
     Route::get('/treasury', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('treasury');
     Route::get('/general-ledger', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('general-ledger.index');
-    Route::get('/cash', [App\Http\Controllers\Dashboard\CashTransactionController::class, 'index'])->name('cash.index');
-    Route::post('/cash', [App\Http\Controllers\Dashboard\CashTransactionController::class, 'store'])->name('cash.store');
     Route::get('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'index'])->name('bank.index');
     Route::post('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'store'])->name('bank.store');
     Route::get('/cheques', [App\Http\Controllers\Dashboard\ChequeController::class, 'index'])->name('cheques.index');
