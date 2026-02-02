@@ -37,7 +37,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{-- عرض الرصيد الافتتاحي كأول سطر --}}
                     <tr class="table-info-light">
                         <td colspan="6" class="font-weight-bold">الرصيد الافتتاحي</td>
                         <td class="font-weight-bolder">{{ number_format($openingBalance, 2) }}</td>
@@ -47,14 +46,11 @@
                         <tr class="{{ $transaction->type == 'in' ? 'table-success-light' : 'table-danger-light' }}">
                             <td class="font-weight-bold">{{ $transaction->voucher_id }}</td>
                             <td>{{ $transaction->transaction_date->format('Y-m-d') }}</td>
-                            <td>{{ $transaction->source }}</td>
+                            <td><a href="{{ route('dashboard.cash.show', $transaction->id) }}">{{ $transaction->source }}</a></td>
                             <td class="text-center">@if($transaction->type == 'in') <span class="font-weight-bold text-success">+ {{ number_format($transaction->amount_ils, 2) }}</span> @else - @endif</td>
                             <td class="text-center">@if($transaction->type == 'out') <span class="font-weight-bold text-danger">- {{ number_format($transaction->amount_ils, 2) }}</span> @else - @endif</td>
                             <td class="font-weight-bolder">{{ number_format($transaction->balance, 2) }}</td>
                             <td class="text-center">
-                                {{-- ======================================================================= --}}
-                                {{-- ===== وهذه هي أزرار الإجراءات الكاملة التي كانت مفقودة ===== --}}
-                                {{-- ======================================================================= --}}
                                 <a href="{{ route('dashboard.cash.edit', $transaction->id) }}" class="btn btn-sm btn-icon btn-light-warning" title="تعديل"><i class="la la-edit"></i></a>
                                 <form action="{{ route('dashboard.cash.destroy', $transaction->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من نقل الحركة إلى سلة المحذوفات؟');" style="display: inline;">
                                     @csrf @method('DELETE')

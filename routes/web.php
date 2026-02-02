@@ -49,14 +49,35 @@ Route::resource('/khaleed-mohamed', App\Http\Controllers\Dashboard\KhaleedMohame
 
     // مسار المركز المالي
     Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
-//مسار ولي خالص
-Route::resource('/waleed-transactions', App\Http\Controllers\Dashboard\WaleedTransactionController::class);
 
-Route::get('/waleed-transactions/trash', [App\Http\Controllers\Dashboard\WaleedTransactionController::class, 'trash'])->name('waleed-transactions.trash');
-Route::put('/waleed-transactions/{id}/restore', [App\Http\Controllers\Dashboard\WaleedTransactionController::class, 'restore'])->name('waleed-transactions.restore');
-Route::delete('/waleed-transactions/{id}/force-delete', [App\Http\Controllers\Dashboard\WaleedTransactionController::class, 'forceDelete'])->name('waleed-transactions.forceDelete');
-// مسارات إدارة الخزائن
-    Route::resource('/cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class)->names('cash-safes');
+
+// المسارات الأصلية للسندات العامة
+Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::resource('vouchers', App\Http\Controllers\Dashboard\VoucherController::class);
+    // ... مسارات سلة المهملات للسندات العامة
+});
+
+// المسارات الخاصة بحساب وليد
+Route::prefix('dashboard/waleed-ledger')->name('dashboard.waleed-ledger.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'store'])->name('store');
+    Route::get('/{voucher}/edit', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'edit'])->name('edit');
+    Route::put('/{voucher}', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'update'])->name('update');
+    Route::delete('/{voucher}', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'destroy'])->name('destroy');
+    // ... مسارات سلة المهملات الخاصة بوليد
+});
+
+// المسارات الخاصة بحساب خالد
+Route::prefix('dashboard/khaled-ledger')->name('dashboard.khaled-ledger.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'store'])->name('store');
+    Route::get('/{voucher}/edit', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'edit'])->name('edit');
+    Route::put('/{voucher}', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'update'])->name('update');
+    Route::delete('/{voucher}', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'destroy'])->name('destroy');
+    // ... مسارات سلة المهملات الخاصة بخالد
+});
 // مسار الربح السنوي
 Route::get('/annual-profit', [App\Http\Controllers\Dashboard\AnnualProfitController::class, 'index'])->name('annual-profit.index');
 
@@ -73,25 +94,10 @@ Route::get('/alerts', [App\Http\Controllers\Dashboard\AlertController::class, 'i
     // مسار لتخزين الحركة الجديدة من صفحة كشف الحساب
     Route::post('bank-accounts/{bankAccount}/transactions', [App\Http\Controllers\Dashboard\BankAccountStatementController::class, 'store'])->name('bank-accounts.transactions.store');
 
-    // مسارات إدارة الشيكات
-    Route::resource('/checks', App\Http\Controllers\Dashboard\CheckController::class)->names('checks');
 
     // مسارات دليل البنوك
     Route::resource('/banks', App\Http\Controllers\Dashboard\BankController::class);
-// Cash Safes Routes
-Route::prefix('cash-safes')->name('cash-safes.')->group(function () {
-    Route::get('/', [App\Http\Controllers\Dashboard\CashSafeController::class, 'index'])->name('index');
-    Route::post('/', [App\Http\Controllers\Dashboard\CashSafeController::class, 'store'])->name('store');
-    Route::put('/{cashSafe}', [App\Http\Controllers\Dashboard\CashSafeController::class, 'update'])->name('update');
-    Route::delete('/{cashSafe}', [App\Http\Controllers\Dashboard\CashSafeController::class, 'destroy'])->name('destroy');
 
-    // Trash Routes
-    Route::prefix('trash')->name('trash.')->group(function () {
-        Route::get('/', [App\Http\Controllers\Dashboard\CashSafeController::class, 'trash'])->name('index');
-        Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\CashSafeController::class, 'restore'])->name('restore');
-        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\CashSafeController::class, 'forceDelete'])->name('force-delete');
-    });
-});
 // Bank Accounts Routes
 Route::prefix('bank-accounts')->name('bank-accounts.')->group(function () {
     Route::get('/', [App\Http\Controllers\Dashboard\BankAccountController::class, 'index'])->name('index');
@@ -112,13 +118,18 @@ Route::post('/fund-transfers', [App\Http\Controllers\Dashboard\FundTransferContr
 // Financial Accounts (Banks, Safes, Checks) Main Page
 Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
 // Checks Management Routes
-Route::prefix('checks')->name('checks.')->group(function () {
+Route::prefix('dashboard/checks')->name('dashboard.checks.')->middleware(['auth'])->group(function () {
+    Route::get('/', [App\Http\Controllers\Dashboard\CheckController::class, 'index'])->name('index');
     Route::get('/create', [App\Http\Controllers\Dashboard\CheckController::class, 'create'])->name('create');
     Route::post('/', [App\Http\Controllers\Dashboard\CheckController::class, 'store'])->name('store');
+    Route::get('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'show'])->name('show');
     Route::get('/{check}/edit', [App\Http\Controllers\Dashboard\CheckController::class, 'edit'])->name('edit');
     Route::put('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'update'])->name('update');
     Route::delete('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'destroy'])->name('destroy');
-    Route::post('/{check}/update-status', [App\Http\Controllers\Dashboard\CheckController::class, 'updateStatus'])->name('update-status');
+    Route::put('/{check}/update-status', [App\Http\Controllers\Dashboard\CheckController::class, 'updateStatus'])->name('update-status');
+    Route::get('/trash', [App\Http\Controllers\Dashboard\CheckController::class, 'trash'])->name('trash');
+    Route::post('/trash/{id}/restore', [App\Http\Controllers\Dashboard\CheckController::class, 'restore'])->name('restore');
+    Route::delete('/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\CheckController::class, 'forceDelete'])->name('force-delete');
 });
 Route::prefix('bank-transactions')->name('bank-transactions.')->group(function () {
         Route::get('/trash', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'trash'])->name('trash');

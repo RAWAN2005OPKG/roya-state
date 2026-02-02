@@ -45,7 +45,6 @@
         <div><strong>{{ $transaction->type == 'in' ? 'استلمنا من السيد/السادة:' : 'صرفنا للسيد/السادة:' }}</strong> {{ $transaction->source }}</div>
         <div><strong>مبلغ وقدره:</strong> <span class="font-weight-bolder h4">{{ number_format($transaction->amount, 2) }} {{ $transaction->currency }}</span></div>
         <div class="amount-in-words">
-            {{-- يمكنك إضافة مكتبة لتحويل الأرقام إلى كلمات هنا إذا أردت --}}
             فقط {{ number_format($transaction->amount, 2) }} {{ $transaction->currency }} لا غير
         </div>
         <div><strong>وذلك عن:</strong> {{ $transaction->details ?? $transaction->source }}</div>

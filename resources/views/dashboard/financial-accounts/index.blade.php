@@ -3,10 +3,6 @@
 
 @push('styles')
 <style>
-    /* تحسينات بسيطة على التصميم */
-    .kpi-card .symbol-label {
-        font-size: 2rem; /* تكبير حجم الأيقونات */
-    }
     .kpi-card .card-body {
         padding: 1.5rem;
     }
@@ -27,7 +23,6 @@
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h1 class="h2 mb-0 text-gray-800 font-weight-bolder">المركز المالي</h1>
-        {{-- يمكنك إضافة زر هنا لاحقًا --}}
     </div>
 
     <!-- Totals KPI Cards -->
@@ -40,6 +35,7 @@
                     </div>
                     <div class="d-flex flex-column flex-grow-1">
                         <a href="#" class="font-weight-bolder text-dark-75 font-size-lg mb-1">أرصدة الخزائن (الكاش)</a>
+                        {{-- يتم تمرير هذا المتغير من المتحكم --}}
                         <span class="text-muted font-weight-bold font-size-h4">{{ number_format($totalCashBalance, 2) }}</span>
                     </div>
                 </div>
@@ -52,7 +48,7 @@
                         <span class="symbol-label"><i class="fas fa-university text-primary"></i></span>
                     </div>
                     <div class="d-flex flex-column flex-grow-1">
-                        <a href="{{ route('dashboard.bank-accounts.index') }}" class="font-weight-bolder text-dark-75 font-size-lg mb-1">أرصدة البنوك</a>
+                        <a href="{{-- route('dashboard.bank-accounts.index') --}}" class="font-weight-bolder text-dark-75 font-size-lg mb-1">أرصدة البنوك</a>
                         <span class="text-muted font-weight-bold font-size-h4">{{ number_format($totalBankBalance, 2) }}</span>
                     </div>
                 </div>
@@ -80,7 +76,6 @@
                 <ul class="nav nav-tabs nav-bold nav-tabs-line">
                     <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tab_cash_safes"><span class="nav-icon"><i class="fas fa-cash-register"></i></span><span class="nav-text">الخزائن النقدية</span></a></li>
                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab_bank_accounts"><span class="nav-icon"><i class="fas fa-university"></i></span><span class="nav-text">الحسابات البنكية</span></a></li>
-                    {{-- التصحيح 1: توحيد ID التبويب --}}
                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab_checks"><span class="nav-icon"><i class="fas fa-money-check-alt"></i></span><span class="nav-text">حافظة الشيكات</span></a></li>
                 </ul>
             </div>
@@ -101,7 +96,7 @@
                                     <td><span class="label label-lg font-weight-bold label-light-{{ $safe->is_active ? 'success' : 'danger' }} label-inline">{{ $safe->is_active ? 'نشطة' : 'غير نشطة' }}</span></td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="3" class="text-center p-5 text-muted">لا توجد خزائن لعرضها.</td></tr>
+                                <tr><td colspan="3" class="text-center p-5 text-muted">لا توجد خزائن لعرضها. قم بإضافة خزينة جديدة.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -116,11 +111,9 @@
                             <tbody>
                                 @forelse($bankAccounts as $account)
                                 <tr>
-                                    {{-- التصحيح 2: عرض اسم البنك من خلال العلاقة --}}
                                     <td>{{ $account->bank->name ?? 'N/A' }}</td>
-                                    <td><a href="{{ route('dashboard.bank-accounts.statement.show', $account->id) }}">{{ $account->account_name }}</a></td>
+                                    <td><a href="{{-- route('dashboard.bank-accounts.statement.show', $account->id) --}}">{{ $account->account_name }}</a></td>
                                     <td>{{ $account->account_number }}</td>
-                                    {{-- التصحيح 3: استخدام اسم العمود الصحيح للرصيد --}}
                                     <td class="font-weight-bold">{{ number_format($account->current_balance, 2) }} {{ $account->currency }}</td>
                                     <td><span class="label label-lg font-weight-bold label-light-{{ $account->is_active ? 'success' : 'danger' }} label-inline">{{ $account->is_active ? 'نشط' : 'غير نشط' }}</span></td>
                                 </tr>
@@ -133,7 +126,6 @@
                 </div>
 
                 <!-- 3. تبويب الشيكات -->
-                {{-- التصحيح 1: توحيد ID التبويب --}}
                 <div class="tab-pane fade" id="tab_checks" role="tabpanel">
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -153,15 +145,16 @@
                                             {{ $statusTexts[$check->status] ?? $check->status }}
                                         </span>
                                     </td>
-                                    <td><a href="{{ route('dashboard.checks.edit', $check->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل الشيك"><i class="la la-edit"></i></a></td>
+                                    <td><a href=" route('dashboard.checks.edit', $check->id) " class="btn btn-sm btn-clean btn-icon" title="تعديل الشيك"><i class="la la-edit"></i></a></td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="5" class="text-center p-5 text-muted">لا توجد شيكات لعرضها.</td></tr>
+                                <tr><td colspan="5" class="text-center p-5 text-muted">لا توجد شيكات في المحفظة حالياً.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
-                    <div class="d-flex justify-content-center mt-3">{{ $checks->appends(['tab' => 'checks'])->links() }}</div>
+                    {{-- روابط الترقيم (Pagination) للشيكات --}}
+                    <div class="d-flex justify-content-center mt-3">{{ $checks->links() }}</div>
                 </div>
             </div>
         </div>
