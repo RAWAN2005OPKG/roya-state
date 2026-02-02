@@ -119,6 +119,7 @@ Route::post('/fund-transfers', [App\Http\Controllers\Dashboard\FundTransferContr
 Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
 // Checks Management Routes
 Route::prefix('dashboard/checks')->name('dashboard.checks.')->middleware(['auth'])->group(function () {
+    
     Route::get('/', [App\Http\Controllers\Dashboard\CheckController::class, 'index'])->name('index');
     Route::get('/create', [App\Http\Controllers\Dashboard\CheckController::class, 'create'])->name('create');
     Route::post('/', [App\Http\Controllers\Dashboard\CheckController::class, 'store'])->name('store');
@@ -127,6 +128,8 @@ Route::prefix('dashboard/checks')->name('dashboard.checks.')->middleware(['auth'
     Route::put('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'update'])->name('update');
     Route::delete('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'destroy'])->name('destroy');
     Route::put('/{check}/update-status', [App\Http\Controllers\Dashboard\CheckController::class, 'updateStatus'])->name('update-status');
+    
+    // --- مسارات سلة المهملات ---
     Route::get('/trash', [App\Http\Controllers\Dashboard\CheckController::class, 'trash'])->name('trash');
     Route::post('/trash/{id}/restore', [App\Http\Controllers\Dashboard\CheckController::class, 'restore'])->name('restore');
     Route::delete('/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\CheckController::class, 'forceDelete'])->name('force-delete');
@@ -316,8 +319,6 @@ Route::resource('stocktakes', App\Http\Controllers\Dashboard\StocktakeController
     Route::get('/general-ledger', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('general-ledger.index');
     Route::get('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'index'])->name('bank.index');
     Route::post('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'store'])->name('bank.store');
-    Route::get('/cheques', [App\Http\Controllers\Dashboard\ChequeController::class, 'index'])->name('cheques.index');
-    Route::post('/cheques', [App\Http\Controllers\Dashboard\ChequeController::class, 'store'])->name('cheques.store');
     Route::post('/funds-transfers', [App\Http\Controllers\Dashboard\FundsTransferController::class, 'store'])->name('funds-transfers.store');
 });
 
