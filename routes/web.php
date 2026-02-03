@@ -118,28 +118,30 @@ Route::post('/fund-transfers', [App\Http\Controllers\Dashboard\FundTransferContr
 // Financial Accounts (Banks, Safes, Checks) Main Page
 Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
 // Checks Management Routes
-Route::prefix('dashboard/checks')->name('dashboard.checks.')->middleware(['auth'])->group(function () {
-    
-    Route::get('/', [App\Http\Controllers\Dashboard\CheckController::class, 'index'])->name('index');
-    Route::get('/create', [App\Http\Controllers\Dashboard\CheckController::class, 'create'])->name('create');
-    Route::post('/', [App\Http\Controllers\Dashboard\CheckController::class, 'store'])->name('store');
-    Route::get('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'show'])->name('show');
-    Route::get('/{check}/edit', [App\Http\Controllers\Dashboard\CheckController::class, 'edit'])->name('edit');
-    Route::put('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'update'])->name('update');
-    Route::delete('/{check}', [App\Http\Controllers\Dashboard\CheckController::class, 'destroy'])->name('destroy');
-    Route::put('/{check}/update-status', [App\Http\Controllers\Dashboard\CheckController::class, 'updateStatus'])->name('update-status');
-    
-    // --- مسارات سلة المهملات ---
-    Route::get('/trash', [App\Http\Controllers\Dashboard\CheckController::class, 'trash'])->name('trash');
-    Route::post('/trash/{id}/restore', [App\Http\Controllers\Dashboard\CheckController::class, 'restore'])->name('restore');
-    Route::delete('/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\CheckController::class, 'forceDelete'])->name('force-delete');
+Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::get('checks/trash', [App\Http\Controllers\Dashboard\CheckController::class, 'trash'])->name('checks.trash');
+    Route::get('checks/{id}/restore', [App\Http\Controllers\Dashboard\CheckController::class, 'restore'])->name('checks.restore');
+    Route::delete('checks/{id}/force-delete', [App\Http\Controllers\Dashboard\CheckController::class, 'forceDelete'])->name('checks.forceDelete');
+    Route::get('checks/export', [App\Http\Controllers\Dashboard\CheckController::class, 'exportExcel'])->name('checks.export');
 });
+    Route::resource('checks', App\Http\Controllers\Dashboard\CheckController::class);
+
 Route::prefix('bank-transactions')->name('bank-transactions.')->group(function () {
         Route::get('/trash', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'trash'])->name('trash');
         Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'restore'])->name('restore');
         Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'forceDelete'])->name('force-delete');
     });
     Route::resource('bank-transactions', App\Http\Controllers\Dashboard\BankTransactionController::class);
+
+    Route::get('khaled/trash', [App\Http\Controllers\Dashboard\KhaledController::class, 'trash'])->name('khaled.trash');
+    Route::post('khaled/restore/{id}', [App\Http\Controllers\Dashboard\KhaledController::class, 'restore'])->name('khaled.restore');
+    Route::delete('khaled/force-delete/{id}', [App\Http\Controllers\Dashboard\KhaledController::class, 'forceDelete'])->name('khaled.forceDelete');
+    Route::get('khaled/export/excel', [App\Http\Controllers\Dashboard\KhaledController::class, 'exportExcel'])->name('khaled.export.excel');
+    Route::get('khaled/get-rate', [App\Http\Controllers\Dashboard\KhaledController::class, 'getRateAjax'])->name('khaled.getRate'); // For AJAX
+    Route::resource('khaled', App\Http\Controllers\Dashboard\KhaledController::class);
+});
+
+
     // --- وحدات التحويلات ---
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->only(['index', 'store']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
@@ -320,7 +322,6 @@ Route::resource('stocktakes', App\Http\Controllers\Dashboard\StocktakeController
     Route::get('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'index'])->name('bank.index');
     Route::post('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'store'])->name('bank.store');
     Route::post('/funds-transfers', [App\Http\Controllers\Dashboard\FundsTransferController::class, 'store'])->name('funds-transfers.store');
-});
 
 
 Route::get('/create-test-user', function () {

@@ -1,64 +1,114 @@
 @extends('layouts.container')
-@section('title', 'تفاصيل شيك: ' . $check->check_number)
-
-@push('styles')
-<style>
-    .details-card .detail-item { display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid #f1f1f1; }
-    .details-card .detail-item strong { color: #5e6278; }
-    .details-card .detail-item span { color: #181c32; font-weight: 500; }
-    .details-section-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eff2f5; }
-</style>
-@endpush
+@section('title', 'تفاصيل الشيك رقم: ' . $check->check_number)
 
 @section('content')
-<div class="card card-custom gutter-b details-card">
+<div class="card card-custom">
     <div class="card-header">
-        <h3 class="card-title">تفاصيل الشيك</h3>
+        <div class="card-title">
+            <h3 class="card-label">تفاصيل الشيك: {{ $check->party_name }}</h3>
+        </div>
         <div class="card-toolbar">
-            <a href="{{ route('dashboard.checks.edit', $check->id) }}" class="btn btn-primary mr-2">تعديل</a>
-            <a href="{{ route('dashboard.checks.index') }}" class="btn btn-secondary">العودة للقائمة</a>
+            <a href="{{ route('dashboard.checks.index') }}" class="btn btn-light-primary font-weight-bolder mr-2">
+                <i class="la la-arrow-right"></i> عودة للقائمة
+            </a>
+            <a href="{{ route('dashboard.checks.edit', $check->id) }}" class="btn btn-warning font-weight-bolder">
+                <i class="la la-edit"></i> تعديل البيانات
+            </a>
         </div>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-lg-6">
-                <h4 class="details-section-title">المعلومات الأساسية</h4>
-                <div class="detail-item"><strong>رقم الشيك:</strong> <span>{{ $check->check_number }}</span></div>
-                <div class="detail-item"><strong>بنك الشيك:</strong> <span>{{ $check->bank_name }}</span></div>
-                <div class="detail-item"><strong>تاريخ التحرير:</strong> <span>{{ $check->issue_date->format('d-m-Y') }}</span></div>
-                <div class="detail-item"><strong>تاريخ الاستحقاق:</strong> <span>{{ $check->due_date->format('d-m-Y') }}</span></div>
+        <div class="row mb-6">
+            <div class="col-md-4">
+                <label class="text-muted">رقم الشيك:</label>
+                <p class="font-weight-bold font-size-h4">{{ $check->check_number }}</p>
             </div>
-            <div class="col-lg-6">
-                <h4 class="details-section-title">المعلومات المالية</h4>
-                <div class="detail-item"><strong>المبلغ:</strong> <span class="font-weight-bolder text-primary">{{ number_format($check->amount, 2) }} {{ $check->currency }}</span></div>
-                @if($check->currency !== 'ILS')
-                <div class="detail-item"><strong>سعر الصرف:</strong> <span>{{ number_format($check->exchange_rate, 4) }}</span></div>
-                <div class="detail-item"><strong>القيمة بالشيكل:</strong> <span class="font-weight-bolder">{{ number_format($check->amount_ils, 2) }} ILS</span></div>
-                @endif
+            <div class="col-md-4">
+                <label class="text-muted">اسم البنك:</label>
+                <p class="font-weight-bold font-size-h4">{{ $check->bank_name }}</p>
             </div>
-        </div>
-        <div class="separator separator-dashed my-10"></div>
-        <div class="row">
-            <div class="col-lg-6">
-                <h4 class="details-section-title">تفاصيل الطرف</h4>
-                <div class="detail-item"><strong>نوع الشيك:</strong> <span>{!! $check->type == 'receivable' ? '<span class="text-success">شيك قبض (وارد)</span>' : '<span class="text-danger">شيك دفع (صادر)</span>' !!}</span></div>
-                <div class="detail-item"><strong>اسم الطرف:</strong> <span>{{ $check->party_name }}</span></div>
-                <div class="detail-item"><strong>رقم الهاتف:</strong> <span>{{ $check->party_phone ?? 'N/A' }}</span></div>
-            </div>
-            <div class="col-lg-6">
-                <h4 class="details-section-title">الربط والحسابات</h4>
-                <div class="detail-item"><strong>المشروع المرتبط:</strong> <span>{{ $check->project->name ?? 'لا يوجد' }}</span></div>
-                <div class="detail-item"><strong>حساب الإيداع:</strong> <span>{{ $check->depositBankAccount->account_name ?? 'N/A' }}</span></div>
-                <div class="detail-item"><strong>حساب الدفع:</strong> <span>{{ $check->paymentBankAccount->account_name ?? 'N/A' }}</span></div>
+            <div class="col-md-4">
+                <label class="text-muted">نوع الشيك:</label>
+                <p>
+                    @if($check->type == 'receivable')
+                        <span class="label label-xl label-light-success label-inline">وارد (قبض)</span>
+                    @else
+                        <span class="label label-xl label-light-danger label-inline">صادر (دفع)</span>
+                    @endif
+                </p>
             </div>
         </div>
-        <div class="separator separator-dashed my-10"></div>
+
+        <div class="row mb-6">
+            <div class="col-md-4">
+                <label class="text-muted">تاريخ التحرير:</label>
+                <p class="font-weight-bold">{{ $check->issue_date->format('Y-m-d') }}</p>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted">تاريخ الاستحقاق:</label>
+                <p class="font-weight-bold text-primary font-size-h4">{{ $check->due_date->format('Y-m-d') }}</p>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted">الطرف الثاني:</label>
+                <p class="font-weight-bold font-size-h4">{{ $check->party_name }}</p>
+            </div>
+        </div>
+
+        <div class="separator separator-dashed my-8"></div>
+
+        <div class="row mb-6">
+            <div class="col-md-4">
+                <label class="text-muted">المبلغ:</label>
+                <p class="font-weight-bold font-size-h3 text-dark">{{ number_format($check->amount, 2) }} {{ $check->currency }}</p>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted">سعر الصرف:</label>
+                <p class="font-weight-bold">{{ $check->exchange_rate }}</p>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted">القيمة بالشيكل:</label>
+                <p class="font-weight-bold text-success font-size-h3">{{ number_format($check->amount_ils, 2) }} ILS</p>
+            </div>
+        </div>
+
+        <div class="separator separator-dashed my-8"></div>
+
+        <div class="row mb-6">
+            <div class="col-md-6">
+                <label class="text-muted">الحساب البنكي المرتبط:</label>
+                <p class="font-weight-bold">
+                    @if($check->type == 'receivable')
+                        {{ $check->depositBankAccount->account_name ?? 'غير محدد' }}
+                    @else
+                        {{ $check->paymentBankAccount->account_name ?? 'غير محدد' }}
+                    @endif
+                </p>
+            </div>
+            <div class="col-md-3">
+                <label class="text-muted">المشروع:</label>
+                <p class="font-weight-bold">{{ $check->project->name ?? 'غير مرتبط بمشروع' }}</p>
+            </div>
+            <div class="col-md-3">
+                <label class="text-muted">الوحدة العقارية:</label>
+                <p class="font-weight-bold">{{ $check->projectUnit->unit_number ?? 'غير مرتبط بوحدة' }}</p>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12">
-                <h4 class="details-section-title">ملاحظات</h4>
-                <p>{{ $check->notes ?? 'لا توجد ملاحظات.' }}</p>
+                <label class="text-muted">ملاحظات:</label>
+                <div class="bg-light p-5 rounded">
+                    {{ $check->notes ?: 'لا توجد ملاحظات إضافية' }}
+                </div>
             </div>
         </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+        <form action="{{ route('dashboard.checks.destroy', $check->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger font-weight-bold" onclick="return confirm('هل أنت متأكد من الحذف؟')">حذف الشيك</button>
+        </form>
+        <p class="text-muted font-size-sm">تاريخ الإضافة: {{ $check->created_at->format('Y-m-d H:i') }}</p>
     </div>
 </div>
 @endsection

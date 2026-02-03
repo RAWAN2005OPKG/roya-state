@@ -11,10 +11,22 @@ class Check extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'check_number', 'type', 'status', 'issue_date', 'due_date',
-        'party_name', 'party_phone', 'amount', 'currency', 'exchange_rate', 'amount_ils',
-        'bank_name', 'deposit_bank_account_id', 'payment_bank_account_id',
-        'project_id', 'project_unit_id', 'payer_signature', 'recipient_signature', 'notes',
+        'check_number',
+        'bank_name',
+        'issue_date',
+        'due_date',
+        'type',
+        'party_name',
+        'party_phone',
+        'amount',
+        'currency',
+        'exchange_rate',
+        'amount_ils',
+        'deposit_bank_account_id',
+        'payment_bank_account_id',
+        'project_id',
+        'project_unit_id',
+        'notes',
     ];
 
     protected $casts = [

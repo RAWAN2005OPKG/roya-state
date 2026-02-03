@@ -8,141 +8,134 @@ use App\Models\Project;
 use App\Models\BankAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\ChecksExport;
 
 class CheckController extends Controller
 {
+    /**
+     * عرض قائمة الشيكات
+     */
     public function index(Request $request)
     {
-        $query = Check::with(['project', 'depositBankAccount.bank'])->latest();
+        $query = Check::query();
 
-        // تطبيق الفلاتر
-        if ($request->filled('search')) {
-            $query->where('check_number', 'like', "%{$request->search}%")
-                  ->orWhere('party_name', 'like', "%{$request->search}%");
+        // فلترة بسيطة إذا لزم الأمر
+        if ($request->has('search')) {
+            $query->where('check_number', 'like', '%' . $request->search . '%')
+                  ->orWhere('party_name', 'like', '%' . $request->search . '%');
         }
-        if ($request->filled('status')) $query->where('status', $request->status);
-        if ($request->filled('type')) $query->where('type', $request->type);
-        if ($request->filled('due_date_from')) $query->where('due_date', '>=', $request->due_date_from);
-        if ($request->filled('due_date_to')) $query->where('due_date', '<=', $request->due_date_to);
 
-        $checks = $query->paginate(15)->appends($request->query());
+        $checks = $query->latest()->paginate(15);
+
         return view('dashboard.checks.index', compact('checks'));
     }
 
+    /**
+     * عرض نموذج إضافة شيك جديد
+     */
     public function create()
     {
-        $projects = Project::select('id', 'name')->get();
-        $bankAccounts = BankAccount::with('bank')->where('is_active', true)->get();
-        return view('dashboard.checks.create', compact('projects', 'bankAccounts'));
-    }
-
-    public function store(Request $request)
-    {
-        $validatedData = $this->validateCheck($request);
-        $validatedData['amount_ils'] = $validatedData['amount'] * $validatedData['exchange_rate'];
-
-        Check::create($validatedData);
-        return redirect()->route('dashboard.checks.index')->with('success', 'تم تسجيل الشيك بنجاح.');
-    }
-
-    public function show(Check $check)
-    {
-        return view('dashboard.checks.show', compact('check'));
-    }
-
-    public function edit(Check $check)
-    {
-        $projects = Project::select('id', 'name')->get();
-        $bankAccounts = BankAccount::with('bank')->where('is_active', true)->get();
-        return view('dashboard.checks.edit', compact('check', 'projects', 'bankAccounts'));
-    }
-
-    public function update(Request $request, Check $check)
-    {
-        $validatedData = $this->validateCheck($request, $check->id);
-        $validatedData['amount_ils'] = $validatedData['amount'] * $validatedData['exchange_rate'];
-
-        $check->update($validatedData);
-        return redirect()->route('dashboard.checks.index')->with('success', 'تم تحديث الشيك بنجاح.');
-    }
-
-    public function destroy(Check $check)
-    {
-        $check->delete();
-        return redirect()->route('dashboard.checks.index')->with('success', 'تم نقل الشيك إلى سلة المهملات.');
+        $bankAccounts = BankAccount::all();
+        $projects = Project::all();
+        return view('dashboard.checks.create', compact('bankAccounts', 'projects'));
     }
 
     /**
-     * [الجديد] دالة لتغيير حالة الشيك (صرف، إرجاع، إلغاء)
+     * حفظ الشيك الجديد
      */
-    public function updateStatus(Request $request, Check $check)
+    public function store(Request $request)
     {
-        $request->validate(['status' => 'required|in:cashed,returned,cancelled']);
-        $newStatus = $request->status;
-
-        try {
-            DB::transaction(function () use ($check, $newStatus) {
-                // منطق تحديث الأرصدة بناءً على تغيير الحالة
-                if ($newStatus == 'cashed') {
-                    if ($check->type == 'receivable' && $check->deposit_bank_account_id) {
-                        // شيك قبض تم صرفه: زيادة رصيد حساب الإيداع
-                        $account = BankAccount::find($check->deposit_bank_account_id);
-                        $account->current_balance += $check->amount_ils; // افترض أن الأرصدة بالشيكل
-                        $account->save();
-                    } elseif ($check->type == 'payable' && $check->payment_bank_account_id) {
-                        // شيك دفع تم صرفه: خصم من رصيد حساب الدفع
-                        $account = BankAccount::find($check->payment_bank_account_id);
-                        $account->current_balance -= $check->amount_ils;
-                        $account->save();
-                    }
-                }
-                // يمكنك إضافة منطق معاكس إذا تم التراجع عن الصرف
-
-                $check->update(['status' => $newStatus]);
-            });
-            return back()->with('success', 'تم تحديث حالة الشيك بنجاح.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ أثناء تحديث الحالة: ' . $e->getMessage());
-        }
-    }
-
-    private function validateCheck(Request $request, $checkId = null)
-    {
-        return $request->validate([
-            'check_number' => 'required|string|unique:checks,check_number,' . $checkId,
-            'type' => 'required|in:payable,receivable',
+        $validated = $request->validate([
+            'check_number' => 'required|string|max:255',
+            'bank_name' => 'required|string|max:255',
             'issue_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:issue_date',
+            'due_date' => 'required|date',
+            'type' => 'required|in:receivable,payable',
             'party_name' => 'required|string|max:255',
-            'party_phone' => 'nullable|string',
-            'amount' => 'required|numeric|min:0.01',
+            'party_phone' => 'nullable|string|max:20',
+            'amount' => 'required|numeric|min:0',
             'currency' => 'required|string|size:3',
-            'exchange_rate' => 'required|numeric',
-            'bank_name' => 'required|string',
+            'exchange_rate' => 'required|numeric|min:0',
             'deposit_bank_account_id' => 'nullable|exists:bank_accounts,id',
             'payment_bank_account_id' => 'nullable|exists:bank_accounts,id',
             'project_id' => 'nullable|exists:projects,id',
             'notes' => 'nullable|string',
         ]);
+
+        // حساب القيمة بالشيكل
+        $validated['amount_ils'] = $validated['amount'] * $validated['exchange_rate'];
+
+        Check::create($validated);
+
+        return redirect()->route('dashboard.checks.index')
+            ->with('success', 'تم إضافة الشيك بنجاح');
     }
 
-    public function trash()
+    /**
+     * عرض تفاصيل الشيك
+     */
+    public function show(Check $check)
     {
-        $trashedChecks = Check::onlyTrashed()->latest()->paginate(10);
-        return view('dashboard.checks.trash', compact('trashedChecks'));
+        return view('dashboard.checks.show', compact('check'));
     }
 
-    public function restore($id)
+    /**
+     * عرض نموذج تعديل الشيك
+     */
+    public function edit(Check $check)
     {
-        $check = Check::onlyTrashed()->findOrFail($id);
-        $check->restore();
-        return redirect()->route('dashboard.checks.trash')->with('success', 'تم استعادة الشيك بنجاح.');
+        $bankAccounts = BankAccount::all();
+        $projects = Project::all();
+        return view('dashboard.checks.edit', compact('check', 'bankAccounts', 'projects'));
     }
 
-    public function forceDelete($id)
+    /**
+     * تحديث بيانات الشيك
+     */
+    public function update(Request $request, Check $check)
     {
-        $check = Check::onlyTrashed()->findOrFail($id);
-        $check->forceDelete();
-        return redirect()->route('dashboard.checks.trash')->with('success', 'تم حذف الشيك نهائياً.');
+        $validated = $request->validate([
+            'check_number' => 'required|string|max:255',
+            'bank_name' => 'required|string|max:255',
+            'issue_date' => 'required|date',
+            'due_date' => 'required|date',
+            'type' => 'required|in:receivable,payable',
+            'party_name' => 'required|string|max:255',
+            'party_phone' => 'nullable|string|max:20',
+            'amount' => 'required|numeric|min:0',
+            'currency' => 'required|string|size:3',
+            'exchange_rate' => 'required|numeric|min:0',
+            'deposit_bank_account_id' => 'nullable|exists:bank_accounts,id',
+            'payment_bank_account_id' => 'nullable|exists:bank_accounts,id',
+            'project_id' => 'nullable|exists:projects,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        $validated['amount_ils'] = $validated['amount'] * $validated['exchange_rate'];
+
+        $check->update($validated);
+
+        return redirect()->route('dashboard.checks.index')
+            ->with('success', 'تم تحديث بيانات الشيك بنجاح');
+    }
+
+    /**
+     * حذف الشيك
+     */
+    public function destroy(Check $check)
+    {
+        $check->delete();
+        return redirect()->route('dashboard.checks.index')
+            ->with('success', 'تم حذف الشيك بنجاح');
+    }
+
+    /**
+     * تصدير الشيكات إلى ملف Excel
+     */
+    public function exportExcel()
+    {
+        // ملاحظة: يتطلب مكتبة Maatwebsite/Laravel-Excel
+        // سأقوم بتزويدك بكود الـ Export أيضاً
+        return Excel::download(new ChecksExport, 'checks_report_' . date('Y-m-d') . '.xlsx');
     }
 }

@@ -200,13 +200,13 @@
         <span class="menu-text">الحركات البنكية</span>
     </a>
 </li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('dashboard.khaled.index') }}">
+        <i class="mdi mdi-file-document menu-icon"></i>
+        <span class="menu-title">خالد</span>
+    </a>
+</li>
 
-                <li class="menu-item {{ request()->routeIs('dashboard.checks.*') ? 'menu-item-active' : '' }}">
-                    <a href="{{ route('dashboard.checks.index') }}" class="menu-link">
-                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                        <span class="menu-text">إدارة الشيكات</span>
-                    </a>
-                </li>
                    <li class="menu-item {{ request()->routeIs('dashboard.fund-transfers.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.fund-transfers.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
@@ -219,21 +219,48 @@
                         <span class="menu-text">تحويل المشاريع</span>
                     </a>
                 </li>
-           <li class="menu-item {{ request()->routeIs('dashboard.waleed-transactions.*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
-    <a href="{{ route('dashboard.waleed-transactions.index') }}" class="menu-link">
-        <span class="svg-icon menu-icon"><i class="fas fa-user-tie"></i></span>
-        <span class="menu-text">سجل وليد الخالص</span>
-    </a>
-</li>
- <li class="menu-item {{ request()->routeIs('dashboard.khaleed-mohamed.*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
-    <a href="{{ route('dashboard.khaleed-mohamed.index') }}" class="menu-link">
-        <span class="svg-icon menu-icon"><i class="fas fa-users"></i></span>
-        <span class="menu-text">سجل خالد ومحمد</span>
-    </a>
-</li>
+
 </ul>
         </div>
     </li>
+<li class="menu-item menu-item-submenu {{ request()->routeIs('dashboard.checks.*') ? 'menu-item-open menu-item-here' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
+    <a href="javascript:;" class="menu-link menu-toggle">
+        <span class="svg-icon menu-icon">
+            <i class="la la-money-check-alt icon-xl"></i>
+        </span>
+        <span class="menu-text">إدارة الشيكات</span>
+        <i class="menu-arrow"></i>
+    </a>
+    <div class="menu-submenu">
+        <i class="menu-arrow"></i>
+        <ul class="menu-subnav">
+            <li class="menu-item menu-item-parent" aria-haspopup="true">
+                <span class="menu-link">
+                    <span class="menu-text">إدارة الشيكات</span>
+                </span>
+            </li>
+
+            <!-- رابط عرض الكل -->
+            <li class="menu-item {{ request()->routeIs('dashboard.checks.index') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+                <a href="{{ route('dashboard.checks.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">قائمة الشيكات</span>
+                </a>
+            </li>
+
+            <!-- رابط إضافة جديد -->
+            <li class="menu-item {{ request()->routeIs('dashboard.checks.create') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+                <a href="{{ route('dashboard.checks.create') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">إضافة شيك جديد</span>
+                </a>
+            </li>
+
+
+        </ul>
+    </div>
+</li>
+
 <li class="menu-item menu-item-submenu {{ request()->is('dashboard/purchases*') || request()->is('dashboard/purchase-returns*') ? 'menu-item-open menu-item-here' : '' }}" aria-haspopup="true" data-menu-toggle="hover">
     <a href="javascript:;" class="menu-link menu-toggle">
         <span class="svg-icon menu-icon"><i class="fas fa-shopping-cart"></i></span>
