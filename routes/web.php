@@ -51,33 +51,6 @@ Route::resource('/khaleed-mohamed', App\Http\Controllers\Dashboard\KhaleedMohame
     Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
 
 
-// المسارات الأصلية للسندات العامة
-Route::prefix('dashboard')->name('dashboard.')->group(function () {
-    Route::resource('vouchers', App\Http\Controllers\Dashboard\VoucherController::class);
-    // ... مسارات سلة المهملات للسندات العامة
-});
-
-// المسارات الخاصة بحساب وليد
-Route::prefix('dashboard/waleed-ledger')->name('dashboard.waleed-ledger.')->group(function () {
-    Route::get('/', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'index'])->name('index');
-    Route::get('/create', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'create'])->name('create');
-    Route::post('/', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'store'])->name('store');
-    Route::get('/{voucher}/edit', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'edit'])->name('edit');
-    Route::put('/{voucher}', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'update'])->name('update');
-    Route::delete('/{voucher}', [App\Http\Controllers\Dashboard\WaleedLedgerController::class, 'destroy'])->name('destroy');
-    // ... مسارات سلة المهملات الخاصة بوليد
-});
-
-// المسارات الخاصة بحساب خالد
-Route::prefix('dashboard/khaled-ledger')->name('dashboard.khaled-ledger.')->group(function () {
-    Route::get('/', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'index'])->name('index');
-    Route::get('/create', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'create'])->name('create');
-    Route::post('/', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'store'])->name('store');
-    Route::get('/{voucher}/edit', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'edit'])->name('edit');
-    Route::put('/{voucher}', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'update'])->name('update');
-    Route::delete('/{voucher}', [App\Http\Controllers\Dashboard\KhaledLedgerController::class, 'destroy'])->name('destroy');
-    // ... مسارات سلة المهملات الخاصة بخالد
-});
 // مسار الربح السنوي
 Route::get('/annual-profit', [App\Http\Controllers\Dashboard\AnnualProfitController::class, 'index'])->name('annual-profit.index');
 
@@ -139,11 +112,11 @@ Route::prefix('bank-transactions')->name('bank-transactions.')->group(function (
     Route::get('khaled/export/excel', [App\Http\Controllers\Dashboard\KhaledController::class, 'exportExcel'])->name('khaled.export.excel');
     Route::get('khaled/get-rate', [App\Http\Controllers\Dashboard\KhaledController::class, 'getRateAjax'])->name('khaled.getRate'); // For AJAX
     Route::resource('khaled', App\Http\Controllers\Dashboard\KhaledController::class);
-});
+
 
 
     // --- وحدات التحويلات ---
-    Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->only(['index', 'store']);
+    Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferCoCntroller::class)->only(['index', 'store']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
  Route::get('/purchases', [App\Http\Controllers\Dashboard\PurchaseController::class, 'index'])->name('purchases.index');
 
@@ -232,6 +205,10 @@ Route::prefix('projects')->name('projects.')->group(function () {
     });
     Route::get('/daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'index'])->name('daily.index');
     Route::post('/daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'store'])->name('daily.store');
+    Route::get('cash-safes/trash', [App\Http\Controllers\Dashboard\CashSafeController::class, 'trash'])->name('cash-safes.trash');
+    Route::post('cash-safes/restore/{id}', [App\Http\Controllers\Dashboard\CashSafeController::class, 'restore'])->name('cash-safes.restore');
+    Route::delete('cash-safes/force-delete/{id}', [App\Http\Controllers\Dashboard\CashSafeController::class, 'forceDelete'])->name('cash-safes.forceDelete');
+    Route::resource('cash-safes', App\Http\Controllers\Dashboard\CashSafeController::class);
 
     Route::resource('receipt-vouchers', App\Http\Controllers\Dashboard\ReceiptVoucherController::class)->except(['show']);
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->except(['show']);
@@ -322,6 +299,8 @@ Route::resource('stocktakes', App\Http\Controllers\Dashboard\StocktakeController
     Route::get('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'index'])->name('bank.index');
     Route::post('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'store'])->name('bank.store');
     Route::post('/funds-transfers', [App\Http\Controllers\Dashboard\FundsTransferController::class, 'store'])->name('funds-transfers.store');
+
+});
 
 
 Route::get('/create-test-user', function () {

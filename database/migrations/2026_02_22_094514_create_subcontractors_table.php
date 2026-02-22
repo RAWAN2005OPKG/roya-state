@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('project_investor', function (Blueprint $table) {
-    $table->string('currency')->nullable()->change();
-});
-
+        Schema::create('subcontractors', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -22,9 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-     Schema::table('project_investor', function (Blueprint $table) {
-    $table->string('currency')->default('USD')->change();
-});
-
+        Schema::dropIfExists('subcontractors');
     }
 };

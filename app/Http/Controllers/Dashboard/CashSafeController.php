@@ -8,61 +8,84 @@ use Illuminate\Http\Request;
 
 class CashSafeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $cashSafes = CashSafe::latest()->paginate(10);
-        return view('dashboard.cash_safes.index', compact('cashSafes'));
+        $query = CashSafe::query();
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        $safes = $query->latest()->paginate(10);
+        return view('dashboard.cash_safes.index', compact('safes'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function create()
+    {
+        return view('dashboard.cash_safes.create');
+    }
+
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|unique:cash_safes,name',
-            'initial_balance' => 'required|numeric|min:0',
+        $data = $request->validate([
+            'name' => 'required|string|max:255|unique:cash_safes,name',
+            'currency' => 'required|string|size:3',
+            'balance' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
         ]);
+        $data['is_active'] = $request->has('is_active');
 
-        $validatedData['balance'] = $validatedData['initial_balance']; // الرصيد الحالي يبدأ بالافتتاحي
+        CashSafe::create($data);
 
-        CashSafe::create($validatedData);
-
-        return redirect()->route('dashboard.cash-safes.index')->with('success', 'تمت إضافة الخزينة بنجاح.');
+        return redirect()->route('dashboard.cash-safes.index')->with('success', 'تم إنشاء الخزينة النقدية بنجاح.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(CashSafe $cashSafe)
     {
         return view('dashboard.cash_safes.edit', compact('cashSafe'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, CashSafe $cashSafe)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|unique:cash_safes,name,' . $cashSafe->id,
-            'is_active' => 'required|boolean',
+        $data = $request->validate([
+            'name' => 'required|string|max:255|unique:cash_safes,name,' . $cashSafe->id,
+            'currency' => 'required|string|size:3',
+            'balance' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
         ]);
+        $data['is_active'] = $request->has('is_active');
 
-        $cashSafe->update($validatedData);
+        $cashSafe->update($data);
 
-        return redirect()->route('dashboard.cash-safes.index')->with('success', 'تم تعديل الخزينة بنجاح.');
+        return redirect()->route('dashboard.cash-safes.index')->with('success', 'تم تحديث الخزينة النقدية بنجاح.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(CashSafe $cashSafe)
     {
+        // يمكنك إضافة شرط هنا لمنع حذف خزينة رصيدها لا يساوي صفر
+        if ($cashSafe->balance > 0) {
+            return redirect()->back()->with('error', 'لا يمكن حذف خزينة تحتوي على رصيد.');
+        }
         $cashSafe->delete();
-        return redirect()->route('dashboard.cash-safes.index')->with('success', 'تم حذف الخزينة بنجاح.');
+        return redirect()->route('dashboard.cash-safes.index')->with('success', 'تم نقل الخزينة إلى سلة المحذوفات.');
+    }
+
+    // --- سلة المحذوفات ---
+    public function trash()
+    {
+        $safes = CashSafe::onlyTrashed()->latest()->paginate(10);
+        return view('dashboard.cash_safes.trash', compact('safes'));
+    }
+
+    public function restore($id)
+    {
+        CashSafe::onlyTrashed()->findOrFail($id)->restore();
+        return redirect()->route('dashboard.cash-safes.trash')->with('success', 'تم استعادة الخزينة بنجاح.');
+    }
+
+    public function forceDelete($id)
+    {
+        CashSafe::onlyTrashed()->findOrFail($id)->forceDelete();
+        return redirect()->route('dashboard.cash-safes.trash')->with('success', 'تم حذف الخزينة نهائياً.');
     }
 }

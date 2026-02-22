@@ -138,7 +138,15 @@ class KhaledController extends Controller
             'client_id' => 'nullable|exists:clients,id',
             'investor_id' => 'nullable|exists:investors,id',
             'notes' => 'nullable|string',
-            // ... add other fields for validation
+            'from_bank_account_id' => 'nullable|exists:bank_accounts,id',
+            'to_bank_account_id' => 'nullable|exists:bank_accounts,id',
+            'cash_safe_id' => 'nullable|exists:cash_safes,id',
+            'handler_name' => 'nullable|string',
+            'handler_role' => 'nullable|string',
+            'check_number' => 'nullable|string',
+            'check_owner_name' => 'nullable|string',
+            'check_bank_name' => 'nullable|string',
+            'check_due_date' => 'nullable|date',
         ]);
 
         $data['amount_ils'] = $data['amount'] * $data['exchange_rate'];
