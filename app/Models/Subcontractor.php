@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // تأكد من وجود هذا السطر
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\DB;
 
@@ -24,9 +24,7 @@ class Subcontractor extends Model
         });
     }
 
-    /**
-     * علاقة مع عقود الموردين (الجدول الصحيح)
-     */
+
     public function contracts()
     {
         return $this->hasMany(SubcontractorContract::class);
