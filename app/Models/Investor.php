@@ -10,21 +10,16 @@ class Investor extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * [الحل] تأكد من أن unique_id موجود هنا.
-     */
     protected $fillable = [
         'name',
-        'unique_id', // <-- [مهم جداً] يجب أن يكون هذا الحقل هنا
+        'unique_id',
         'company',
         'id_number',
         'phone',
         'notes',
     ];
 
-    /**
-     * [الحل] هذا هو الكود الصحيح لدالة boot.
-     */
+
     protected static function boot()
     {
         parent::boot();
