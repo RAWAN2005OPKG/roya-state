@@ -6,43 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('report_projects', function (Blueprint $table) {
             $table->id();
 
-            // --- معلومات التقرير الأساسية ---
-            $table->string('name'); // اسم المشروع/التقرير
-            $table->string('project_title')->nullable(); // عنوان فرعي أو وصف مختصر
+            // هذه هي الحقول التي طلبتها في الموديل
+            $table->string('name'); // اسم التقرير
+            $table->string('project_title'); // عنوان المشروع
+            $table->string('owner_name'); // اسم المالك
+            $table->string('owner_phone')->nullable(); // هاتف المالك
+            $table->string('owner_id')->nullable(); // هوية المالك
+            $table->string('project_status')->default('pending'); // حالة المشروع
+            $table->date('start_date')->nullable(); // تاريخ البدء
+            $table->decimal('total_budget', 15, 2)->default(0); // الميزانية الإجمالية
+            $table->string('currency', 3)->default('USD'); // العملة
+            $table->text('description')->nullable(); // الوصف
+            $table->json('project_media')->nullable(); // لتخزين مسارات الصور والفيديوهات
 
-            // --- معلومات المالك ---
-            $table->string('owner_name');
-            $table->string('owner_phone')->nullable();
-            $table->string('owner_id')->nullable(); // رقم هوية المالك
-
-            // --- حالة المشروع وتواريخه ---
-            $table->string('project_status')->nullable();
-            $table->date('start_date')->nullable();
-
-            // --- المعلومات المالية ---
-            $table->decimal('total_budget', 15, 2)->nullable(); // الميزانية الإجمالية
-            $table->string('currency', 10)->nullable();
-
-            // --- معلومات إضافية ---
-            $table->text('description')->nullable(); // وصف تفصيلي
-            $table->string('project_media')->nullable(); // مسار الصورة أو الفيديو المرفق
-
-            $table->timestamps(); // تنشئ created_at و updated_at
-            $table->softDeletes(); // لدعم سلة المحذوفات
+            $table->timestamps(); // حقول created_at و updated_at
+            $table->softDeletes(); // حقل deleted_at للحذف الناعم
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('report_projects');

@@ -10,16 +10,8 @@ class ReportProject extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * The table associated with the model.
-     * اسم الجدول في قاعدة البيانات.
-     */
     protected $table = 'report_projects';
 
-    /**
-     * The attributes that are mass assignable.
-     * الحقول التي نسمح بتعبئتها من خلال النماذج.
-     */
     protected $fillable = [
         'name',
         'project_title',
@@ -34,19 +26,12 @@ class ReportProject extends Model
         'project_media',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     * هذا يضمن أن الحقول ستعامل دائمًا بأنواع البيانات الصحيحة.
-     */
     protected $casts = [
         'total_budget' => 'decimal:2',
         'start_date' => 'date',
+        'project_media' => 'array', // هذا مهم جداً للتعامل مع حقل JSON
     ];
 
-
-      public function payments()
-      {
-         return $this->hasMany(Payment::class);
-      }
-
+    // حالياً، لا توجد علاقات ضرورية أخرى بناءً على التحليل.
+    // إذا أردت ربطه بالدفعات، يمكننا إضافة علاقة morphMany هنا.
 }

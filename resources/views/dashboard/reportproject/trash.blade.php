@@ -1,45 +1,41 @@
 @extends('layouts.container')
-@section('title', 'سلة محذوفات المشاريع')
+@section('title', 'سلة مهملات تقارير المشاريع')
+
 @section('content')
-<main class="main-content">
-    <div class="page-header"><h1><i class="fas fa-trash-alt"></i> سلة محذوفات المشاريع</h1></div>
-    <div class="card card-custom">
-        <div class="card-header">
-            <div class="card-title"><h3 class="card-label">المشاريع المحذوفة</h3></div>
-            <div class="card-toolbar"><a href="{{ route('dashboard.reportproject.index') }}" class="btn btn-secondary">العودة لقائمة المشاريع</a></div>
-        </div>
-        <div class="card-body">
-            @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead><tr><th>اسم المشروع</th><th>المالك</th><th>تاريخ الحذف</th><th>تحكم</th></tr></thead>
-                    <tbody>
-                        @forelse ($projects as $project)
-                            <tr>
-                                <td>{{ $project->name }}</td>
-                                <td>{{ $project->owner_name }}</td>
-                                <td>{{ $project->deleted_at->format('Y-m-d H:i') }}</td>
-                                <td nowrap="nowrap">
-                                    <form action="{{ route('dashboard.reportproject.trash.restore', $project->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        @method('PUT')
-                                        <button type="submit" class="btn btn-success btn-sm">استعادة</button>
-                                    </form>
-                                    <form action="{{ route('dashboard.reportproject.trash.forceDelete', $project->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من الحذف النهائي؟ لا يمكن التراجع عن هذا الإجراء.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm">حذف نهائي</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="4" class="text-center">سلة المحذوفات فارغة.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-4">{{ $projects->links() }}</div>
-        </div>
+<div class="card card-custom">
+    <div class="card-header">
+        <h3 class="card-title">سلة المهملات</h3>
+        <div class="card-toolbar"><a href="{{ route('dashboard.reportproject.index') }}" class="btn btn-secondary">العودة للقائمة</a></div>
     </div>
-</main>
+    <div class="card-body">
+        @if (session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead><tr><th>اسم التقرير</th><th>تاريخ الحذف</th><th>إجراءات</th></tr></thead>
+                <tbody>
+                    @forelse($trashedReports as $report)
+                    <tr>
+                        <td>{{ $report->name }}</td>
+                        <td>{{ $report->deleted_at->format('Y-m-d H:i A') }}</td>
+                        <td>
+                            <form action="{{ route('dashboard.reportproject.restore', $report->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-success">استعادة</button>
+                            </form>
+                            <form action="{{ route('dashboard.reportproject.force-delete', $report->id) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من الحذف النهائي؟ لا يمكن التراجع عن هذا الإجراء.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-danger">حذف نهائي</button>
+                            </form>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="3" class="text-center p-5">سلة المهملات فارغة.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-center mt-3">{{ $trashedReports->links() }}</div>
+    </div>
+</div>
 @endsection

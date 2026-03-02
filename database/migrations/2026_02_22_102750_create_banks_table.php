@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subcontractors', function (Blueprint $table) {
+        Schema::create('banks', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique(); // اسم البنك يجب أن يكون فريداً
+            $table->boolean('is_active')->default(true); // لتعطيل أو تفعيل البنك
             $table->timestamps();
+            $table->softDeletes(); // لإمكانية الحذف الناعم
         });
     }
 
@@ -22,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subcontractors');
+        Schema::dropIfExists('banks');
     }
 };

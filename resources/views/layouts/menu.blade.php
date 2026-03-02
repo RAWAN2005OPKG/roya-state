@@ -206,19 +206,6 @@
         <span class="menu-title">خالد</span>
     </a>
 </li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('dashboard.walled.index') }}">
-        <i class="mdi mdi-file-document menu-icon"></i>
-        <span class="menu-title">وليد</span>
-    </a>
-
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('dashboard.mohammed.index') }}">
-        <i class="mdi mdi-file-document menu-icon"></i>
-        <span class="menu-title">محمد</span>
-    </a>
-</li>
                    <li class="menu-item {{ request()->routeIs('dashboard.fund-transfers.*') ? 'menu-item-active' : '' }}">
                     <a href="{{ route('dashboard.fund-transfers.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>

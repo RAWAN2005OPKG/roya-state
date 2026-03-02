@@ -3,160 +3,105 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\ReportProject;
-use App\Exports\ReportProjectExport;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request;
 
 class ReportProjectController extends Controller
 {
-    /**
-     * عرض قائمة تقارير المشاريع.
-     */
+    // 1. عرض القائمة الرئيسية مع البحث
     public function index(Request $request)
     {
-        // ** التصحيح الثالث: البحث في مودل ReportProject **
-        $query = ReportProject::query();
-        $search = $request->input('search');
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
+        $query = ReportProject::latest();
 
-        if ($search) {
-            // البحث في الحقول الخاصة بـ ReportProject
-            $query->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('owner_name', 'LIKE', "%{$search}%")
-                  ->orWhere('project_title', 'LIKE', "%{$search}%");
+        // منطق البحث
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('project_title', 'like', "%{$searchTerm}%")
+                  ->orWhere('owner_name', 'like', "%{$searchTerm}%");
+            });
         }
 
-        $projects = $query->orderBy($sortBy, $sortOrder)->paginate(10);
-
-        return view('dashboard.reportproject.index', compact('projects', 'search', 'sortBy', 'sortOrder'));
+        $reportProjects = $query->paginate(10)->appends($request->query());
+        return view('dashboard.reportproject.index', compact('reportProjects'));
     }
 
-    /**
-     * عرض نموذج إنشاء تقرير مشروع جديد.
-     */
+    // 2. عرض صفحة الإنشاء
     public function create()
     {
-        $project = new ReportProject(); // استخدام المودل الصحيح
-        return view('dashboard.reportproject.create', compact('project'));
+        return view('dashboard.reportproject.create');
     }
 
-    /**
-     * تخزين تقرير مشروع جديد.
-     */
+    // 3. حفظ التقرير الجديد
     public function store(Request $request)
     {
-        // استخدام دالة التحقق من الصحة بعد تعديلها
-        $validated = $this->validateReportProject($request);
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'project_title' => 'required|string|max:255',
+            'owner_name' => 'required|string|max:255',
+            'owner_phone' => 'nullable|string',
+            'owner_id' => 'nullable|string',
+            'project_status' => 'required|string',
+            'start_date' => 'nullable|date',
+            'total_budget' => 'nullable|numeric',
+            'currency' => 'required|string|size:3',
+            'description' => 'nullable|string',
+        ]);
 
-        if ($request->hasFile('project_media')) {
-            $validated['project_media'] = $request->file('project_media')->store('report_projects', 'public');
-        }
+        ReportProject::create($validatedData);
 
-        ReportProject::create($validated); // استخدام المودل الصحيح
-
-        return redirect()->route('dashboard.reportproject.index')->with('success', 'تم إضافة تقرير المشروع بنجاح.');
+        return redirect()->route('dashboard.reportproject.index')->with('success', 'تم حفظ تقرير المشروع بنجاح.');
     }
 
-    /**
-     * عرض تفاصيل تقرير مشروع.
-     */
-    public function show(ReportProject $project) // استخدام الحقن للمودل الصحيح
+    // 4. عرض صفحة التعديل
+    public function edit(ReportProject $reportproject) // استخدام Route Model Binding
     {
-        // يمكنك إضافة أي علاقات تحتاجينها هنا
-        // $project->load('some_relation');
-
-        return view('dashboard.reportproject.show', compact('project'));
+        return view('dashboard.reportproject.edit', ['report' => $reportproject]);
     }
 
-    /**
-     * عرض نموذج تعديل تقرير مشروع.
-     */
-    public function edit(ReportProject $project) // استخدام الحقن للمودل الصحيح
+    // 5. تحديث التقرير
+    public function update(Request $request, ReportProject $reportproject)
     {
-        return view('dashboard.reportproject.edit', compact('project'));
-    }
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'project_title' => 'required|string|max:255',
+            'owner_name' => 'required|string|max:255',
+            // ... نفس قواعد التحقق في store
+        ]);
 
-    /**
-     * تحديث بيانات تقرير مشروع.
-     */
-    public function update(Request $request, ReportProject $project) // استخدام الحقن للمودل الصحيح
-    {
-        $validated = $this->validateReportProject($request, $project->id);
-
-        if ($request->hasFile('project_media')) {
-            if ($project->project_media) {
-                Storage::disk('public')->delete($project->project_media);
-            }
-            $validated['project_media'] = $request->file('project_media')->store('report_projects', 'public');
-        }
-
-        $project->update($validated);
+        $reportproject->update($validatedData);
 
         return redirect()->route('dashboard.reportproject.index')->with('success', 'تم تحديث تقرير المشروع بنجاح.');
     }
 
-    /**
-     * نقل تقرير المشروع إلى سلة المحذوفات.
-     */
-    public function destroy(ReportProject $project) // استخدام الحقن للمودل الصحيح
+    // 6. الحذف الناعم (نقل إلى سلة المهملات)
+    public function destroy(ReportProject $reportproject)
     {
-        $project->delete();
-        return back()->with('success', 'تم نقل تقرير المشروع إلى سلة المحذوفات.');
+        $reportproject->delete();
+        return redirect()->route('dashboard.reportproject.index')->with('success', 'تم نقل التقرير إلى سلة المهملات.');
     }
 
-    // --- دوال سلة المحذوفات ---
+    // 7. عرض سلة المهملات
     public function trash()
     {
-        $trashedProjects = ReportProject::onlyTrashed()->paginate(10);
-        return view('dashboard.reportproject.trash', ['projects' => $trashedProjects]);
+        $trashedReports = ReportProject::onlyTrashed()->latest()->paginate(10);
+        return view('dashboard.reportproject.trash', compact('trashedReports'));
     }
 
+    // 8. استعادة من سلة المهملات
     public function restore($id)
     {
-        ReportProject::withTrashed()->findOrFail($id)->restore();
-        return back()->with('success', 'تم استعادة تقرير المشروع بنجاح.');
+        $report = ReportProject::onlyTrashed()->findOrFail($id);
+        $report->restore();
+        return redirect()->route('dashboard.reportproject.trash')->with('success', 'تم استعادة التقرير بنجاح.');
     }
 
+    // 9. الحذف النهائي
     public function forceDelete($id)
     {
-        $project = ReportProject::withTrashed()->findOrFail($id);
-        if ($project->project_media) {
-            Storage::disk('public')->delete($project->project_media);
-        }
-        $project->forceDelete();
-        return back()->with('success', 'تم حذف تقرير المشروع نهائيًا.');
-    }
-
-    // --- دالة التصدير ---
-    public function exportExcel()
-    {
-        return Excel::download(new ReportProjectExport, 'report_projects.xlsx');
-    }
-
-    /**
-     * ** التصحيح الرابع: دالة تحقق خاصة بـ ReportProject **
-     * تم تبسيط الحقول لتكون منطقية لتقرير مشروع.
-     */
-    private function validateReportProject(Request $request, $projectId = null)
-    {
-        $rules = [
-            'name' => ['required', 'string', 'max:255'],
-            'project_title' => ['required', 'string', 'max:255'],
-            'owner_name' => ['required', 'string', 'max:255'],
-            'owner_phone' => ['nullable', 'string', 'max:50'],
-            'owner_id' => ['nullable', 'string', 'max:50'],
-            'start_date' => ['nullable', 'date'],
-            'project_status' => ['nullable', 'string', 'max:50'],
-            'total_budget' => ['nullable', 'numeric'],
-            'description' => ['nullable', 'string'],
-            'project_media' => ['nullable', 'file', 'mimes:jpg,jpeg,png,mp4', 'max:20480'],
-            // أزلت الحقول غير المنطقية مثل تفاصيل الدفع والشيكات
-            // هذه الحقول يجب أن تكون في جداول أخرى (مثل جدول الدفعات)
-        ];
-
-        return $request->validate($rules);
+        $report = ReportProject::onlyTrashed()->findOrFail($id);
+        $report->forceDelete();
+        return redirect()->route('dashboard.reportproject.trash')->with('success', 'تم حذف التقرير نهائياً.');
     }
 }

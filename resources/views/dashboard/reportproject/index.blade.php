@@ -1,86 +1,56 @@
 @extends('layouts.container')
-@section('title', 'إدارة تقارير المشاريع')
+@section('title', 'تقارير المشاريع')
+
 @section('content')
-<main class="main-content">
-    <div class="page-header">
-        <h1><i class="fas fa-project-diagram"></i> إدارة تقارير المشاريع</h1>
-        <div class="header-actions">
-            <a href="{{ route('dashboard.reportproject.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة مشروع</a>
-            <a href="{{ route('dashboard.reportproject.trash.index') }}" class="btn btn-danger"><i class="fas fa-trash"></i> سلة المحذوفات</a>
+<div class="card card-custom">
+    <div class="card-header">
+        <h3 class="card-title">قائمة تقارير المشاريع</h3>
+        <div class="card-toolbar">
+            <a href="{{ route('dashboard.reportproject.trash') }}" class="btn btn-outline-danger mr-2">سلة المهملات</a>
+            <a href="{{ route('dashboard.reportproject.create') }}" class="btn btn-primary">إضافة تقرير جديد</a>
         </div>
     </div>
-    <div class="card card-custom">
-        <div class="card-body">
-            <div class="table-controls">
-                <form action="{{ route('dashboard.reportproject.index') }}" method="GET" class="search-form">
-                    <input type="text" name="search" class="form-control" placeholder="ابحث بالاسم, المالك, العنوان..." value="{{ $search ?? '' }}">
-                    <button type="submit" class="btn btn-light-primary">بحث</button>
-                </form>
-                <div class="header-actions">
-                    <a href="{{ route('dashboard.reportproject.export.excel') }}" class="btn btn-success"><i class="fas fa-file-excel"></i> تصدير Excel</a>
-                    <button onclick="window.print();" class="btn btn-info"><i class="fas fa-print"></i> طباعة</button>
+    <div class="card-body">
+        @if (session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+
+        <!-- نموذج البحث -->
+        <form method="GET" action="{{ route('dashboard.reportproject.index') }}" class="mb-5">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="ابحث بالاسم، العنوان، أو المالك..." value="{{ request('search') }}">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">بحث</button>
                 </div>
             </div>
-            @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th><a href="{{ route('dashboard.reportproject.index', ['sort_by' => 'name', 'sort_order' => ($sortBy == 'name' && $sortOrder == 'asc') ? 'desc' : 'asc']) }}">اسم المشروع</a></th>
-                            <th><a href="{{ route('dashboard.reportproject.index', ['sort_by' => 'owner_name', 'sort_order' => ($sortBy == 'owner_name' && $sortOrder == 'asc') ? 'desc' : 'asc']) }}">المالك</a></th>
-                            <th><a href="{{ route('dashboard.reportproject.index', ['sort_by' => 'project_status', 'sort_order' => ($sortBy == 'project_status' && $sortOrder == 'asc') ? 'desc' : 'asc']) }}">الحالة</a></th>
-                            <th><a href="{{ route('dashboard.reportproject.index', ['sort_by' => 'total_budget', 'sort_order' => ($sortBy == 'total_budget' && $sortOrder == 'asc') ? 'desc' : 'asc']) }}">الميزانية</a></th>
-                            <th>تحكم</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($projects as $project)
-                            <tr>
-                                <td>
-                                    <a href="{{ route('dashboard.reportproject.show', $project->id) }}"><strong>{{ $project->name }}</strong></a>
-                                    <br><small>{{ $project->project_title }}</small>
-                                </td>
-                                <td>{{ $project->owner_name }}</td>
-                                <td><span class="badge badge-info">{{ $project->project_status }}</span></td>
-                                <td>{{ number_format($project->total_budget, 2) }} {{ $project->currency }}</td>
-                                <td nowrap="nowrap">
-                                    <a href="{{ route('dashboard.reportproject.edit', $project->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل"><i class="fas fa-edit"></i></a>
-                                    <button type="button" class="btn btn-sm btn-clean btn-icon" title="حذف" onclick="confirmDelete({{ $project->id }})"><i class="fas fa-trash"></i></button>
-                                    <form id="delete-form-{{ $project->id }}" action="{{ route('dashboard.reportproject.destroy', $project->id) }}" method="POST" style="display: none;">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="5" class="text-center">لا توجد تقارير مشاريع لعرضها.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-4">{{ $projects->appends(request()->query())->links() }}</div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr><th>اسم التقرير</th><th>عنوان المشروع</th><th>المالك</th><th>الحالة</th><th>الإجراءات</th></tr>
+                </thead>
+                <tbody>
+                    @forelse($reportProjects as $report)
+                    <tr>
+                        <td>{{ $report->name }}</td>
+                        <td>{{ $report->project_title }}</td>
+                        <td>{{ $report->owner_name }}</td>
+                        <td><span class="badge badge-info">{{ $report->project_status }}</span></td>
+                        <td>
+                            <a href="{{ route('dashboard.reportproject.edit', $report->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل"><i class="la la-edit"></i></a>
+                            <form action="{{ route('dashboard.reportproject.destroy', $report->id) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من رغبتك في نقل هذا التقرير إلى سلة المهملات؟');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-clean btn-icon" title="حذف"><i class="la la-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="5" class="text-center p-5">لا توجد تقارير لعرضها.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+        <div class="d-flex justify-content-center mt-3">{{ $reportProjects->links() }}</div>
     </div>
-</main>
-@endsection
-@section('script')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    function confirmDelete(id) {
-        Swal.fire({
-            title: 'هل أنت متأكد؟',
-            text: "سيتم نقل هذا المشروع إلى سلة المحذوفات!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'نعم، انقله!',
-            cancelButtonText: 'إلغاء'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('delete-form-' + id).submit();
-            }
-        });
-    }
-</script>
+</div>
 @endsection

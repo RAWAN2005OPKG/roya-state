@@ -114,7 +114,18 @@ Route::prefix('bank-transactions')->name('bank-transactions.')->group(function (
     Route::resource('khaled', App\Http\Controllers\Dashboard\KhaledController::class);
 
 
+Route::prefix('dashboard/reportproject')->name('dashboard.reportproject.')->middleware(['auth'])->group(function () {
+    Route::get('/', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'store'])->name('store');
+    Route::get('/{reportproject}/edit', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'edit'])->name('edit');
+    Route::put('/{reportproject}', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'update'])->name('update');
+    Route::delete('/{reportproject}', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'destroy'])->name('destroy');
 
+    Route::get('/trash', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'trash'])->name('trash');
+    Route::post('/trash/{id}/restore', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'restore'])->name('restore');
+    Route::delete('/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'forceDelete'])->name('force-delete');
+});
     // --- وحدات التحويلات ---
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferCoCntroller::class)->only(['index', 'store']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);

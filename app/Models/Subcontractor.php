@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Support\Facades\DB;
 
 class Subcontractor extends Model
 {
@@ -16,56 +15,42 @@ class Subcontractor extends Model
         'unique_id', 'name', 'specialization', 'id_number', 'phone', 'notes',
     ];
 
-    protected static function booted()
-    {
-        static::creating(function ($subcontractor) {
-            $lastId = self::max('id') ?? 0;
-            $subcontractor->unique_id = 'SUB-' . ($lastId + 1);
-        });
-    }
-
-
+    /**
+     * علاقة "متعدد لمتعدد" مع المشاريع من خلال جدول العقود.
+     */
     public function contracts()
     {
-        return $this->hasMany(SubcontractorContract::class);
+        return $this->belongsToMany(Project::class, 'subcontractor_contracts')
+                    ->withPivot('id', 'contract_date', 'contract_value', 'currency', 'exchange_rate', 'contract_details')
+                    ->withTimestamps();
     }
 
     /**
-     * علاقة مع الدفعات
+     * علاقة مع الدفعات (إذا كان لديك جدول دفعات للموردين).
      */
     public function payments()
     {
-        return $this->morphMany(SupplierPayment::class, 'payable');
+        return $this->morphMany(Payment::class, 'payable'); // نفترض أن جدول payments يخدم الجميع
     }
 
-    // ===================================================================
-    // ===== هذا هو الجزء الذي كان يحتوي على الخطأ وتم تصحيحه بالكامل =====
-    // ===================================================================
+    // --- Accessors لحساب الأرصدة ---
 
-    /**
-     * حساب إجمالي قيمة العقود بالشيكل.
-     * الآن هو يجمع من الجدول الصحيح (subcontractor_contracts) وباستخدام الأعمدة الصحيحة.
-     */
     protected function totalContractsValue(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->contracts()->sum(DB::raw('contract_value * exchange_rate'))
+            get: fn () => $this->contracts->sum(function ($contract) {
+                return $contract->pivot->contract_value * $contract->pivot->exchange_rate;
+            })
         );
     }
 
-    /**
-     * حساب إجمالي المبالغ المدفوعة لهذا المورد.
-     */
     protected function totalPaid(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->payments()->sum('amount')
+            get: fn () => $this->payments()->where('type', 'out')->sum('amount_ils')
         );
     }
 
-    /**
-     * حساب الرصيد المتبقي للمورد.
-     */
     protected function remainingBalance(): Attribute
     {
         return Attribute::make(
