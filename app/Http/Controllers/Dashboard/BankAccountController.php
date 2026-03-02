@@ -67,39 +67,49 @@ class BankAccountController extends Controller
     /**
      * عرض نموذج تعديل حساب بنكي
      */
-    public function edit(BankAccount $bankAccount)
+    public function edit(BankTransaction $transaction)
     {
-        // جلب كل البنوك النشطة للسماح بتغيير البنك
-        $banks = Bank::where('is_active', true)->orderBy('name')->get();
+        // تحميل العلاقات المطلوبة بكفاءة لتجنب أخطاء N+1
+        $transaction->load('bankAccount.bank');
 
-        return view('dashboard.bank-accounts.edit', compact('bankAccount', 'banks'));
+        // جلب قائمة بأسماء البنوك من دليل البنوك
+        $banks = Bank::pluck('name');
+
+        // تمرير متغير الحركة وقائمة البنوك إلى الواجهة
+        return view('dashboard.bank-accounts.transactions.edit', compact('transaction', 'banks'));
     }
 
     /**
-     * تحديث بيانات حساب بنكي في قاعدة البيانات
+     * تحديث حركة بنكية في قاعدة البيانات.
      */
-    // داخل دالة update في BankAccountController.php
+    public function update(Request $request, BankTransaction $transaction)
+    {
+        // قواعد التحقق من صحة البيانات
+        $validatedData = $request->validate([
+            'date' => 'required|date',
+            'type' => ['required', Rule::in(['deposit', 'withdrawal', 'transfer', 'personal_withdrawal'])],
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => ['required', Rule::in(['SAR', 'USD', 'ILS', 'JOD'])], // أضف العملات التي تستخدمها
+            'client_name' => 'nullable|string|max:255',
+            'client_phone' => 'nullable|string|max:255',
+            'payer_id_number' => 'nullable|string|max:255',
+            'project_name' => 'nullable|string|max:255',
+            'source' => 'nullable|string|max:255',
+            'transfer_number' => 'nullable|string|max:255',
+            'transfer_details' => 'nullable|string|max:255',
+            'payer_bank_name' => 'nullable|string|max:255',
+            'beneficiary_bank_name' => 'nullable|string|max:255',
+            'details' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
 
-public function update(Request $request, BankAccount $bankAccount)
-{
-    $validatedData = $request->validate([
-        'bank_id' => 'required|exists:banks,id',
-        'account_name' => 'required|string|max:255',
+        // تحديث بيانات الحركة بالبيانات الجديدة التي تم التحقق منها
+        $transaction->update($validatedData);
 
-        'account_number' => 'required|string|unique:bank_accounts,account_number,' . $bankAccount->id,
-
-        'iban' => 'nullable|string|unique:bank_accounts,iban,' . $bankAccount->id,
-        'currency' => 'required|string|size:3',
-        'current_balance' => 'required|numeric',
-        'is_active' => 'required|boolean',
-    ]);
-
-    $bankAccount->update($validatedData);
-
-    return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم تحديث الحساب البنكي بنجاح.');
-}
-
-
+        // إعادة التوجيه إلى صفحة كشف الحساب مع رسالة نجاح
+        return redirect()->route('dashboard.bank-accounts.show', $transaction->bank_account_id)
+                         ->with('success', 'تم تحديث الحركة البنكية بنجاح.');
+    }
     /**
      * حذف حساب بنكي من قاعدة البيانات
      */

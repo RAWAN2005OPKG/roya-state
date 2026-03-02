@@ -60,8 +60,6 @@ Route::get('/alerts', [App\Http\Controllers\Dashboard\AlertController::class, 'i
     // مسارات إدارة الحسابات البنكية (مع الحركات)
     Route::get('/bank-accounts/{bankAccount}', [App\Http\Controllers\Dashboard\BankAccountController::class, 'show'])->name('bank-accounts.show');
     Route::post('/bank-accounts/{bankAccount}/transactions', [App\Http\Controllers\Dashboard\BankAccountController::class, 'storeTransaction'])->name('bank-accounts.transactions.store');
-    Route::get('/bank-transactions/{transaction}/edit', [App\Http\Controllers\Dashboard\BankAccountController::class, 'editTransaction'])->name('bank-accounts.transactions.edit');
-    Route::put('/bank-transactions/{transaction}', [App\Http\Controllers\Dashboard\BankAccountController::class, 'updateTransaction'])->name('bank-accounts.transactions.update');
     Route::resource('/bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->except(['show'])->names('bank-accounts');
  Route::get('bank-accounts/{bankAccount}/statement', [App\Http\Controllers\Dashboard\BankAccountStatementController::class, 'show'])->name('bank-accounts.statement.show');
 
@@ -92,20 +90,20 @@ Route::post('/fund-transfers', [App\Http\Controllers\Dashboard\FundTransferContr
 // Financial Accounts (Banks, Safes, Checks) Main Page
 Route::get('/financial-accounts', [App\Http\Controllers\Dashboard\FinancialAccountsController::class, 'index'])->name('financial-accounts.index');
 // Checks Management Routes
-Route::prefix('dashboard')->name('dashboard.')->group(function () {
-    Route::get('checks/trash', [App\Http\Controllers\Dashboard\CheckController::class, 'trash'])->name('checks.trash');
-    Route::get('checks/{id}/restore', [App\Http\Controllers\Dashboard\CheckController::class, 'restore'])->name('checks.restore');
-    Route::delete('checks/{id}/force-delete', [App\Http\Controllers\Dashboard\CheckController::class, 'forceDelete'])->name('checks.forceDelete');
-    Route::get('checks/export', [App\Http\Controllers\Dashboard\CheckController::class, 'exportExcel'])->name('checks.export');
-});
+   Route::prefix('checks')->name('checks.')->group(function () {
+        Route::get('/trash', [App\Http\Controllers\Dashboard\CheckController::class, 'trash'])->name('trash');
+        Route::get('/{id}/restore', [App\Http\Controllers\Dashboard\CheckController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\CheckController::class, 'forceDelete'])->name('forceDelete');
+        Route::get('/export', [App\Http\Controllers\Dashboard\CheckController::class, 'exportExcel'])->name('export');
+    });
     Route::resource('checks', App\Http\Controllers\Dashboard\CheckController::class);
 
 Route::prefix('bank-transactions')->name('bank-transactions.')->group(function () {
-        Route::get('/trash', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'trash'])->name('trash');
-        Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'restore'])->name('restore');
-        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'forceDelete'])->name('force-delete');
-    });
-    Route::resource('bank-transactions', App\Http\Controllers\Dashboard\BankTransactionController::class);
+    Route::get('/trash', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'trash'])->name('trash');
+    Route::patch('/{id}/restore', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'forceDelete'])->name('force-delete');
+});
+Route::resource('bank-transactions', App\Http\Controllers\Dashboard\BankTransactionController::class);
 
     Route::get('khaled/trash', [App\Http\Controllers\Dashboard\KhaledController::class, 'trash'])->name('khaled.trash');
     Route::post('khaled/restore/{id}', [App\Http\Controllers\Dashboard\KhaledController::class, 'restore'])->name('khaled.restore');
@@ -176,18 +174,15 @@ Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryCo
     Route::get('investors/{investor}/export/word', [App\Http\Controllers\Dashboard\InvestorController::class, 'export.word'])->name('investors.export.word');
     Route::resource('investors', App\Http\Controllers\Dashboard\InvestorController::class);
 
+Route::prefix('contracts')->name('contracts.')->middleware('auth')->group(function () {
+    Route::get('/get-contractables', [App\Http\Controllers\Dashboard\ContractController::class, 'getContractables'])->name('getContractables');
 
-    // 6. العقود (Contracts)
-    Route::get('contracts/get-contractables', [App\Http\Controllers\Dashboard\ContractController::class, 'getContractables'])->name('contracts.getContractables');
+    Route::get('/trash', [App\Http\Controllers\Dashboard\ContractController::class, 'trash'])->name('trash');
+    Route::post('/{id}/restore', [App\Http\Controllers\Dashboard\ContractController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('forceDelete');
+});
 
-Route::resource('contracts',  App\Http\Controllers\Dashboard\ContractController::class);
-
-    Route::get('contracts/trash', [App\Http\Controllers\Dashboard\ContractController::class, 'trash'])->name('contracts.trash');
-    Route::post('contracts/{id}/restore', [App\Http\Controllers\Dashboard\ContractController::class, 'restore'])->name('contracts.restore');
-    Route::delete('contracts/{id}/force-delete', [App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('contracts.forceDelete');
-  // --- مسار AJAX الجديد لجلب الكيانات في صفحة العقود ---
- Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::class);
-    Route::get('get-contractables', [App\Http\Controllers\Dashboard\ContractController::class, 'getContractables'])->name('getContractables');
+Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::class)->middleware('auth');
 
     // --- قسم القيود (Payments) ---
     Route::get('get-payables', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayables'])->name('getPayables');

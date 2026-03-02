@@ -1,17 +1,21 @@
 <?php
+
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\BankTransaction;
 use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class BankTransactionController extends Controller
 {
+
     public function index(Request $request)
     {
-        $query = BankTransaction::with(['fromAccount.bank', 'toAccount.bank']);
+        $query = BankTransaction::with(['fromAccount.bank', 'toAccount.bank'])->latest('transaction_date');
+
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
@@ -20,83 +24,136 @@ class BankTransactionController extends Controller
                   ->orWhereHas('toAccount', fn($ta) => $ta->where('account_name', 'like', "%{$searchTerm}%"));
             });
         }
+
         $perPage = $request->query('per_page', 10);
-        $transactions = $query->latest('transaction_date')->paginate($perPage);
-        $bankAccounts = BankAccount::with('bank')->get()->map(function ($account) {
-            $in = BankTransaction::where('to_account_id', $account->id)->sum('amount');
-            $out = BankTransaction::where('from_account_id', $account->id)->sum('amount');
-            $account->balance = $account->opening_balance + $in - $out;
-            return $account;
+        $transactions = $query->paginate($perPage);
+
+        $bankAccounts = BankAccount::with('bank')->get()->each(function ($account) {
+            $account->calculateBalance();
         });
+
         return view('dashboard.bank-transactions.index', compact('transactions', 'bankAccounts', 'request'));
     }
 
     public function create()
     {
         $bankAccounts = BankAccount::with('bank')->get();
-        $transaction = new BankTransaction();
-        return view('dashboard.bank-transactions.create', compact('bankAccounts', 'transaction'));
+        return view('dashboard.bank-transactions.create', compact('bankAccounts'));
     }
 
     // ===================================================================
-    // ===== هذه هي دالة الحفظ المصححة التي تفهم النموذج =====
+    // ===== هذا هو الجزء الذي تم تعديله بالكامل لحل المشكلة =====
     // ===================================================================
     public function store(Request $request)
     {
-        $type = $request->input('type');
-        $rules = [
+        // 1. التحقق من الحقول المشتركة
+        $validated = $request->validate([
             'type' => 'required|in:deposit,withdrawal,transfer',
             'transaction_date' => 'required|date',
             'amount' => 'required|numeric|min:0.01',
             'details' => 'nullable|string',
-        ];
+        ]);
 
-        // ===== هذا هو الجزء الذي تم تصحيحه بالكامل =====
-        if ($type === 'deposit') {
-            // النموذج يرسل bank_account_id، ونحن نتوقعه
-            $rules['bank_account_id'] = 'required|exists:bank_accounts,id';
-        } elseif ($type === 'withdrawal') {
-            // النموذج يرسل bank_account_id، ونحن نتوقعه
-            $rules['bank_account_id'] = 'required|exists:bank_accounts,id';
-        } elseif ($type === 'transfer') {
-            // النموذج يرسل from_account_id و to_account_id
-            $rules['from_account_id'] = 'required|exists:bank_accounts,id';
-            $rules['to_account_id'] = 'required|exists:bank_accounts,id|different:from_account_id';
+        // 2. التحقق من الحقول المعتمدة على النوع
+        if ($request->type === 'deposit' || $request->type === 'withdrawal') {
+            $request->validate(['bank_account_id' => 'required|exists:bank_accounts,id']);
+        } elseif ($request->type === 'transfer') {
+            $request->validate([
+                'from_account_id' => 'required|exists:bank_accounts,id',
+                'to_account_id' => 'required|exists:bank_accounts,id|different:from_account_id',
+            ]);
         }
-        $validated = $request->validate($rules);
 
         try {
-            DB::transaction(function () use ($validated, $type) {
-                $data = [
-                    'type' => $type,
-                    'transaction_date' => $validated['transaction_date'],
-                    'amount' => $validated['amount'],
-                    'details' => $validated['details'],
-                ];
+            DB::transaction(function () use ($request, $validated) {
+                // 3. التعامل مع كل حالة على حدة
+                if ($validated['type'] === 'transfer') {
+                    $fromAccount = BankAccount::find($request->from_account_id);
+                    $toAccount = BankAccount::find($request->to_account_id);
 
-                if ($type === 'deposit') {
-                    $account = BankAccount::find($validated['bank_account_id']);
-                    $data['to_account_id'] = $validated['bank_account_id'];
-                    $data['currency'] = $account->currency;
-                } elseif ($type === 'withdrawal') {
-                    $account = BankAccount::find($validated['bank_account_id']);
-                    $data['from_account_id'] = $validated['bank_account_id'];
-                    $data['currency'] = $account->currency;
-                } elseif ($type === 'transfer') {
-                    $fromAccount = BankAccount::find($validated['from_account_id']);
-                    $data['from_account_id'] = $validated['from_account_id'];
-                    $data['to_account_id'] = $validated['to_account_id'];
-                    $data['currency'] = $fromAccount->currency;
+                    // حركة السحب من الحساب الأول
+                    $withdrawal = BankTransaction::create([
+                        'type' => 'withdrawal',
+                        'status' => 'completed',
+                        'transaction_date' => $validated['transaction_date'],
+                        'amount' => $validated['amount'],
+                        'currency' => $fromAccount->currency, // عملة الحساب المصدر
+                        'from_account_id' => $fromAccount->id,
+                        'details' => $validated['details'] . ' (تحويل إلى حساب ' . $toAccount->account_name . ')',
+                    ]);
+
+                    // حركة الإيداع في الحساب الثاني
+                    $deposit = BankTransaction::create([
+                        'type' => 'deposit',
+                        'status' => 'completed',
+                        'transaction_date' => $validated['transaction_date'],
+                        'amount' => $validated['amount'],
+                        'currency' => $toAccount->currency, // عملة الحساب المستقبل
+                        'to_account_id' => $toAccount->id,
+                        'details' => $validated['details'] . ' (تحويل من حساب ' . $fromAccount->account_name . ')',
+                        'related_transaction_id' => $withdrawal->id,
+                    ]);
+
+                    // ربط الحركتين ببعضهما
+                    $withdrawal->update(['related_transaction_id' => $deposit->id]);
+
+                } else { // حالة الإيداع أو السحب
+                    $account = BankAccount::find($request->bank_account_id);
+                    BankTransaction::create([
+                        'type' => $validated['type'],
+                        'status' => 'completed',
+                        'transaction_date' => $validated['transaction_date'],
+                        'amount' => $validated['amount'],
+                        'currency' => $account->currency, // عملة الحساب المحدد
+                        'from_account_id' => $validated['type'] === 'withdrawal' ? $account->id : null,
+                        'to_account_id' => $validated['type'] === 'deposit' ? $account->id : null,
+                        'details' => $validated['details'],
+                    ]);
                 }
-                BankTransaction::create($data);
             });
-            return redirect()->route('dashboard.bank-transactions.index')->with('success', 'تم حفظ الحركة البنكية بنجاح.');
+
+            return redirect()->route('dashboard.bank-transactions.index')->with('success', 'تم حفظ الحركة بنجاح.');
+
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'فشل حفظ الحركة: ' . $e->getMessage());
         }
     }
 
-    // باقي الدوال (show, edit, destroy, trash, restore, forceDelete)
+    public function update(Request $request, BankTransaction $bankTransaction)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:deposit,withdrawal', // التحديث للحوالات أكثر تعقيداً، سنركز على الحركات البسيطة
+            'transaction_date' => 'required|date',
+            'amount' => 'required|numeric|min:0.01',
+            'details' => 'nullable|string',
+            'bank_account_id' => 'required|exists:bank_accounts,id',
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated, $bankTransaction) {
+                // الخطوة 1: التراجع عن أثر الحركة القديمة (هذه الدالة غير موجودة في لارافيل، يجب أن نكتبها)
+                // هذه الخطوة غير ضرورية إذا كنا سنعيد حساب الرصيد من الصفر دائماً، وهو الأسلوب الآمن
+
+                // الخطوة 2: تحديث بيانات الحركة
+                $bankTransaction->update([
+                    'type' => $validated['type'],
+                    'transaction_date' => $validated['transaction_date'],
+                    'amount' => $validated['amount'],
+                    'details' => $validated['details'],
+                    // تحديث الحسابات المرتبطة
+                    'from_account_id' => $validated['type'] === 'withdrawal' ? $validated['bank_account_id'] : null,
+                    'to_account_id' => $validated['type'] === 'deposit' ? $validated['bank_account_id'] : null,
+                ]);
+
+                // الخطوة 3: إعادة حساب الرصيد (غير ضروري هنا لأن دالة index تقوم به)
+            });
+
+            return redirect()->route('dashboard.bank-transactions.index')->with('success', 'تم تحديث الحركة بنجاح.');
+
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'فشل تحديث الحركة: ' . $e->getMessage());
+        }
+    }
     public function show(BankTransaction $bankTransaction)
     {
         $bankTransaction->load(['fromAccount.bank', 'toAccount.bank']);
@@ -106,36 +163,32 @@ class BankTransactionController extends Controller
     public function edit(BankTransaction $bankTransaction)
     {
         $bankAccounts = BankAccount::with('bank')->get();
+        // لتبسيط النموذج، سنجمع الحسابات في حقل واحد
+        $bankTransaction->bank_account_id = $bankTransaction->from_account_id ?? $bankTransaction->to_account_id;
         return view('dashboard.bank-transactions.edit', compact('bankTransaction', 'bankAccounts'));
-    }
-
-    public function update(Request $request, BankTransaction $bankTransaction)
-    {
-        // منطق التحديث يمكن إضافته هنا بنفس طريقة دالة store
-        return redirect()->route('dashboard.bank-transactions.index')->with('success', 'تم تحديث الحركة بنجاح.');
     }
 
     public function destroy(BankTransaction $bankTransaction)
     {
         $bankTransaction->delete();
-        return redirect()->route('dashboard.bank-transactions.index')->with('success', 'تم نقل الحركة إلى سلة المحذوفات.');
+        return redirect()->route('dashboard.bank-transactions.index')->with('success', 'تم نقل الحركة إلى سلة المهملات.');
     }
 
     public function trash()
     {
-        $trashedTransactions = BankTransaction::onlyTrashed()->with(['fromAccount.bank', 'toAccount.bank'])->latest()->get();
+        $trashedTransactions = BankTransaction::onlyTrashed()->with(['fromAccount', 'toAccount'])->latest('deleted_at')->paginate(10);
         return view('dashboard.bank-transactions.trash', compact('trashedTransactions'));
     }
 
     public function restore($id)
     {
         BankTransaction::onlyTrashed()->findOrFail($id)->restore();
-        return redirect()->route('dashboard.bank-transactions.trash')->with('success', 'تم استعادة الحركة بنجاح.');
+        return back()->with('success', 'تم استعادة الحركة بنجاح.');
     }
 
     public function forceDelete($id)
     {
         BankTransaction::onlyTrashed()->findOrFail($id)->forceDelete();
-        return redirect()->route('dashboard.bank-transactions.trash')->with('success', 'تم حذف الحركة نهائياً.');
+        return back()->with('success', 'تم حذف الحركة نهائياً.');
     }
 }

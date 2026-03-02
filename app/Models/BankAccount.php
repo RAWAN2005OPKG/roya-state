@@ -20,4 +20,12 @@ class BankAccount extends Model
     {
         return $this->hasMany(BankTransaction::class);
     }
+     public function calculateBalance(): void
+    {
+        $inflow = BankTransaction::where('to_account_id', $this->id)->sum('amount');
+
+        $outflow = BankTransaction::where('from_account_id', $this->id)->sum('amount');
+
+        $this->balance = ($this->opening_balance ?? 0) + $inflow - $outflow;
+    }
 }

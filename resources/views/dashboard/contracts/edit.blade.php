@@ -77,7 +77,6 @@
     </div>
 </main>
 @endsection
-
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -92,7 +91,8 @@ $(document ).ready(function() {
             placeholder: `ابحث بالاسم أو ID...`,
             allowClear: true,
             ajax: {
-                url: "{{ route('dashboard.getContractables') }}",
+
+                url: "{{ route('dashboard.contracts.getContractables') }}",
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
@@ -106,22 +106,21 @@ $(document ).ready(function() {
         });
     }
 
-    // تشغيل عند تحميل الصفحة
-    if (entityTypeSelector.val()) {
-        setupSelect2(entityTypeSelector.val());
-    }
-
     entityTypeSelector.on('change', function() {
         const selectedType = $(this).val();
         contractableTypeHidden.val(selectedType);
-        contractableIdSelect.empty().val(null).trigger('change');
-
+        // لا تقم بمسح القيمة إذا كانت موجودة مسبقاً
+        // contractableIdSelect.empty().val(null).trigger('change');
         if (selectedType) {
             setupSelect2(selectedType);
         } else {
             contractableIdSelect.prop('disabled', true);
         }
     });
+
+    if (entityTypeSelector.val()) {
+        entityTypeSelector.trigger('change');
+    }
 });
 </script>
 @endpush

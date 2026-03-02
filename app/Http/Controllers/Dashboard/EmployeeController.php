@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use Illuminate\Http\Request;
-use App\Exports\EmployeesExport; // تأكدي من إنشاء هذا الملف إذا أردتِ استخدام خاصية التصدير
+use App\Exports\EmployeesExport;
+use App\Models\BankAccount;
 use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeController extends Controller
@@ -44,20 +45,25 @@ class EmployeeController extends Controller
         return view('dashboard.employees.index', compact('employees', 'sortBy', 'sortOrder', 'search'));
     }
 
-    /**
-     * عرض نموذج إضافة موظف جديد.
-     */
     public function create()
     {
-        return view('dashboard.employees.create');
+        // جلب الحسابات البنكية لإرسالها إلى الواجهة
+        $bankAccounts = BankAccount::with('bank')->get();
+        return view('dashboard.employees.create', compact('bankAccounts'));
     }
 
-    /**
-     * تخزين الموظف الجديد في قاعدة البيانات.
-     */
     public function store(Request $request)
     {
-        $validated = $this->validateEmployee($request);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'position' => 'required|string|max:255',
+            'email' => 'nullable|email|unique:employees,email',
+            'phone' => 'nullable|string|max:20',
+            'salary' => 'required|numeric|min:0',
+            'currency' => 'required|string|size:3',
+            'bank_account_id' => 'nullable|exists:bank_accounts,id', // <-- قاعدة التحقق الجديدة
+        ]);
+
         Employee::create($validated);
         return redirect()->route('dashboard.employees.index')->with('success', 'تم إضافة الموظف بنجاح.');
     }
@@ -65,30 +71,35 @@ class EmployeeController extends Controller
     /**
      * عرض تفاصيل موظف محدد.
      */
-    public function show(Employee $employee)
+   public function show(Employee $employee)
     {
-        // يمكنك هنا عرض صفحة تفاصيل الموظف، بما في ذلك سجل رواتبه
+        // تحميل العلاقة لعرضها في الواجهة
+        $employee->load('bankAccount.bank');
         return view('dashboard.employees.show', compact('employee'));
     }
 
-    /**
-     * عرض نموذج تعديل بيانات موظف.
-     */
     public function edit(Employee $employee)
     {
-        return view('dashboard.employees.edit', compact('employee'));
+        // جلب الحسابات البنكية لإرسالها إلى الواجهة
+        $bankAccounts = BankAccount::with('bank')->get();
+        return view('dashboard.employees.edit', compact('employee', 'bankAccounts'));
     }
 
-    /**
-     * تحديث بيانات الموظف في قاعدة البيانات.
-     */
     public function update(Request $request, Employee $employee)
     {
-        $validated = $this->validateEmployee($request, $employee->id);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'position' => 'required|string|max:255',
+            'email' => 'nullable|email|unique:employees,email,' . $employee->id,
+            'phone' => 'nullable|string|max:20',
+            'salary' => 'required|numeric|min:0',
+            'currency' => 'required|string|size:3',
+            'bank_account_id' => 'nullable|exists:bank_accounts,id',
+        ]);
+
         $employee->update($validated);
         return redirect()->route('dashboard.employees.index')->with('success', 'تم تحديث بيانات الموظف بنجاح.');
     }
-
     /**
      * نقل الموظف إلى سلة المحذوفات (حذف ناعم).
      */

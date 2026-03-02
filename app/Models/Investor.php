@@ -33,8 +33,10 @@ class Investor extends Model
         });
     }
 
-    // --- بقية العلاقات والدوال تبقى كما هي ---
-
+  public function contracts()
+    {
+        return $this->morphMany(Contract::class, 'contractable');
+    }
     public function projects()
     {
         return $this->belongsToMany(Project::class, 'project_investor')

@@ -9,7 +9,7 @@ use App\Models\BankAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Exports\ChecksExport;
-
+use App\Models\ProjectUnit;
 class CheckController extends Controller
 {
     /**
@@ -37,6 +37,13 @@ class CheckController extends Controller
     {
         $bankAccounts = BankAccount::all();
         $projects = Project::all();
+        $projectUnits = ProjectUnit::with('project:id,name')->get(['id', 'project_id', 'unit_number']);
+
+    return view('dashboard.checks.create', compact(
+        'bankAccounts',
+        'projects',
+        'projectUnits'
+    ));
         return view('dashboard.checks.create', compact('bankAccounts', 'projects'));
     }
 
@@ -86,6 +93,14 @@ class CheckController extends Controller
     {
         $bankAccounts = BankAccount::all();
         $projects = Project::all();
+        $projectUnits = ProjectUnit::with('project:id,name')->get(['id', 'project_id', 'unit_number']);
+
+    return view('dashboard.checks.edit', compact(
+        'check',
+        'bankAccounts',
+        'projects',
+        'projectUnits'
+    ));
         return view('dashboard.checks.edit', compact('check', 'bankAccounts', 'projects'));
     }
 
@@ -128,6 +143,33 @@ class CheckController extends Controller
         return redirect()->route('dashboard.checks.index')
             ->with('success', 'تم حذف الشيك بنجاح');
     }
+    public function trash()
+{
+    $checks = Check::onlyTrashed()->latest('deleted_at')->paginate(10);
+    return view('dashboard.checks.trash', compact('checks'));
+}
+
+
+    /**
+     * استعادة شيك محذوف من سلة المهملات.
+     */
+    public function restore($id)
+    {
+        $check = Check::onlyTrashed()->findOrFail($id);
+        $check->restore();
+        return redirect()->route('dashboard.checks.trash')->with('success', 'تم استعادة الشيك بنجاح.');
+    }
+
+    /**
+     * حذف شيك بشكل نهائي من قاعدة البيانات.
+     */
+    public function forceDelete($id)
+    {
+        $check = Check::onlyTrashed()->findOrFail($id);
+        $check->forceDelete();
+        return redirect()->route('dashboard.checks.trash')->with('success', 'تم حذف الشيك نهائياً.');
+    }
+
 
     /**
      * تصدير الشيكات إلى ملف Excel

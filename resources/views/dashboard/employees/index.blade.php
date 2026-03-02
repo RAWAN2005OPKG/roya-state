@@ -1,3 +1,4 @@
+
 @extends('layouts.container')
 @section('title', 'إدارة الموظفين')
 
@@ -25,21 +26,19 @@
                     <input type="text" name="search" class="form-control" placeholder="ابحث بالاسم, المنصب, الهاتف..." value="{{ $search ?? '' }}">
                     <button type="submit" class="btn btn-light-primary">بحث</button>
                 </form>
-
-                {{-- أزرار الإجراءات --}}
+  {{-- أزرار الإجراءات --}}
                 <div class="header-actions">
                     <a href="{{ route('dashboard.employees.export.excel') }}" class="btn btn-success"><i class="fas fa-file-excel"></i> تصدير Excel</a>
                     <button onclick="window.print();" class="btn btn-info"><i class="fas fa-print"></i> طباعة</button>
                 </div>
             </div>
-
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th><a href="{{ route('dashboard.employees.index', ['sort_by' => 'name', 'sort_order' => ($sortBy == 'name' && $sortOrder == 'asc') ? 'desc' : 'asc']) }}">الاسم</a></th>
-                            <th><a href="{{ route('dashboard.employees.index', ['sort_by' => 'position', 'sort_order' => ($sortBy == 'position' && $sortOrder == 'asc') ? 'desc' : 'asc']) }}">المنصب</a></th>
-                            <th><a href="{{ route('dashboard.employees.index', ['sort_by' => 'salary', 'sort_order' => ($sortBy == 'salary' && $sortOrder == 'asc') ? 'desc' : 'asc']) }}">الراتب</a></th>
+                            <th>الاسم</th>
+                            <th>المنصب</th>
+                            <th>الراتب</th>
                             <th>الهاتف</th>
                             <th>تحكم</th>
                         </tr>
@@ -57,9 +56,15 @@
                                 <td>{{ number_format($employee->salary, 2) }} {{ $employee->currency }}</td>
                                 <td>{{ $employee->phone }}</td>
                                 <td class="text-center" nowrap="nowrap">
-                                    <a href="{{ route('dashboard.employees.edit', $employee->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل">
-                                        <i class="fas fa-edit"></i>
+                                    {{-- ===== الزر الجديد: عرض ===== --}}
+                                    <a href="{{ route('dashboard.employees.show', $employee->id) }}" class="btn btn-sm btn-clean btn-icon" title="عرض التفاصيل">
+                                        <i class="fas fa-eye text-info"></i>
                                     </a>
+
+                                    <a href="{{ route('dashboard.employees.edit', $employee->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل">
+                                        <i class="fas fa-edit text-primary"></i>
+                                    </a>
+
                                     <form id="delete-form-{{ $employee->id }}" action="{{ route('dashboard.employees.destroy', $employee->id) }}" method="POST" style="display: inline;">
                                         @csrf
                                         @method('DELETE')
@@ -78,9 +83,8 @@
                 </table>
             </div>
 
-            {{-- روابط التنقل بين الصفحات --}}
             <div class="mt-4">
-                {{ $employees->appends(request()->query())->links() }}
+                {{ $employees->links() }}
             </div>
         </div>
     </div>

@@ -6,9 +6,6 @@
     </div>
 @endif
 
-{{-- =================================================================== --}}
-{{--  القسم 1: تفاصيل الحركة الأساسية                                  --}}
-{{-- =================================================================== --}}
 <h4 class="form-section-title">1. تفاصيل الحركة الأساسية</h4>
 
 <div class="form-group row">
@@ -22,7 +19,7 @@
     </div>
     <div class="col-lg-6">
         <label>تاريخ الحركة <span class="text-danger">*</span></label>
-        <input type="date" name="transaction_date" class="form-control" value="{{ old('transaction_date', isset($transaction) ? $transaction->transaction_date->format('Y-m-d') : date('Y-m-d')) }}" required>
+<input type="date" name="transaction_date" class="form-control" value="{{ old('transaction_date', $transaction->transaction_date?->format('Y-m-d') ?? date('Y-m-d')) }}" required>
     </div>
 </div>
 

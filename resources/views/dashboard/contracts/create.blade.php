@@ -87,7 +87,6 @@
 @endsection
 
 @push('scripts')
-{{-- نفس كود الجافاسكريبت الصحيح الذي كان يعمل --}}
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
 <script>

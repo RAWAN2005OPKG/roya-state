@@ -22,17 +22,17 @@ class Employee extends Model
         'phone',
         'salary',
         'currency',
-        'iban',
-        'wallet_name',
-        'bank_name',
-        'bank_branch',
+        'bank_account_id',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array<string, string>
-     */
+
+    public function bankAccount()
+    {
+        // تأكد من أن اسم الموديل 'BankAccount' صحيح
+        return $this->belongsTo(BankAccount::class);
+    }
+
+
     protected $casts = [
         // هذا يضمن أن حقل الراتب سيعامل دائمًا كرقم عشري
         'salary' => 'decimal:2',

@@ -10,33 +10,32 @@ class Contract extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'contractable_type',
-        'contractable_id',
-        'project_id',
-        'contract_date',
-        'contract_value',
-        'currency',
-        'exchange_rate',
-        'contract_details',
-        'attachment',
-        'client_id',
-    ];
+    /**
+     * اسم الجدول المرتبط بالموديل.
+     */
+    protected $table = 'contracts';
 
+    protected $guarded = [];
+
+    /**
+     * تحويل الحقول إلى أنواع بيانات محددة.
+     */
     protected $casts = [
         'contract_date' => 'date',
     ];
 
+    /**
+     * علاقة متعددة الأشكال لجلب صاحب العقد.
+     */
     public function contractable()
     {
         return $this->morphTo();
     }
 
+    /**
+     * علاقة لجلب المشروع المرتبط.
+     */
     public function project()
-    {
-        return $this->belongsTo(Project::class);
-    }
-     public function projectunit()
     {
         return $this->belongsTo(Project::class);
     }

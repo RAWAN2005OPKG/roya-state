@@ -24,9 +24,9 @@ class Client extends Model
         });
     }
 
-   public function contracts()
+  public function contracts()
     {
-        return $this->hasMany(Contract::class);
+        return $this->morphMany(Contract::class, 'contractable');
     }
 public function investments()
     {
