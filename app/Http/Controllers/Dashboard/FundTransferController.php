@@ -14,7 +14,6 @@ class FundTransferController extends Controller
 {
     public function index()
     {
-        $cashSafes = CashSafe::where('is_active', true)->get();
         $bankAccounts = BankAccount::where('is_active', true)->get();
         $transfers = FundTransfer::latest()->take(15)->get();
 
@@ -24,7 +23,7 @@ class FundTransferController extends Controller
             $transfer->toAccountName = $this->getAccountName($transfer->to_type, $transfer->to_id);
         });
 
-        return view('dashboard.fund_transfers.index', compact('cashSafes', 'bankAccounts', 'transfers'));
+        return view('dashboard.fund_transfers.index', compact( 'bankAccounts', 'transfers'));
     }
 
     public function store(Request $request)
