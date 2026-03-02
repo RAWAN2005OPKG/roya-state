@@ -78,21 +78,27 @@ class BankAccountController extends Controller
     /**
      * تحديث بيانات حساب بنكي في قاعدة البيانات
      */
-    public function update(Request $request, BankAccount $bankAccount)
-    {
-        $validated = $request->validate([
-            'bank_id' => 'required|exists:banks,id', // <-- التصحيح الأهم: استخدام bank_id
-            'account_name' => 'required|string|max:255',
-            'account_number' => 'required|string|max:255|unique:bank_accounts,account_number,' . $bankAccount->id,
-            'iban' => 'nullable|string|max:255|unique:bank_accounts,iban,' . $bankAccount->id,
-            'currency' => 'required|string|max:10',
-            'is_active' => 'required|boolean',
-        ]);
+    // داخل دالة update في BankAccountController.php
 
-        $bankAccount->update($validated);
+public function update(Request $request, BankAccount $bankAccount)
+{
+    $validatedData = $request->validate([
+        'bank_id' => 'required|exists:banks,id',
+        'account_name' => 'required|string|max:255',
 
-        return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم تعديل الحساب البنكي بنجاح.');
-    }
+        'account_number' => 'required|string|unique:bank_accounts,account_number,' . $bankAccount->id,
+
+        'iban' => 'nullable|string|unique:bank_accounts,iban,' . $bankAccount->id,
+        'currency' => 'required|string|size:3',
+        'current_balance' => 'required|numeric',
+        'is_active' => 'required|boolean',
+    ]);
+
+    $bankAccount->update($validatedData);
+
+    return redirect()->route('dashboard.bank-accounts.index')->with('success', 'تم تحديث الحساب البنكي بنجاح.');
+}
+
 
     /**
      * حذف حساب بنكي من قاعدة البيانات

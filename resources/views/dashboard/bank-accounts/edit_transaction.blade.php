@@ -7,8 +7,12 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 mb-0 text-gray-800">تعديل حركة بنكية</h1>
+            {{-- ======================================================== --}}
+            {{-- ===== هذا هو السطر الذي تم تصحيحه بالكامل ===== --}}
+            {{-- ======================================================== --}}
             <p class="text-muted mb-0">
-                خاصة بحساب: {{ $transaction->bankAccount->account_name }} ({{ $transaction->bankAccount->bank_name }})
+                خاصة بحساب: {{ $transaction->bankAccount->account_name }}
+                ({{ $transaction->bankAccount->bank->name ?? 'بنك غير محدد' }})
             </p>
         </div>
     </div>
@@ -18,6 +22,7 @@
         <div class="card-header">
             <h3 class="card-title">نموذج تعديل الحركة</h3>
         </div>
+        {{-- تأكد من أن المسار صحيح ويستخدم ID الحركة --}}
         <form class="form" action="{{ route('dashboard.bank-accounts.transactions.update', $transaction->id) }}" method="POST">
             @csrf
             @method('PUT') {{-- مهم جداً لتحديد أن العملية هي تحديث --}}
@@ -33,7 +38,7 @@
                     <div class="col-md-3 form-group"><label>تاريخ الحركة <span class="text-danger">*</span></label><input type="date" name="date" class="form-control" value="{{ old('date', $transaction->date->format('Y-m-d')) }}" required></div>
                     <div class="col-md-3 form-group"><label>نوع الحركة <span class="text-danger">*</span></label><select name="type" class="form-control" required><option value="deposit" @selected(old('type', $transaction->type) == 'deposit')>إيداع</option><option value="withdrawal" @selected(old('type', $transaction->type) == 'withdrawal')>سحب نقدي</option><option value="transfer" @selected(old('type', $transaction->type) == 'transfer')>حوالة بنكية</option><option value="personal_withdrawal" @selected(old('type', $transaction->type) == 'personal_withdrawal')>مسحوبات شخصية</option></select></div>
                     <div class="col-md-3 form-group"><label>المبلغ <span class="text-danger">*</span></label><input type="number" name="amount" class="form-control" step="0.01" required value="{{ old('amount', $transaction->amount) }}"></div>
-                    <div class="col-md-3 form-group"><label>العملة <span class="text-danger">*</span></label><select name="currency" class="form-control" required><option value="SAR" @selected(old('currency', $transaction->currency) == 'SAR')>ريال سعودي</option><option value="USD" @selected(old('currency', $transaction->currency) == 'USD')>دولار أمريكي</option></select></div>
+                    <div class="col-md-3 form-group"><label>العملة <span class="text-danger">*</span></label><select name="currency" class="form-control" required><option value="SAR" @selected(old('currency', $transaction->currency) == 'SAR')>ريال سعودي</option><option value="USD" @selected(old('currency', $transaction->currency) == 'USD')>دولار أمريكي</option><option value="ILS" @selected(old('currency', $transaction->currency) == 'ILS')>شيكل</option><option value="JOD" @selected(old('currency', $transaction->currency) == 'JOD')>دينار أردني</option></select></div>
                 </div>
 
                 <div class="separator separator-dashed my-5"></div>
@@ -78,6 +83,7 @@
             </div>
             <div class="card-footer">
                 <button type="submit" class="btn btn-primary mr-2">حفظ التعديلات</button>
+                {{-- تأكد من أن هذا المسار صحيح ويأخذ ID الحساب البنكي --}}
                 <a href="{{ route('dashboard.bank-accounts.show', $transaction->bank_account_id) }}" class="btn btn-secondary">إلغاء</a>
             </div>
         </form>

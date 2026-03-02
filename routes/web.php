@@ -40,6 +40,7 @@ Route::prefix('/khaleed-mohamed')->name('khaleed-mohamed.')->group(function () {
     Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\KhaleedMohamedController::class, 'forceDelete'])->name('force-delete');
 });
 Route::resource('/khaleed-mohamed', App\Http\Controllers\Dashboard\KhaleedMohamedController::class);
+
 // --- الوحدات المالية ---
     Route::resource('accounts', App\Http\Controllers\Dashboard\AccountController::class);
     Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);
@@ -113,8 +114,8 @@ Route::prefix('bank-transactions')->name('bank-transactions.')->group(function (
     Route::get('khaled/get-rate', [App\Http\Controllers\Dashboard\KhaledController::class, 'getRateAjax'])->name('khaled.getRate'); // For AJAX
     Route::resource('khaled', App\Http\Controllers\Dashboard\KhaledController::class);
 
-
 Route::prefix('dashboard/reportproject')->name('dashboard.reportproject.')->middleware(['auth'])->group(function () {
+
     Route::get('/', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'index'])->name('index');
     Route::get('/create', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'create'])->name('create');
     Route::post('/', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'store'])->name('store');
@@ -122,10 +123,28 @@ Route::prefix('dashboard/reportproject')->name('dashboard.reportproject.')->midd
     Route::put('/{reportproject}', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'update'])->name('update');
     Route::delete('/{reportproject}', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'destroy'])->name('destroy');
 
+    // مسارات سلة المهملات
     Route::get('/trash', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'trash'])->name('trash');
     Route::post('/trash/{id}/restore', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'restore'])->name('restore');
     Route::delete('/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'forceDelete'])->name('force-delete');
 });
+    Route::resource('reportproject', App\Http\Controllers\Dashboard\ReportProjectController::class);
+Route::prefix('dashboard/projects')->name('dashboard.projects.')->middleware(['auth'])->group(function () {
+
+    Route::get('/', [App\Http\Controllers\Dashboard\ProjectController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Dashboard\ProjectController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Dashboard\ProjectController::class, 'store'])->name('store');
+    Route::get('/{projects}/edit', [App\Http\Controllers\Dashboard\ProjectController::class, 'edit'])->name('edit');
+    Route::put('/{projects}', [App\Http\Controllers\Dashboard\ProjectController::class, 'update'])->name('update');
+    Route::delete('/{projects}', [App\Http\Controllers\Dashboard\ProjectController::class, 'destroy'])->name('destroy');
+
+    // مسارات سلة المهملات
+    Route::get('/trash', [App\Http\Controllers\Dashboard\ProjectController::class, 'trash'])->name('trash');
+    Route::post('/trash/{id}/restore', [App\Http\Controllers\Dashboard\ProjectController::class, 'restore'])->name('restore');
+    Route::delete('/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\ProjectController::class, 'forceDelete'])->name('force-delete');
+});
+    Route::resource('projects', App\Http\Controllers\Dashboard\ProjectController::class);
+
     // --- وحدات التحويلات ---
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferCoCntroller::class)->only(['index', 'store']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
@@ -157,15 +176,6 @@ Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryCo
     Route::get('investors/{investor}/export/word', [App\Http\Controllers\Dashboard\InvestorController::class, 'export.word'])->name('investors.export.word');
     Route::resource('investors', App\Http\Controllers\Dashboard\InvestorController::class);
 
-   Route::name('reportproject.')->group(function () {
-        Route::get('reportproject/trash', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'trash'])->name('trash.index');
-        Route::put('reportproject/trash/{id}/restore', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'restore'])->name('trash.restore');
-        Route::delete('reportproject/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'forceDelete'])->name('trash.forceDelete');
-
-        Route::get('reportproject/export/excel', [App\Http\Controllers\Dashboard\ReportProjectController::class, 'exportExcel'])->name('export.excel');
-    });
-
-    Route::resource('reportproject', App\Http\Controllers\Dashboard\ReportProjectController::class);
 
     // 6. العقود (Contracts)
     Route::get('contracts/get-contractables', [App\Http\Controllers\Dashboard\ContractController::class, 'getContractables'])->name('contracts.getContractables');
@@ -204,16 +214,7 @@ Route::resource('supplier-expenses', \App\Http\Controllers\Dashboard\SupplierExp
     });
     Route::resource('employees', App\Http\Controllers\Dashboard\EmployeeController::class);
 
-    // 8. المشاريع (Projects)
-Route::prefix('projects')->name('projects.')->group(function () {
-        Route::get('/', [App\Http\Controllers\Dashboard\ProjectController::class, 'index'])->name('index');
-        Route::get('/create', [App\Http\Controllers\Dashboard\ProjectController::class, 'create'])->name('create');
-        Route::post('/', [App\Http\Controllers\Dashboard\ProjectController::class, 'store'])->name('store');
-        Route::get('/{project}', [App\Http\Controllers\Dashboard\ProjectController::class, 'show'])->name('show');
-        Route::get('/{project}/edit', [App\Http\Controllers\Dashboard\ProjectController::class, 'edit'])->name('edit');
-        Route::put('/{project}', [App\Http\Controllers\Dashboard\ProjectController::class, 'update'])->name('update');
-        Route::delete('/{project}', [App\Http\Controllers\Dashboard\ProjectController::class, 'destroy'])->name('destroy');
-    });
+
     Route::get('/daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'index'])->name('daily.index');
     Route::post('/daily-report', [App\Http\Controllers\Dashboard\DailyReportController::class, 'store'])->name('daily.store');
     Route::get('cash-safes/trash', [App\Http\Controllers\Dashboard\CashSafeController::class, 'trash'])->name('cash-safes.trash');

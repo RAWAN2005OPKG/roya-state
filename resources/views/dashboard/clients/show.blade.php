@@ -61,7 +61,7 @@
             <div class="tab-pane" id="contracts">
                 @forelse($client->contracts as $contract)
                     <div class="mb-3 p-3 border rounded">
-                        <h5>عقد الوحدة: {{ $contract->projectUnit->unit_number }} في مشروع ({{ $contract->projectUnit->project->name }})</h5>
+<h5>عقد الوحدة: {{ $contract->projectUnit?->unit_number ?? 'غير محددة' }} في مشروع ({{ $contract->projectUnit?->project?->name ?? 'غير محدد' }})</h5>
                         <p>قيمة العقد: {{ number_format($contract->total_amount, 2) }} {{ $contract->currency }}</p>
                     </div>
                 @empty

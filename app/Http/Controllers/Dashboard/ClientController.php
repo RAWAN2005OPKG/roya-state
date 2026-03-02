@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Exports\ClientsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\Contract;
 use App\Models\ProjectUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,7 +52,7 @@ class ClientController extends Controller
             'contracts' => 'required|array|min:1',
             'contracts.*.unit_id' => 'required|exists:project_units,id',
             'contracts.*.sale_date' => 'required|date',
-            'contracts.*.total_amount' => 'required|numeric|min:0',
+            'contracts.*.total_amount' => 'required|numeric|min:0', // اسم الحقل من النموذج
             'contracts.*.currency' => 'required|in:USD,JOD,ILS',
             'contracts.*.exchange_rate' => 'required|numeric|min:0',
             'contracts.*.total_amount_ils' => 'required|numeric|min:0',
@@ -62,11 +63,14 @@ class ClientController extends Controller
             DB::beginTransaction();
             $client = Client::create($validated);
             foreach ($validated['contracts'] as $contractData) {
-                $contract = new \App\Models\Contract();
+
+                $contract = new Contract();
                 $contract->client_id = $client->id;
                 $contract->project_unit_id = $contractData['unit_id'];
                 $contract->contract_date = $contractData['sale_date'];
-                $contract->total_amount = $contractData['total_amount'];
+
+                $contract->contract_value = $contractData['total_amount'];
+
                 $contract->currency = $contractData['currency'];
                 $contract->exchange_rate = $contractData['exchange_rate'];
                 $contract->total_amount_ils = $contractData['total_amount_ils'];
@@ -93,7 +97,7 @@ class ClientController extends Controller
         }
     }
 
-    // --- [الجديد] دوال التعديل (Update) ---
+    // --- دوال التعديل (Update) ---
 
     public function edit(Client $client)
     {
@@ -113,7 +117,7 @@ class ClientController extends Controller
             'contracts.*.id' => 'nullable|exists:contracts,id',
             'contracts.*.unit_id' => 'required|exists:project_units,id',
             'contracts.*.sale_date' => 'required|date',
-            'contracts.*.total_amount' => 'required|numeric|min:0',
+            'contracts.*.total_amount' => 'required|numeric|min:0', // اسم الحقل من النموذج
             'contracts.*.currency' => 'required|in:USD,JOD,ILS',
             'contracts.*.exchange_rate' => 'required|numeric|min:0',
             'contracts.*.total_amount_ils' => 'required|numeric|min:0',
@@ -121,20 +125,20 @@ class ClientController extends Controller
 
         try {
             DB::beginTransaction();
-
-            // تحديث بيانات العميل الأساسية
             $client->update($validated);
 
             $existingContractIds = [];
             if (!empty($validated['contracts'])) {
                 foreach ($validated['contracts'] as $contractData) {
-                    // استخدام updateOrCreate لتحديث العقد الحالي أو إنشاء عقد جديد
+
                     $contract = $client->contracts()->updateOrCreate(
                         ['id' => $contractData['id'] ?? null],
                         [
                             'project_unit_id' => $contractData['unit_id'],
                             'contract_date' => $contractData['sale_date'],
-                            'total_amount' => $contractData['total_amount'],
+
+                            'contract_value' => $contractData['total_amount'],
+
                             'currency' => $contractData['currency'],
                             'exchange_rate' => $contractData['exchange_rate'],
                             'total_amount_ils' => $contractData['total_amount_ils'],
@@ -144,7 +148,6 @@ class ClientController extends Controller
                 }
             }
 
-            // حذف أي عقود قديمة تم إزالتها من النموذج
             $client->contracts()->whereNotIn('id', $existingContractIds)->delete();
 
             DB::commit();
@@ -155,33 +158,35 @@ class ClientController extends Controller
         }
     }
 
+    // --- دوال الحذف وسلة المهملات ---
+
     public function destroy(Client $client)
     {
         $client->delete();
         return redirect()->route('dashboard.clients.index')->with('success', 'تم نقل العميل إلى سلة المحذوفات.');
     }
 
-public function trash()
-{
-    $trashedClients = Client::onlyTrashed()->latest()->paginate(10);
-    return view('dashboard.clients.trash', compact('trashedClients'));
-}
+    public function trash()
+    {
+        $trashedClients = Client::onlyTrashed()->latest()->paginate(10);
+        return view('dashboard.clients.trash', compact('trashedClients'));
+    }
 
-public function restore($id)
-{
-    $client = Client::onlyTrashed()->findOrFail($id);
-    $client->restore();
-    return redirect()->route('dashboard.clients.trash')->with('success', 'تم استعادة العميل بنجاح.');
-}
+    public function restore($id)
+    {
+        $client = Client::onlyTrashed()->findOrFail($id);
+        $client->restore();
+        return redirect()->route('dashboard.clients.trash')->with('success', 'تم استعادة العميل بنجاح.');
+    }
 
-public function forceDelete($id)
-{
-    $client = Client::onlyTrashed()->findOrFail($id);
-    $client->forceDelete();
-    return redirect()->route('dashboard.clients.trash')->with('success', 'تم حذف العميل نهائياً.');
-}
+    public function forceDelete($id)
+    {
+        $client = Client::onlyTrashed()->findOrFail($id);
+        $client->forceDelete();
+        return redirect()->route('dashboard.clients.trash')->with('success', 'تم حذف العميل نهائياً.');
+    }
 
-    // --- دوال التصدير والطباعة (Export) ---
+    // --- دوال التصدير والطباعة ---
 
     public function exportExcel(Request $request)
     {

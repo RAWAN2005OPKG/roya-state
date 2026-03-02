@@ -30,38 +30,55 @@ class SubcontractorController extends Controller
         return view('dashboard.subcontractors.create', compact('projects'));
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'specialization' => 'required|string|max:255',
-            'id_number' => 'nullable|string|max:255|unique:subcontractors,id_number',
-            'phone' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-            'contracts' => 'nullable|array',
-            'contracts.*.project_id' => 'required_with:contracts|exists:projects,id',
-            'contracts.*.contract_date' => 'required_with:contracts|date',
-            'contracts.*.contract_value' => 'required_with:contracts|numeric|min:0',
-            'contracts.*.currency' => 'required_with:contracts|string',
-            'contracts.*.exchange_rate' => 'required_with:contracts|numeric|min:0',
-            'contracts.*.contract_details' => 'nullable|string',
-        ]);
+public function store(Request $request)
+{
 
-        DB::beginTransaction();
-        try {
-            $subcontractor = Subcontractor::create($validated);
-            if ($request->has('contracts')) {
-                foreach ($validated['contracts'] as $contractData) {
-                    $subcontractor->contracts()->create($contractData);
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'specialization' => 'required|string|max:255',
+        'id_number' => 'nullable|string|max:20|unique:subcontractors,id_number',
+        'phone' => 'nullable|string|max:20',
+        'notes' => 'nullable|string',
+
+        // التأكد من أن اسم المصفوفة هو 'contracts' كما في النموذج
+        'contracts' => 'nullable|array',
+
+        // التأكد من أن كل الحقول داخل المصفوفة تستخدم 'contracts.*'
+        'contracts.*.project_id' => 'required|exists:projects,id',
+        'contracts.*.contract_date' => 'required|date',
+        'contracts.*.contract_value' => 'required|numeric|min:0',
+        'contracts.*.currency' => 'required|string|size:3',
+        'contracts.*.exchange_rate' => 'required|numeric',
+        'contracts.*.contract_details' => 'nullable|string',
+    ]);
+
+    try {
+        DB::transaction(function () use ($validatedData) {
+            // 1. إنشاء المقاول
+            $subcontractor = Subcontractor::create($validatedData);
+
+            // 2. ربط العقود (هذا الجزء كان صحيحاً)
+            if (!empty($validatedData['contracts'])) {
+                foreach ($validatedData['contracts'] as $contractData) {
+                    $pivotData = [
+                        'contract_date'    => $contractData['contract_date'],
+                        'contract_value'   => $contractData['contract_value'],
+                        'currency'         => $contractData['currency'],
+                        'exchange_rate'    => $contractData['exchange_rate'],
+                        'contract_details' => $contractData['contract_details'] ?? null,
+                    ];
+                    $subcontractor->contracts()->attach($contractData['project_id'], $pivotData);
                 }
             }
-            DB::commit();
-            return redirect()->route('dashboard.subcontractors.index')->with('success', 'تمت إضافة المورد بنجاح.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withErrors(['error' => 'حدث خطأ ما: ' . $e->getMessage()])->withInput();
-        }
+        });
+
+        return redirect()->route('dashboard.subcontractors.index')->with('success', 'تم حفظ المقاول وعقوداته بنجاح.');
+
+    } catch (\Exception $e) {
+        return back()->withInput()->with('error', 'فشل حفظ البيانات. خطأ تقني: ' . $e->getMessage());
     }
+}
+
 
     public function show(Subcontractor $subcontractor)
     {

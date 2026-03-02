@@ -6,8 +6,7 @@
     <div class="card-header">
         <h3 class="card-title">قائمة تقارير المشاريع</h3>
         <div class="card-toolbar">
-            <a href="{{ route('dashboard.reportproject.trash') }}" class="btn btn-outline-danger mr-2">سلة المهملات</a>
-            <a href="{{ route('dashboard.reportproject.create') }}" class="btn btn-primary">إضافة تقرير جديد</a>
+           <a href="{{ route('dashboard.reportproject.create') }}" class="btn btn-primary">إضافة تقرير جديد</a>
         </div>
     </div>
     <div class="card-body">
