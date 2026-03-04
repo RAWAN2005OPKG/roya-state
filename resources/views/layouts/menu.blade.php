@@ -203,7 +203,23 @@
                     <span class="menu-text">سندات خالد</span>
                 </a>
             </li>
+           <li class="menu-item {{ request()->is('dashboard/mohammed*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+    <a href="{{ route('dashboard.mohammed.index') }}" class="menu-link">
+        <span class="svg-icon menu-icon">
+            <i class="fas fa-file-invoice text-info"></i>
+        </span>
+        <span class="menu-text">سندات محمد</span>
+    </a>
+</li>
 
+<li class="menu-item {{ request()->is('dashboard/wali*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+    <a href="{{ route('dashboard.wali.index') }}" class="menu-link">
+        <span class="svg-icon menu-icon">
+            <i class="fas fa-file-alt text-warning"></i>
+        </span>
+        <span class="menu-text">سندات وليد</span>
+    </a>
+</li>
                    <li class="menu-item" aria-haspopup="true">
                     <a href="{{ route('dashboard.fund-transfers.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
