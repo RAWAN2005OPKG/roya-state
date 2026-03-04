@@ -183,11 +183,14 @@ Route::prefix('contracts')->name('contracts.')->middleware('auth')->group(functi
 });
 
 Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::class)->middleware('auth');
+Route::prefix('dashboard/payments')->name('dashboard.payments.')->middleware('auth')->group(function () {
+    Route::get('/trash', [App\Http\Controllers\Dashboard\PaymentController::class, 'trash'])->name('trash');
+    Route::post('/{id}/restore', [App\Http\Controllers\Dashboard\PaymentController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\PaymentController::class, 'forceDelete'])->name('forceDelete');
+});
 
-    // --- قسم القيود (Payments) ---
-    Route::get('get-payables', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayables'])->name('getPayables');
-    Route::get('get-payable-contracts', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayableContracts'])->name('getPayableContracts'); // <-- [مهم] هذا هو المسار الصحيح
-    Route::resource('payments', App\Http\Controllers\Dashboard\PaymentController::class)->only(['index', 'create', 'store']);
+Route::resource('dashboard/payments', App\Http\Controllers\Dashboard\PaymentController::class)->middleware('auth');
+
 // ---  مصروفات الموردين (Supplier Expenses) ---
 Route::resource('supplier-expenses', \App\Http\Controllers\Dashboard\SupplierExpenseController::class)->names('supplier_expenses')->except(['show']);
 

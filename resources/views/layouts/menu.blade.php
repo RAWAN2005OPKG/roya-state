@@ -136,19 +136,14 @@
             <i class="menu-arrow"></i>
         </a>        <div class="menu-submenu">
         <ul class="menu-subnav">
-                <li class="menu-item" aria-haspopup="true">
-                    <a href="{{ route('dashboard.payments.create') }}" class="menu-link">
-                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                        <span class="menu-text">تسجيل قيد يومي</span>
-                    </a>
-                </li>
+
                 <li class="menu-item" aria-haspopup="true">
                     <a href="{{ route('dashboard.payments.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">سجل القيود (الدفعات)</span>
                     </a>
                 </li>
-               <li class="menu-item {{ request()->routeIs('dashboard.cash.*') ? 'menu-item-active' : '' }}">
+               <li class="menu-item" aria-haspopup="true">
                    <a href="{{ route('dashboard.cash.index') }}" class="menu-link">
                    <i class="mmenu-bullet menu-bullet-dot"></i>
                    <span class="menu-text">المحفظة النقدية</span>
@@ -156,7 +151,7 @@
                </li>
 
 
-                 <li class="menu-item {{ request()->routeIs('dashboard.financial-accounts.index') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+                 <li class="menu-item " aria-haspopup="true">
                 <a href="{{ route('dashboard.financial-accounts.index') }}" class="menu-link">
                     <i class="menu-bullet menu-bullet-dot"><span></span></i>
                     <span class="menu-text">المركز المالي</span>
@@ -169,26 +164,26 @@
                 </a>
             </li>
 
-                <li class="menu-item {{ request()->routeIs('dashboard.expenses.*') ? 'menu-item-active' : '' }}">
+                <li class="menu-item" aria-haspopup="true">
                     <a href="{{ route('dashboard.expenses.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">دراسة تحليل المشروع</span>
                     </a>
                 </li>
 
-<li class="menu-item {{ request()->is('dashboard/supplier-expenses*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+<li class="menu-item" aria-haspopup="true">
                 <a href="{{ route('dashboard.supplier_expenses.index') }}" class="menu-link">
                     <i class="menu-bullet menu-bullet-dot"><span></span></i>
                     <span class="menu-text">مصروفات المورّدين</span>
                 </a>
             </li>
 
-             <li class="menu-item {{ request()->routeIs('dashboard.banks.*') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+             <li class="menu-item" aria-haspopup="true">
                     <a href="{{ route('dashboard.banks.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">دليل البنوك</span>
                     </a>
-                </li> <li class="menu-item {{ request()->routeIs('dashboard.bank-accounts.*') ? 'menu-item-active' : '' }}">
+                </li> <li class="menu-item" aria-haspopup="true">
                     <a href="{{ route('dashboard.bank-accounts.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">إدارة البنوك</span>
@@ -201,18 +196,18 @@
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link" href="{{ route('dashboard.khaled.index') }}">
+    <a class="nav-link" aria-haspopup="true">
         <i class="mdi mdi-file-document menu-icon"></i>
         <span class="menu-title">خالد</span>
     </a>
 </li>
-                   <li class="menu-item {{ request()->routeIs('dashboard.fund-transfers.*') ? 'menu-item-active' : '' }}">
+                   <li class="menu-item" aria-haspopup="true">
                     <a href="{{ route('dashboard.fund-transfers.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">تحويل الأموال</span>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->routeIs('dashboard.project-transfers.*') ? 'menu-item-active' : '' }}">
+                <li class="menu-item" aria-haspopup="true">
                     <a href="{{ route('dashboard.project-transfers.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">تحويل المشاريع</span>

@@ -6,7 +6,8 @@
     <div class="card-header">
         <h3 class="card-title"><i class="fas fa-file-invoice-dollar text-success mr-2"></i> القيود اليومية</h3>
         <div class="card-toolbar">
-            <a href="{{ route('dashboard.payments.create') }}" class="btn btn-success"><i class="la la-plus"></i> تسجيل قيد جديد</a>
+            <a href="{{ route('dashboard.payments.create') }}" class="btn btn-success mr-2"><i class="la la-plus"></i> تسجيل قيد جديد</a>
+            <a href="{{ route('dashboard.payments.trash') }}" class="btn btn-danger"><i class="fas fa-trash"></i> سلة المحذوفات</a>
         </div>
     </div>
     <div class="card-body">
@@ -19,19 +20,11 @@
                 <div class="col-md-2 align-self-end"><button type="submit" class="btn btn-primary">فلترة</button><a href="{{ route('dashboard.payments.index') }}" class="btn btn-secondary ml-2">إلغاء</a></div>
             </div>
         </form>
-
-        <div class="table-responsive">
+<div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>التاريخ</th>
-                        <th>الكيان</th>
-                        <th>النوع</th>
-                        <th>المبلغ</th>
-                        <th>القيمة (ILS)</th>
-                        <th>الطريقة</th>
-                        <th>ملاحظات</th>
+                        <th>ID</th><th>التاريخ</th><th>الكيان</th><th>النوع</th><th>المبلغ</th><th>الطريقة</th><th>تحكم</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,32 +36,57 @@
                             @if($payment->payable)
                                 <span class="font-weight-bold">{{ $payment->payable->name }}</span>
 
-                                <small class="text-muted">{{ str_replace('App\\Models\\', '', $payment->payable_type) }} / {{ $payment->payable->unique_id }}</small>
+                                <small class="text-muted">{{ str_replace('App\\Models\\', '', $payment->payable_type) }}</small>
                             @else
                                 <span class="text-danger">كيان محذوف</span>
                             @endif
                         </td>
                         <td>
-                            @if($payment->type == 'in')
-                                <span class="badge badge-light-success">قبض</span>
-                            @else
-                                <span class="badge badge-light-danger">صرف</span>
-                            @endif
+                            @if($payment->type == 'in') <span class="badge badge-light-success">قبض</span> @else <span class="badge badge-light-danger">صرف</span> @endif
                         </td>
                         <td class="font-weight-bold">{{ number_format($payment->amount, 2) }} <span class="text-muted">{{ $payment->currency }}</span></td>
-                        <td class="font-weight-bolder">{{ number_format($payment->amount_ils, 2) }}</td>
                         <td>{{ $payment->method }}</td>
-                        <td>{{ Str::limit($payment->notes, 30) }}</td>
+                        <td nowrap="nowrap">
+                            <a href="{{ route('dashboard.payments.show', $payment->id) }}" class="btn btn-sm btn-clean btn-icon" title="عرض"><i class="fas fa-eye text-info"></i></a>
+                            <a href="{{ route('dashboard.payments.edit', $payment->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل"><i class="fas fa-edit text-primary"></i></a>
+                            <form id="delete-form-{{ $payment->id }}" action="{{ route('dashboard.payments.destroy', $payment->id) }}" method="POST" style="display: inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" class="btn btn-sm btn-clean btn-icon" title="حذف" onclick="confirmDelete('{{ $payment->id }}')">
+                                    <i class="fas fa-trash text-danger"></i>
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" class="text-center py-5">لا توجد قيود مسجلة تطابق البحث.</td></tr>
+                    <tr><td colspan="7" class="text-center py-5">لا توجد قيود مسجلة تطابق البحث.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="d-flex justify-content-center">
-            {{ $payments->links() }}
-        </div>
+        <div class="d-flex justify-content-center">{{ $payments->links() }}</div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(id ) {
+        Swal.fire({
+            title: 'هل أنت متأكد؟',
+            text: "سيتم نقل هذا القيد إلى سلة المحذوفات!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'نعم، انقله!',
+            cancelButtonText: 'إلغاء'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
+</script>
+@endpush

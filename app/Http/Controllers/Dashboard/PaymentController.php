@@ -4,140 +4,208 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
+use App\Models\PaymentDetail;
+use App\Models\BankAccount;
+use App\Models\Contract;
 use App\Models\Client;
 use App\Models\Investor;
 use App\Models\Subcontractor;
-use App\Models\BankAccount; // افترض أن لديك هذا المودل
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Throwable;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PaymentController extends Controller
 {
-    /**
-     * عرض قائمة بكل القيود اليومية (الدفعات)
-     */
     public function index(Request $request)
     {
-        $query = Payment::with('payable')->orderBy('payment_date', 'desc');
+        $query = Payment::with('payable')->latest();
 
         if ($request->filled('search_payable')) {
             $searchTerm = $request->search_payable;
-            $query->whereHasMorph('payable', [Client::class, Investor::class, Subcontractor::class], function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('unique_id', 'like', "%{$searchTerm}%");
-            });
+            $query->whereHasMorph('payable', [Client::class, Investor::class, Subcontractor::class],
+                fn ($q) => $q->where('name', 'like', "%{$searchTerm}%")->orWhere('unique_id', 'like', "%{$searchTerm}%")
+            );
         }
         if ($request->filled('payment_type')) { $query->where('type', $request->payment_type); }
         if ($request->filled('start_date')) { $query->whereDate('payment_date', '>=', $request->start_date); }
         if ($request->filled('end_date')) { $query->whereDate('payment_date', '<=', $request->end_date); }
 
-        $payments = $query->paginate(15);
+        $payments = $query->paginate(15)->withQueryString();
+        $payments->each(fn ($p) => $p->amount_ils = $p->amount * $p->exchange_rate);
+
         return view('dashboard.payments.index', compact('payments'));
     }
 
-    /**
-     * عرض نموذج إنشاء قيد جديد
-     */
+
     public function create()
     {
-        $bankAccounts = BankAccount::with('bank')->get() ?? [];
+        $bankAccounts = BankAccount::with('bank')->get();
         return view('dashboard.payments.create', compact('bankAccounts'));
     }
 
-    /**
-     * حفظ القيد الجديد في قاعدة البيانات
-     */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'payable_type' => 'required|string|in:Client,Investor,Subcontractor',
-            'payable_id' => 'required|integer',
-            'type' => 'required|in:in,out',
-            'payment_date' => 'required|date',
-            'amount' => 'required|numeric|min:0.01',
-            'currency' => 'required|string|max:10',
-            'exchange_rate' => 'required|numeric|min:0',
-            'method' => 'required|in:cash,bank_transfer,check',
-            'notes' => 'nullable|string',
-            'delivered_by' => 'required_if:method,cash|nullable|string',
-            'received_by' => 'required_if:method,cash|nullable|string',
-            'check_number' => 'required_if:method,check|nullable|string',
-            'due_date' => 'required_if:method,check|nullable|date',
-            'check_owner' => 'required_if:method,check|nullable|string',
-            'sender_bank_account_id' => 'required_if:method,bank_transfer|nullable|exists:bank_accounts,id',
-            'receiver_bank_account_id' => 'required_if:method,bank_transfer|nullable|exists:bank_accounts,id',
-            'transaction_reference' => 'nullable|string',
-        ]);
+       $validated = $request->validate([
+    'payment_date' => 'required|date',
+    'type' => 'required|in:in,out',
+    'amount' => 'required|numeric|min:0.01',
+    'currency' => 'required|string|size:3',
+    'exchange_rate' => 'required|numeric|min:0',
+    'method' => 'required|string|in:cash,check,bank_transfer',
+    'notes' => 'nullable|string|max:1000',
+    'contract_id' => 'nullable|exists:contracts,id',
+    'delivered_by' => 'required_if:method,cash|nullable|string|max:255',
+    'received_by' => 'required_if:method,cash|nullable|string|max:255',
+    'check_number' => 'required_if:method,check|nullable|string|max:255',
+    'due_date' => 'required_if:method,check|nullable|date',
+    'check_owner' => 'required_if:method,check|nullable|string|max:255',
+    'sender_bank_account_id' => [
+        'required_if:method,bank_transfer',
+        'nullable',
+        'exists:bank_accounts,id',
+    ],
+    'receiver_bank_account_id' => [
+        'required_if:method,bank_transfer',
+        'nullable',
+        'exists:bank_accounts,id',
+        'different:sender_bank_account_id',
+    ],
+    'transaction_reference' => 'nullable|string|max:255',
+]);
 
+
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($validatedData) {
-                Payment::create([
-                    'payable_type' => "App\\Models\\" . $validatedData['payable_type'],
-                    'payable_id' => $validatedData['payable_id'],
-                    'amount' => $validatedData['amount'],
-                    'currency' => $validatedData['currency'],
-                    'exchange_rate' => $validatedData['exchange_rate'],
-                    'amount_ils' => $validatedData['amount'] * $validatedData['exchange_rate'],
-                    'type' => $validatedData['type'],
-                    'method' => $validatedData['method'],
-                    'payment_date' => $validatedData['payment_date'],
-                    'notes' => $validatedData['notes'],
-                    'delivered_by' => $validatedData['delivered_by'] ?? null,
-                    'received_by' => $validatedData['received_by'] ?? null,
-                    'check_number' => $validatedData['check_number'] ?? null,
-                    'due_date' => $validatedData['due_date'] ?? null,
-                    'check_owner' => $validatedData['check_owner'] ?? null,
-                    'sender_bank_account_id' => $validatedData['sender_bank_account_id'] ?? null,
-                    'receiver_bank_account_id' => $validatedData['receiver_bank_account_id'] ?? null,
-                    'transaction_reference' => $validatedData['transaction_reference'] ?? null,
-                ]);
-            });
-            return redirect()->route('dashboard.payments.index')->with('success', "تم تسجيل القيد بنجاح.");
-        } catch (Throwable $e) {
-            return back()->withInput()->with('error', 'فشل تسجيل القيد: ' . $e->getMessage());
+            $payment = Payment::create([
+                'payable_id' => $validated['payable_id'],
+                'payable_type' => 'App\\Models\\' . $validated['payable_type'],
+                'contract_id' => $validated['contract_id'],
+                'type' => $validated['type'],
+                'payment_date' => $validated['payment_date'],
+                'amount' => $validated['amount'],
+                'currency' => $validated['currency'],
+                'exchange_rate' => $validated['exchange_rate'],
+                'method' => $validated['method'],
+                'notes' => $validated['notes'],
+                'user_id' => Auth::id(),
+            ]);
+
+            $payment->details()->create($request->only([
+                'delivered_by', 'received_by', 'check_number', 'due_date',
+                'check_owner', 'sender_bank_account_id', 'receiver_bank_account_id',
+                'transaction_reference'
+            ]));
+
+            DB::commit();
+            return redirect()->route('dashboard.payments.index')->with('success', 'تم تسجيل القيد بنجاح.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'حدث خطأ غير متوقع. ' . $e->getMessage())->withInput();
         }
     }
 
-    /**
-     * [AJAX] دالة لجلب الكيانات (عملاء، مستثمرين، مقاولين)
-     */
-    public function getPayables(Request $request)
+    public function show(Payment $payment)
     {
-        $type = $request->query('type');
-        if (!in_array($type, ['Client', 'Investor', 'Subcontractor'])) {
-            return response()->json(['error' => 'Invalid type'], 400);
+        $payment->load(['payable', 'contract.project', 'details.senderBankAccount.bank', 'details.receiverBankAccount.bank', 'user']);
+        return view('dashboard.payments.show', compact('payment'));
+    }
+
+    public function edit(Payment $payment)
+    {
+        $payment->load('details');
+        $bankAccounts = BankAccount::with('bank')->get();
+        return view('dashboard.payments.edit', compact('payment', 'bankAccounts'));
+    }
+
+    public function update(Request $request, Payment $payment)
+    {
+          $validated = $request->validate([
+    'payment_date' => 'required|date',
+    'type' => 'required|in:in,out',
+    'amount' => 'required|numeric|min:0.01',
+    'currency' => 'required|string|size:3',
+    'exchange_rate' => 'required|numeric|min:0',
+    'method' => 'required|string|in:cash,check,bank_transfer',
+    'notes' => 'nullable|string|max:1000',
+    'contract_id' => 'nullable|exists:contracts,id',
+    'delivered_by' => 'required_if:method,cash|nullable|string|max:255',
+    'received_by' => 'required_if:method,cash|nullable|string|max:255',
+    'check_number' => 'required_if:method,check|nullable|string|max:255',
+    'due_date' => 'required_if:method,check|nullable|date',
+    'check_owner' => 'required_if:method,check|nullable|string|max:255',
+    'sender_bank_account_id' => [
+        'required_if:method,bank_transfer',
+        'nullable',
+        'exists:bank_accounts,id',
+    ],
+    'receiver_bank_account_id' => [
+        'required_if:method,bank_transfer',
+        'nullable',
+        'exists:bank_accounts,id',
+        'different:sender_bank_account_id',
+    ],
+    'transaction_reference' => 'nullable|string|max:255',
+]);
+
+        DB::beginTransaction();
+        try {
+            // 1. تحديث القيد الرئيسي
+            $payment->update($validated);
+
+            // 2. تحديث تفاصيل الدفع
+            $details_data = $request->only([
+                'delivered_by', 'received_by', 'check_number', 'due_date',
+                'check_owner', 'sender_bank_account_id', 'receiver_bank_account_id',
+                'transaction_reference'
+            ]);
+
+            $details_data = array_filter($details_data, fn($value) => !is_null($value) && $value !== '');
+
+            if ($payment->details) {
+                $payment->details->fill([
+                    'delivered_by' => null, 'received_by' => null, 'check_number' => null,
+                    'due_date' => null, 'check_owner' => null, 'sender_bank_account_id' => null,
+                    'receiver_bank_account_id' => null, 'transaction_reference' => null
+                ])->save();
+                $payment->details->update($details_data);
+            } else {
+                $payment->details()->create($details_data);
+            }
+
+            DB::commit();
+            return redirect()->route('dashboard.payments.index')->with('success', 'تم تحديث القيد رقم ' . $payment->id . ' بنجاح.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'حدث خطأ أثناء التحديث: ' . $e->getMessage())->withInput();
         }
-        $modelClass = "App\\Models\\" . $type;
-        $data = $modelClass::select('id', 'name', 'unique_id')->get();
-        return response()->json($data);
     }
 
-    /**
-     * [AJAX] دالة لجلب تفاصيل كيان معين
-     */
-   public function getPayableContracts(Request $request)
-{
-    $request->validate([
-        'payable_id' => 'required|integer',
-        'payable_type' => 'required|string',
-    ]);
-
-    $modelName = "App\\Models\\" . $request->payable_type;
-
-    if (!class_exists($modelName)) {
-        return response()->json(['contracts' => []]);
+    public function destroy(Payment $payment)
+    {
+        $payment->delete();
+        return redirect()->route('dashboard.payments.index')->with('success', 'تم نقل القيد إلى سلة المحذوفات.');
     }
 
-    $payable = $modelName::find($request->payable_id);
-
-    if (!$payable) {
-        return response()->json(['contracts' => []]);
+    public function trash()
+    {
+        $trashedPayments = Payment::onlyTrashed()->with('payable')->latest()->paginate(15);
+        return view('dashboard.payments.trash', compact('trashedPayments'));
     }
 
-    // جلب العقود المرتبطة بالكيان
-    $contracts = $payable->contracts()->select('id', 'investment_amount')->get();
+    public function restore($id)
+    {
+        Payment::onlyTrashed()->findOrFail($id)->restore();
+        return redirect()->route('dashboard.payments.trash')->with('success', 'تم استعادة القيد بنجاح.');
+    }
 
-    return response()->json(['contracts' => $contracts]);
-}
+    public function forceDelete($id)
+    {
+        $payment = Payment::onlyTrashed()->findOrFail($id);
+        DB::transaction(function () use ($payment) {
+            $payment->details()->delete();
+            $payment->forceDelete();
+        });
+        return redirect()->route('dashboard.payments.trash')->with('success', 'تم حذف القيد نهائياً.');
+    }
 }
