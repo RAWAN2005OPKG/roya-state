@@ -105,12 +105,12 @@ Route::prefix('bank-transactions')->name('bank-transactions.')->group(function (
 });
 Route::resource('bank-transactions', App\Http\Controllers\Dashboard\BankTransactionController::class);
 
-    Route::get('khaled/trash', [App\Http\Controllers\Dashboard\KhaledController::class, 'trash'])->name('khaled.trash');
-    Route::post('khaled/restore/{id}', [App\Http\Controllers\Dashboard\KhaledController::class, 'restore'])->name('khaled.restore');
-    Route::delete('khaled/force-delete/{id}', [App\Http\Controllers\Dashboard\KhaledController::class, 'forceDelete'])->name('khaled.forceDelete');
-    Route::get('khaled/export/excel', [App\Http\Controllers\Dashboard\KhaledController::class, 'exportExcel'])->name('khaled.export.excel');
-    Route::get('khaled/get-rate', [App\Http\Controllers\Dashboard\KhaledController::class, 'getRateAjax'])->name('khaled.getRate'); // For AJAX
-    Route::resource('khaled', App\Http\Controllers\Dashboard\KhaledController::class);
+    Route::prefix('khaled')->name('khaled.')->group(function () {
+        Route::get('/trash', [App\Http\Controllers\Dashboard\KhaledVoucherController::class, 'trash'])->name('trash');
+        Route::post('/{id}/restore', [App\Http\Controllers\Dashboard\KhaledVoucherController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\KhaledVoucherController::class, 'forceDelete'])->name('forceDelete');
+    });
+    Route::resource('khaled', App\Http\Controllers\Dashboard\KhaledVoucherController::class);
 
 Route::prefix('dashboard/reportproject')->name('dashboard.reportproject.')->middleware(['auth'])->group(function () {
 
@@ -181,16 +181,39 @@ Route::prefix('contracts')->name('contracts.')->middleware('auth')->group(functi
     Route::post('/{id}/restore', [App\Http\Controllers\Dashboard\ContractController::class, 'restore'])->name('restore');
     Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\ContractController::class, 'forceDelete'])->name('forceDelete');
 });
+Route::prefix('mohammed')->name('mohammed.')->middleware('auth')->group(function () {
+    Route::get('/trash', [App\Http\Controllers\Dashboard\MohammedVoucherController::class, 'trash'])->name('trash');
+    Route::post('/{id}/restore', [App\Http\Controllers\Dashboard\MohammedVoucherController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\MohammedVoucherController::class, 'forceDelete'])->name('forceDelete');
+});
+Route::resource('dashboard/mohammed', App\Http\Controllers\Dashboard\MohammedVoucherController::class)->middleware('auth');
+// --- مجموعة سندات وليد ---
+Route::prefix('wali')->name('wali.')->middleware('auth')->group(function () {
+    Route::get('/trash', [App\Http\Controllers\Dashboard\WaliVoucherController::class, 'trash'])->name('trash');
+    Route::post('/{id}/restore', [App\Http\Controllers\Dashboard\WaliVoucherController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\WaliVoucherController::class, 'forceDelete'])->name('forceDelete');
+});
+Route::resource('dashboard/wali', App\Http\Controllers\Dashboard\WaliVoucherController::class)->middleware('auth');
 
 Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::class)->middleware('auth');
-Route::prefix('dashboard/payments')->name('dashboard.payments.')->middleware('auth')->group(function () {
-    Route::get('/trash', [App\Http\Controllers\Dashboard\PaymentController::class, 'trash'])->name('trash');
-    Route::post('/{id}/restore', [App\Http\Controllers\Dashboard\PaymentController::class, 'restore'])->name('restore');
-    Route::delete('/{id}/force-delete', [App\Http\Controllers\Dashboard\PaymentController::class, 'forceDelete'])->name('forceDelete');
-});
+ Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Dashboard\PaymentController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Dashboard\PaymentController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Dashboard\PaymentController::class, 'store'])->name('store');
+        Route::get('/{payment}', [App\Http\Controllers\Dashboard\PaymentController::class, 'show'])->name('show');
+        Route::get('/{payment}/edit', [App\Http\Controllers\Dashboard\PaymentController::class, 'edit'])->name('edit');
+        Route::put('/{payment}', [App\Http\Controllers\Dashboard\PaymentController::class, 'update'])->name('update');
+        Route::delete('/{payment}', [App\Http\Controllers\Dashboard\PaymentController::class, 'destroy'])->name('destroy');
 
-Route::resource('dashboard/payments', App\Http\Controllers\Dashboard\PaymentController::class)->middleware('auth');
+        Route::get('/trash', [App\Http\Controllers\Dashboard\PaymentController::class, 'trash'])->name('trash');
+        Route::post('/trash/{id}/restore', [App\Http\Controllers\Dashboard\PaymentController::class, 'restore'])->name('restore');
+        Route::delete('/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\PaymentController::class, 'forceDelete'])->name('forceDelete');
 
+
+
+    });
+      Route::get('/get-payables', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayables'])->name('getPayables');
+        Route::get('/get-payable-contracts', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayableContracts'])->name('getPayableContracts');
 // ---  مصروفات الموردين (Supplier Expenses) ---
 Route::resource('supplier-expenses', \App\Http\Controllers\Dashboard\SupplierExpenseController::class)->names('supplier_expenses')->except(['show']);
 

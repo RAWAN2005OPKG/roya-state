@@ -1,84 +1,84 @@
 @extends('layouts.container')
-@section('title', 'إدارة خالد')
+@section('title', 'سندات خالد')
 
 @section('content')
-<div class="card">
-    <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h4 class="card-title">قائمة السندات (خالد)</h4>
-            <div>
-                <a href="{{ route('dashboard.khaled.create') }}" class="btn btn-success">إنشاء سند جديد</a>
-                <a href="{{ route('dashboard.khaled.trash') }}" class="btn btn-dark">سلة المحذوفات</a>
-                <a href="{{ route('dashboard.khaled.export.excel') }}" class="btn btn-info">تنزيل Excel</a>
-            </div>
+<div class="card card-custom">
+    <div class="card-header flex-wrap border-0 pt-6 pb-0">
+        <div class="card-title">
+            <h3 class="card-label">
+                <i class="fas fa-receipt text-primary mr-2"></i>
+                عرض سندات خالد
+            </h3>
+        </div>
+        <div class="card-toolbar">
+            <a href="{{ route('dashboard.khaled.trash') }}" class="btn btn-danger font-weight-bolder mr-2">
+                <i class="fas fa-trash"></i> سلة المحذوفات
+            </a>
+            <a href="{{ route('dashboard.khaled.create') }}" class="btn btn-primary font-weight-bolder">
+                <i class="la la-plus"></i> إنشاء سند جديد
+            </a>
         </div>
     </div>
+
     <div class="card-body">
-        <form method="GET" action="{{ route('dashboard.khaled.index') }}">
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <input type="text" name="search" class="form-control" placeholder="ابحث بالوصف أو رقم السند..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-2">
-                    <select name="limit" class="form-control" onchange="this.form.submit()">
-                        <option value="10" {{ request('limit') == 10 ? 'selected' : '' }}>10</option>
-                        <option value="20" {{ request('limit') == 20 ? 'selected' : '' }}>20</option>
-                        <option value="30" {{ request('limit') == 30 ? 'selected' : '' }}>30</option>
-                        <option value="50" {{ request('limit') == 50 ? 'selected' : '' }}>50</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary">بحث</button>
-                </div>
-            </div>
-        </form>
+        {{-- رسائل النجاح والخطأ --}}
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
 
         <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
+            <table class="table table-hover">
+                <thead class="thead-light">
                     <tr>
                         <th>#</th>
                         <th>التاريخ</th>
                         <th>النوع</th>
                         <th>البيان</th>
                         <th>المبلغ</th>
-                        <th>القيمة (شيكل)</th>
-                        <th>المشروع</th>
-                        <th>العميل/المستثمر</th>
-                        <th>إجراءات</th>
+                        <th>طريقة الدفع</th>
+                        <th>أنشئ بواسطة</th>
+                        <th>الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($khaleds as $khaled)
+                    @forelse($vouchers as $voucher)
                     <tr>
-                        <td>{{ $khaled->id }}</td>
-                        <td>{{ $khaled->voucher_date->format('Y-m-d') }}</td>
-                        <td><span class="badge {{ $khaled->type == 'receipt' ? 'badge-success' : 'badge-danger' }}">{{ $khaled->type == 'receipt' ? 'قبض' : 'صرف' }}</span></td>
-                        <td>{{ Str::limit($khaled->description, 30) }}</td>
-                        <td>{{ number_format($khaled->amount, 2) }} {{ $khaled->currency }}</td>
-                        <td>{{ number_format($khaled->amount_ils, 2) }} ILS</td>
-                        <td>{{ $khaled->project->name ?? '-' }}</td>
-                        <td>{{ $khaled->client->name ?? $khaled->investor->name ?? '-' }}</td>
+                        <td>{{ $voucher->id }}</td>
+                        <td>{{ $voucher->voucher_date->format('Y-m-d') }}</td>
                         <td>
-                            <a href="{{ route('dashboard.khaled.show', $khaled->id) }}" class="btn btn-sm btn-info">عرض</a>
-                            <a href="{{ route('dashboard.khaled.edit', $khaled->id) }}" class="btn btn-sm btn-primary">تعديل</a>
-                            <form action="{{ route('dashboard.khaled.destroy', $khaled->id) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد؟')">
+                            @if($voucher->type == 'receipt')
+                                <span class="badge badge-light-success">قبض</span>
+                            @else
+                                <span class="badge badge-light-danger">صرف</span>
+                            @endif
+                        </td>
+                        <td>{{ Str::limit($voucher->description, 40) }}</td>
+                        <td class="font-weight-bold">{{ number_format($voucher->amount, 2) }} <span class="text-muted">{{ $voucher->currency }}</span></td>
+                        <td>{{ $voucher->payment_method }}</td>
+                        <td>{{ $voucher->user->name ?? 'N/A' }}</td>
+                        <td>
+                            <a href="{{ route('dashboard.khaled.show', $voucher->id) }}" class="btn btn-sm btn-clean btn-icon" title="عرض"><i class="la la-eye"></i></a>
+                            <a href="{{ route('dashboard.khaled.edit', $voucher->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل"><i class="la la-edit"></i></a>
+                            <form action="{{ route('dashboard.khaled.destroy', $voucher->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف هذا السند؟');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger">حذف</button>
+                                <button type="submit" class="btn btn-sm btn-clean btn-icon" title="حذف"><i class="la la-trash"></i></button>
                             </form>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="text-center">لا توجد بيانات لعرضها.</td>
+                        <td colspan="8" class="text-center py-5">لا توجد سندات لعرضها.</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">
-            {{ $khaleds->appends(request()->query())->links() }}
+        <div class="d-flex justify-content-center">
+            {{ $vouchers->links() }}
         </div>
     </div>
 </div>

@@ -1,5 +1,5 @@
 @extends('layouts.container')
-@section('title', 'إنشاء سند محمد جديد')
+@section('title', 'إنشاء سند وليد جديد')
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -11,8 +11,8 @@
 
 @section('content')
 <div class="card card-custom">
-    <div class="card-header"><h3 class="card-title"><i class="fas fa-plus-circle text-primary mr-2"></i>إنشاء سند جديد (سندات محمد)</h3></div>
-    <form action="{{ route('dashboard.mohammed.store') }}" method="POST" id="voucher-form">
+    <div class="card-header"><h3 class="card-title"><i class="fas fa-plus-circle text-primary mr-2"></i>إنشاء سند جديد (سندات وليد)</h3></div>
+    <form action="{{ route('dashboard.wali.store') }}" method="POST" id="voucher-form">
         @csrf
         <div class="card-body">
             @if ($errors->any())<div class="alert alert-danger"><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
@@ -47,10 +47,7 @@
                 <div class="form-group"><label>ملاحظات</label><textarea name="notes" class="form-control" rows="2">{{ old('notes') }}</textarea></div>
             </div></div>
         </div>
-        <div class="card-footer text-center">
-            <button type="submit" class="btn btn-primary btn-lg px-8">حفظ السند</button>
-            <a href="{{ route('dashboard.mohammed.index') }}" class="btn btn-secondary btn-lg px-6">إلغاء</a>
-        </div>
+        <div class="card-footer text-center"><button type="submit" class="btn btn-primary btn-lg px-8">حفظ السند</button><a href="{{ route('dashboard.wali.index') }}" class="btn btn-secondary btn-lg px-6">إلغاء</a></div>
     </form>
 </div>
 @endsection
@@ -71,24 +68,11 @@ $(document ).ready(function() {
         let html = '';
 
         if (method === 'cash') {
-            html = `<div class="card shadow-sm mb-8"><div class="card-header"><h4 class="card-title">3. تفاصيل الدفع النقدي</h4></div><div class="card-body">
-                <div class="form-group"><label>${type === 'receipt' ? 'تم القبض من' : 'تم الصرف إلى'} <span class="text-danger">*</span></label><input type="text" name="cash_source_name" class="form-control" value="{{ old('cash_source_name') }}" placeholder="اكتب اسم الشخص أو الجهة..." required></div>
-                <div class="row"><div class="col-md-6 form-group"><label>اسم المستلم/المسلم</label><input type="text" name="handler_name" class="form-control" value="{{ old('handler_name') }}"></div><div class="col-md-6 form-group"><label>الوظيفة</label><input type="text" name="handler_role" class="form-control" value="{{ old('handler_role') }}"></div></div>
-            </div></div>`;
+            html = `<div class="card shadow-sm mb-8"><div class="card-header"><h4 class="card-title">3. تفاصيل الدفع النقدي</h4></div><div class="card-body"><div class="form-group"><label>${type === 'receipt' ? 'تم القبض من' : 'تم الصرف إلى'} <span class="text-danger">*</span></label><input type="text" name="cash_source_name" class="form-control" value="{{ old('cash_source_name') }}" placeholder="اكتب اسم الشخص أو الجهة..." required></div><div class="row"><div class="col-md-6 form-group"><label>اسم المستلم/المسلم</label><input type="text" name="handler_name" class="form-control" value="{{ old('handler_name') }}"></div><div class="col-md-6 form-group"><label>الوظيفة</label><input type="text" name="handler_role" class="form-control" value="{{ old('handler_role') }}"></div></div></div></div>`;
         } else if (method === 'bank_transfer') {
-            html = `<div class="card shadow-sm mb-8"><div class="card-header"><h4 class="card-title">3. تفاصيل التحويل البنكي</h4></div><div class="card-body">
-                <div class="form-group"><label>من حساب بنكي</label><select name="from_bank_account_id" class="form-control select2-basic"><option value="">-- اختر --</option>${bankAccountsOptions}</select></div>
-                <div class="form-group"><label>إلى حساب بنكي</label><select name="to_bank_account_id" class="form-control select2-basic"><option value="">-- اختر --</option>${bankAccountsOptions}</select></div>
-            </div></div>`;
+            html = `<div class="card shadow-sm mb-8"><div class="card-header"><h4 class="card-title">3. تفاصيل التحويل البنكي</h4></div><div class="card-body"><div class="form-group"><label>من حساب بنكي</label><select name="from_bank_account_id" class="form-control select2-basic"><option value="">-- اختر --</option>${bankAccountsOptions}</select></div><div class="form-group"><label>إلى حساب بنكي</label><select name="to_bank_account_id" class="form-control select2-basic"><option value="">-- اختر --</option>${bankAccountsOptions}</select></div></div></div>`;
         } else if (method === 'check') {
-            html = `<div class="card shadow-sm mb-8"><div class="card-header"><h4 class="card-title">3. تفاصيل الشيك</h4></div><div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 form-group"><label>رقم الشيك <span class="text-danger">*</span></label><input type="text" name="check_number" class="form-control" value="{{ old('check_number') }}" required></div>
-                    <div class="col-md-4 form-group"><label>اسم صاحب الشيك <span class="text-danger">*</span></label><input type="text" name="check_owner_name" class="form-control" value="{{ old('check_owner_name') }}" required></div>
-                    <div class="col-md-4 form-group"><label>اسم البنك <span class="text-danger">*</span></label><input type="text" name="check_bank_name" class="form-control" value="{{ old('check_bank_name') }}" required></div>
-                </div>
-                <div class="row"><div class="col-md-4 form-group"><label>تاريخ الاستحقاق <span class="text-danger">*</span></label><input type="date" name="check_due_date" class="form-control" value="{{ old('check_due_date', date('Y-m-d')) }}" required></div></div>
-            </div></div>`;
+            html = `<div class="card shadow-sm mb-8"><div class="card-header"><h4 class="card-title">3. تفاصيل الشيك</h4></div><div class="card-body"><div class="row"><div class="col-md-4 form-group"><label>رقم الشيك <span class="text-danger">*</span></label><input type="text" name="check_number" class="form-control" value="{{ old('check_number') }}" required></div><div class="col-md-4 form-group"><label>اسم صاحب الشيك <span class="text-danger">*</span></label><input type="text" name="check_owner_name" class="form-control" value="{{ old('check_owner_name') }}" required></div><div class="col-md-4 form-group"><label>اسم البنك <span class="text-danger">*</span></label><input type="text" name="check_bank_name" class="form-control" value="{{ old('check_bank_name') }}" required></div></div><div class="row"><div class="col-md-4 form-group"><label>تاريخ الاستحقاق <span class="text-danger">*</span></label><input type="date" name="check_due_date" class="form-control" value="{{ old('check_due_date', date('Y-m-d')) }}" required></div></div></div></div>`;
         }
         wrapper.html(html);
         wrapper.find('.select2-basic').select2();

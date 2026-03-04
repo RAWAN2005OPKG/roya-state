@@ -1,59 +1,60 @@
 @extends('layouts.container')
-@section('title', 'سجل خالد ومحمد')
+@section('title', 'سندات محمد')
 
 @section('content')
 <div class="card card-custom">
     <div class="card-header flex-wrap border-0 pt-6 pb-0">
-        <div class="card-title">
-            <h3 class="card-label">سجل حركات خالد ومحمد
-                <span class="d-block text-muted pt-2 font-size-sm">عرض كل الحركات المالية المسجلة</span>
-            </h3>
-        </div>
+        <div class="card-title"><h3 class="card-label"><i class="fas fa-file-invoice text-info mr-2"></i>عرض سندات محمد</h3></div>
         <div class="card-toolbar">
-            <a href="{{ route('dashboard.khaleed-mohamed.create') }}" class="btn btn-primary font-weight-bolder">
-                <i class="fas fa-plus"></i> إضافة حركة جديدة
-            </a>
+            <a href="{{ route('dashboard.mohammed.trash') }}" class="btn btn-danger font-weight-bolder mr-2"><i class="fas fa-trash"></i> سلة المحذوفات</a>
+            <a href="{{ route('dashboard.mohammed.create') }}" class="btn btn-primary font-weight-bolder"><i class="la la-plus"></i> إنشاء سند جديد</a>
         </div>
     </div>
     <div class="card-body">
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+        @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
         <div class="table-responsive">
-            <table class="table table-head-custom table-hover">
-                <thead>
+            <table class="table table-hover">
+                <thead class="thead-light">
                     <tr>
+                        <th>#</th>
                         <th>التاريخ</th>
-                        <th>المشروع</th>
-                        <th>قيمة الدفعة (شيكل)</th>
-                        <th>قيمة الدفعة (دولار)</th>
-                        <th>من (دفع)</th>
-                        <th>صرف لمين</th>
-                        <th>بيانات المصاريف</th>
-                        <th>ملاحظات</th>
+                        <th>النوع</th>
+                        <th>البيان</th>
+                        <th>المبلغ</th>
+                        <th>طريقة الدفع</th>
+                        <th>أنشئ بواسطة</th>
+                        <th>الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($transactions as $transaction)
-                        <tr>
-                            <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
-                            <td>{{ $transaction->project->name ?? '-' }}</td>
-                            <td>{{ $transaction->amount_shekel ? number_format($transaction->amount_shekel, 2) : '-' }}</td>
-                            <td>{{ $transaction->amount_dollar ? number_format($transaction->amount_dollar, 2) : '-' }}</td>
-                            <td><span class="label label-inline label-light-info font-weight-bold">{{ $transaction->paid_by }}</span></td>
-                            <td>{{ $transaction->paid_to }}</td>
-                            <td>{{ Str::limit($transaction->expense_details, 40) }}</td>
-                            <td>{{ Str::limit($transaction->notes, 40) }}</td>
-                        </tr>
+                    @forelse($vouchers as $voucher)
+                    <tr>
+                        <td>{{ $voucher->id }}</td>
+                        <td>{{ $voucher->voucher_date->format('Y-m-d') }}</td>
+                        <td>
+                            @if($voucher->type == 'receipt')<span class="badge badge-light-success">قبض</span>@else<span class="badge badge-light-danger">صرف</span>@endif
+                        </td>
+                        <td>{{ Str::limit($voucher->description, 40) }}</td>
+                        <td class="font-weight-bold">{{ number_format($voucher->amount, 2) }} <span class="text-muted">{{ $voucher->currency }}</span></td>
+                        <td>{{ $voucher->payment_method }}</td>
+                        <td>{{ $voucher->user->name ?? 'N/A' }}</td>
+                        <td>
+                            <a href="{{ route('dashboard.mohammed.show', $voucher->id) }}" class="btn btn-sm btn-clean btn-icon" title="عرض"><i class="la la-eye"></i></a>
+                            <a href="{{ route('dashboard.mohammed.edit', $voucher->id) }}" class="btn btn-sm btn-clean btn-icon" title="تعديل"><i class="la la-edit"></i></a>
+                            <form action="{{ route('dashboard.mohammed.destroy', $voucher->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف هذا السند؟ سيتم نقله إلى سلة المحذوفات.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-clean btn-icon" title="حذف"><i class="la la-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
                     @empty
-                        <tr><td colspan="8" class="text-center p-5 text-muted">لا توجد حركات لعرضها.</td></tr>
+                    <tr><td colspan="8" class="text-center py-5">لا توجد سندات لعرضها.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="d-flex justify-content-center mt-5">
-            {{ $transactions->links() }}
-        </div>
+        <div class="d-flex justify-content-center">{{ $vouchers->links() }}</div>
     </div>
 </div>
 @endsection

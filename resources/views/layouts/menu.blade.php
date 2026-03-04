@@ -183,24 +183,27 @@
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
                         <span class="menu-text">دليل البنوك</span>
                     </a>
-                </li> <li class="menu-item" aria-haspopup="true">
-                    <a href="{{ route('dashboard.bank-accounts.index') }}" class="menu-link">
-                        <i class="menu-bullet menu-bullet-dot"><span></span></i>
-                        <span class="menu-text">إدارة البنوك</span>
-                    </a>
                 </li>
-             <li class="menu-item" aria-haspopup="true">
-    <a href="{{ route('dashboard.bank-transactions.index') }}" class="menu-link">
-        <span class="svg-icon menu-icon"><i class="fas fa-university"></i></span>
-        <span class="menu-text">الحركات البنكية</span>
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" aria-haspopup="true">
-        <i class="mdi mdi-file-document menu-icon"></i>
-        <span class="menu-title">خالد</span>
-    </a>
-</li>
+                 <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.bank-accounts.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">إدارة البنوك</span>
+                </a>
+            </li>
+
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.bank-transactions.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">الحركات البنكية</span>
+                </a>
+            </li>
+            <li class="menu-item" aria-haspopup="true">
+                <a href="{{ route('dashboard.khaled.index') }}" class="menu-link">
+                    <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                    <span class="menu-text">سندات خالد</span>
+                </a>
+            </li>
+
                    <li class="menu-item" aria-haspopup="true">
                     <a href="{{ route('dashboard.fund-transfers.index') }}" class="menu-link">
                         <i class="menu-bullet menu-bullet-dot"><span></span></i>
