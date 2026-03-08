@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,57 +9,20 @@ class Expense extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'project_id',
-        'date',
-        'payee',
-        'phone',
-        'job',
-        'id_number',
-        'project_id',
-        'amount',
-        'currency',
-        'payment_method',
-        'payment_source',
-        'cash_receiver',
-        'cash_receiver_other',
-        'receiver_job',
-        'sender_bank',
-        'other_sender_bank',
-        'sender_branch',
-        'receiver_bank',
-        'other_receiver_bank',
-        'receiver_branch',
-        'transaction_id',
-        'check_number',
-        'check_owner',
-        'check_holder',
-        'check_due_date',
-        'check_receive_date',
-        'notes',
-    ];
+    protected $guarded = []; // للسماح بالحفظ الجماعي
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'date' => 'date',
-        'check_due_date' => 'date',
-        'check_receive_date' => 'date',
-        'amount' => 'decimal:2',
+        'payment_details' => 'array', // لتحويل حقل JSON إلى مصفوفة تلقائياً
     ];
 
-     public function project()
- {
-         return $this->belongsTo(Project::class);
-     }
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
-

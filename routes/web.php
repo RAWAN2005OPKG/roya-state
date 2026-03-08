@@ -44,7 +44,6 @@ Route::resource('/khaleed-mohamed', App\Http\Controllers\Dashboard\KhaleedMohame
 // --- الوحدات المالية ---
     Route::resource('accounts', App\Http\Controllers\Dashboard\AccountController::class);
     Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);
-    Route::resource('expenses', App\Http\Controllers\Dashboard\ExpenseController::class);
     Route::resource('/bank-accounts', App\Http\Controllers\Dashboard\BankAccountController::class)->names('bank-accounts');
     Route::get('/financial-summary', [App\Http\Controllers\Dashboard\FinancialController::class, 'summary'])->name('financial.summary');
 
@@ -145,7 +144,8 @@ Route::prefix('dashboard/projects')->name('dashboard.projects.')->middleware(['a
 
     // --- وحدات التحويلات ---
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferCoCntroller::class)->only(['index', 'store']);
-    Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
+    Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->middleware('auth');
+
  Route::get('/purchases', [App\Http\Controllers\Dashboard\PurchaseController::class, 'index'])->name('purchases.index');
 
     Route::resource('purchases', App\Http\Controllers\Dashboard\PurchaseController::class);
@@ -155,17 +155,14 @@ Route::prefix('dashboard/projects')->name('dashboard.projects.')->middleware(['a
     Route::post('purchase-returns', [App\Http\Controllers\Dashboard\PurchaseReturnController::class, 'store'])->name('purchase-returns.store');
     Route::delete('purchase-returns/{purchase_return}', [App\Http\Controllers\Dashboard\PurchaseReturnController::class, 'destroy'])->name('purchase-returns.destroy');
 
-    Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->only(['index', 'store']);
 Route::resource('journal-entries', App\Http\Controllers\Dashboard\JournalEntryController::class);
 
-    Route::get('/expenses/export/excel', [ App\Http\Controllers\Dashboard\ExpenseController::class, 'exportExcel'])->name('expenses.export.excel');
-    Route::prefix('expenses/trash')->name('expenses.trash.')->controller( App\Http\Controllers\Dashboard\ExpenseController::class)->group(function () {
-        Route::get('/', 'trash')->name('index');
-        Route::put('/{id}/restore', 'restore')->name('restore');
-        Route::delete('/{id}/force-delete', 'forceDelete')->name('forceDelete');
-    });
-    Route::resource('expenses',  App\Http\Controllers\Dashboard\ExpenseController::class);
+Route::get('expenses/export/excel', [App\Http\Controllers\Dashboard\ExpenseController::class, 'exportExcel'])->name('expenses.exportExcel');
 
+    Route::get('expenses/trash', [App\Http\Controllers\Dashboard\ExpenseController::class, 'trash'])->name('expenses.trash');
+    Route::post('expenses/trash/{id}/restore', [App\Http\Controllers\Dashboard\ExpenseController::class, 'restore'])->name('expenses.restore');
+    Route::delete('expenses/trash/{id}/force-delete', [App\Http\Controllers\Dashboard\ExpenseController::class, 'forceDelete'])->name('expenses.forceDelete');
+    Route::resource('expenses', App\Http\Controllers\Dashboard\ExpenseController::class);
    // --- قسم المستثمرين (Investors) ---
     Route::get('investors/trash', [App\Http\Controllers\Dashboard\InvestorController::class, 'trash'])->name('investors.trash');
     Route::put('investors/trash/{id}/restore', [App\Http\Controllers\Dashboard\InvestorController::class, 'restore'])->name('investors.restore');
@@ -245,7 +242,6 @@ Route::resource('supplier-expenses', \App\Http\Controllers\Dashboard\SupplierExp
 
     Route::resource('receipt-vouchers', App\Http\Controllers\Dashboard\ReceiptVoucherController::class)->except(['show']);
     Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->except(['show']);
-    Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->except(['show']);
     Route::resource('alerts', App\Http\Controllers\Dashboard\AlertController::class);
 // --- 5. المقاولون والموردون (Subcontractors) ---
 Route::get('subcontractors/trash', [App\Http\Controllers\Dashboard\SubcontractorController::class, 'trash'])->name('subcontractors.trash');

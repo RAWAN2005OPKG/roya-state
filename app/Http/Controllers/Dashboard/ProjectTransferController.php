@@ -3,60 +3,120 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProjectTransfer;
-use App\Models\Expense; // افترض وجود مودل للمصاريف
-use App\Models\Project; // افترض وجود مودل للمشاريع
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class ProjectTransferController extends Controller
 {
-    public function index()
-    {
-        $transfers = ProjectTransfer::latest()->paginate(20);
-        $projects = Project::all();
-        return view('dashboard.transfers.projects.index', compact('transfers', 'projects'));
+    public function index(Request $request) {
+        $query = ProjectTransfer::with(['fromProject', 'toProject', 'user'])->latest();
+
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('notes', 'like', '%' . $request->search . '%')
+                  ->orWhere('amount', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $transfers = $query->paginate(15);
+        return view('dashboard.project_transfers.index', compact('transfers'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'date' => 'required|date',
-            'expense_id' => 'required|exists:expenses,id',
-            'to_project_id' => 'required|exists:projects,id',
-            'amount' => 'required|numeric|min:0.01',
-            'reason' => 'required|string|max:500',
+    public function create() {
+        $projects = Project::where('status', '!=', 'completed')->get();
+        return view('dashboard.project_transfers.create', compact('projects'));
+    }
+
+    public function store(Request $request) {
+        $validated = $request->validate([
+            'from_project_id' => ['required', 'exists:projects,id', 'different:to_project_id'],
+            'to_project_id' => ['required', 'exists:projects,id'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'transfer_date' => ['required', 'date'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'from_project_id.different' => 'لا يمكن التحويل إلى نفس المشروع.'
         ]);
-
-        $expense = Expense::findOrFail($request->expense_id);
-
-        // تأكد من أن المبلغ المحول لا يتجاوز قيمة المصروف
-        if ($request->amount > $expense->amount) {
-            return back()->withErrors(['amount' => 'المبلغ المحول لا يمكن أن يكون أكبر من قيمة المصروف الأصلية.']);
-        }
 
         DB::beginTransaction();
         try {
-            // 1. إنشاء سجل التحويل
-            ProjectTransfer::create([
-                'date' => $request->date,
-                'expense_id' => $expense->id,
-                'from_project_id' => $expense->project_id,
-                'to_project_id' => $request->to_project_id,
-                'amount' => $request->amount,
-                'reason' => $request->reason,
-            ]);
+            // إنشاء سجل التحويل
+            ProjectTransfer::create($validated + ['user_id' => Auth::id()]);
 
-            // 2. تحديث المصروف الأصلي (هنا يمكنك اختيار إما تعديل المصروف أو إنشاء قيد محاسبي)
-            // أبسط طريقة هي تعديل المشروع المرتبط بالمصروف
-            $expense->project_id = $request->to_project_id;
-            $expense->save();
+            // تحديث أرصدة المشاريع
+            $fromProject = Project::find($validated['from_project_id']);
+            $toProject = Project::find($validated['to_project_id']);
+
+            $fromProject->decrement('balance', $validated['amount']);
+            $toProject->increment('balance', $validated['amount']);
 
             DB::commit();
-            return back()->with('success', 'تم تحويل المصروف إلى المشروع الجديد بنجاح.');
-
+            return redirect()->route('dashboard.project-transfers.index')->with('success', 'تم تحويل المبلغ بين المشاريع بنجاح.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'حدث خطأ أثناء عملية التحويل.');
+            return back()->with('error', 'حدث خطأ: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function edit(ProjectTransfer $projectTransfer) {
+        $projects = Project::where('status', '!=', 'completed')->get();
+        return view('dashboard.project_transfers.edit', compact('projectTransfer', 'projects'));
+    }
+
+    public function update(Request $request, ProjectTransfer $projectTransfer) {
+        $validated = $request->validate([
+            'from_project_id' => ['required', 'exists:projects,id', 'different:to_project_id'],
+            'to_project_id' => ['required', 'exists:projects,id'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'transfer_date' => ['required', 'date'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // 1. عكس العملية القديمة
+            $oldFromProject = Project::find($projectTransfer->from_project_id);
+            $oldToProject = Project::find($projectTransfer->to_project_id);
+            $oldFromProject->increment('balance', $projectTransfer->amount);
+            $oldToProject->decrement('balance', $projectTransfer->amount);
+
+            // 2. تطبيق العملية الجديدة
+            $newFromProject = Project::find($validated['from_project_id']);
+            $newToProject = Project::find($validated['to_project_id']);
+            $newFromProject->decrement('balance', $validated['amount']);
+            $newToProject->increment('balance', $validated['amount']);
+
+            // 3. تحديث سجل التحويل نفسه
+            $projectTransfer->update($validated);
+
+            DB::commit();
+            return redirect()->route('dashboard.project-transfers.index')->with('success', 'تم تحديث التحويل بنجاح.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'حدث خطأ: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function destroy(ProjectTransfer $projectTransfer) {
+        DB::beginTransaction();
+        try {
+            // عكس أثر التحويل على أرصدة المشاريع قبل الحذف
+            $fromProject = Project::find($projectTransfer->from_project_id);
+            $toProject = Project::find($projectTransfer->to_project_id);
+            $fromProject->increment('balance', $projectTransfer->amount);
+            $toProject->decrement('balance', $projectTransfer->amount);
+
+            // حذف سجل التحويل
+            $projectTransfer->delete();
+
+            DB::commit();
+            return redirect()->route('dashboard.project-transfers.index')->with('success', 'تم حذف التحويل وعكس أثره المالي بنجاح.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'حدث خطأ أثناء الحذف: ' . $e->getMessage());
         }
     }
 }

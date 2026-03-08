@@ -28,4 +28,10 @@ class BankAccount extends Model
 
         $this->balance = ($this->opening_balance ?? 0) + $inflow - $outflow;
     }
+       public function getOpeningBalance(): float
+{
+    // 'opening_balance' هو اسم العمود في قاعدة البيانات
+    // الذي يخزن الرصيد الذي تم إدخاله عند إنشاء الحساب.
+    return (float) $this->opening_balance;
+}
 }
