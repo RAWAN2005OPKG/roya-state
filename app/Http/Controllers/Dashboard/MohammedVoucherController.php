@@ -34,7 +34,7 @@ class MohammedVoucherController extends Controller
         $investors = Investor::all();
         $bankAccounts = BankAccount::with('bank')->where('is_active', true)->get();
         $exchangeRates = ['USD' => 3.7, 'JOD' => 5.2];
-        
+
         return view('dashboard.mohammed.create', compact('projects', 'clients', 'investors', 'bankAccounts', 'exchangeRates'));
     }
 
@@ -68,7 +68,7 @@ class MohammedVoucherController extends Controller
         try {
             $detailsData = $request->only(['cash_source_name', 'handler_name', 'handler_role', 'from_bank_account_id', 'to_bank_account_id', 'check_number', 'check_owner_name', 'check_bank_name', 'check_due_date', 'check_id']);
             $voucherData = array_diff_key($validated, array_flip(array_keys($detailsData)));
-            
+
             $voucher = MohammedVoucher::create($voucherData + ['user_id' => Auth::id()]);
             $voucher->details()->create($detailsData);
 
@@ -100,13 +100,13 @@ class MohammedVoucherController extends Controller
         $investors = Investor::all();
         $bankAccounts = BankAccount::with('bank')->where('is_active', true)->get();
         $exchangeRates = ['USD' => 3.7, 'JOD' => 5.2];
-        
+
         return view('dashboard.mohammed.edit', [
-            'voucher' => $mohammed, 
-            'projects' => $projects, 
-            'clients' => $clients, 
-            'investors' => $investors, 
-            'bankAccounts' => $bankAccounts, 
+            'voucher' => $mohammed,
+            'projects' => $projects,
+            'clients' => $clients,
+            'investors' => $investors,
+            'bankAccounts' => $bankAccounts,
             'exchangeRates' => $exchangeRates
         ]);
     }
@@ -133,7 +133,7 @@ class MohammedVoucherController extends Controller
             $voucherData = array_diff_key($validated, array_flip(array_keys($detailsData)));
 
             $mohammed->update($voucherData);
-            
+
             if ($mohammed->details) {
                 $mohammed->details->fill(array_fill_keys(array_keys($detailsData), null))->save();
                 $mohammed->details->update(array_filter($detailsData));
