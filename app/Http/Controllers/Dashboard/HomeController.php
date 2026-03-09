@@ -3,93 +3,104 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Carbon\Carbon;
-use App\Models\SaleInvoice;
-use App\Models\PurchaseInvoice;
+use App\Models\Project;
+use App\Models\CashTransaction;
+use App\Models\BankTransaction;
 use App\Models\Expense;
+use App\Services\FinancialService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
+    protected $financialService;
+
+    // حقن الخدمة المالية في المتحكم
+    public function __construct(FinancialService $financialService)
+    {
+        $this->financialService = $financialService;
+    }
+
+    /**
+     * عرض لوحة التحكم الرئيسية مع كل البيانات المجمعة.
+     */
     public function index()
     {
-        // 1. بطاقات الإحصائيات الرئيسية
-        $totalRevenue = SaleInvoice::sum('total_amount');
-        $totalExpenses = Expense::sum('amount');
-        $netProfit = $totalRevenue - $totalExpenses;
+        // 1. جلب الأرصدة الرئيسية باستخدام الخدمة المالية
+        $totalCapital = $this->financialService->getTotalCapital();
+        $totalCashBalance = $this->financialService->getCashBalance();
+        $totalBankBalance = $this->financialService->getBankBalance();
 
-        // 2. بيانات الرسم البياني (آخر 6 أشهر)
-        $revenueData = [];
+        // 2. إحصائيات سريعة
+        $projectsCount = Project::count();
+        $activeProjectsCount = Project::where('status', 'active')->count(); // نفترض وجود حقل status
+
+        // 3. بيانات الرسم البياني لتوزيع السيولة
+        $liquidityData = [
+            'labels' => ['رصيد الخزينة', 'رصيد البنوك'],
+            'data' => [$totalCashBalance, $totalBankBalance],
+        ];
+
+        // 4. بيانات الرسم البياني للإيرادات والمصروفات الشهرية (آخر 6 أشهر)
+        $monthlyFlow = $this->getMonthlyFinancialFlow();
+
+        // 5. جلب آخر 5 حركات (كمثال)
+        $latestCash = CashTransaction::latest()->take(5)->get();
+        $latestBank = BankTransaction::latest()->take(5)->get();
+
+        // 6. إرسال كل البيانات إلى الواجهة
+        return view('dashboard.home', [
+            'totalCapital' => $totalCapital,
+            'totalCashBalance' => $totalCashBalance,
+            'totalBankBalance' => $totalBankBalance,
+            'projectsCount' => $projectsCount,
+            'activeProjectsCount' => $activeProjectsCount,
+            'liquidityData' => json_encode($liquidityData),
+            'monthlyFlowData' => json_encode($monthlyFlow),
+            'latestCash' => $latestCash,
+            'latestBank' => $latestBank,
+        ]);
+    }
+
+    /**
+     * دالة مساعدة لجلب بيانات الإيرادات والمصروفات الشهرية.
+     */
+    private function getMonthlyFinancialFlow()
+    {
+        $labels = [];
+        $incomeData = [];
         $expenseData = [];
-        $months = [];
 
         for ($i = 5; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
-            $monthName = $date->format('F'); // اسم الشهر (e.g., November)
-            $months[] = $monthName;
+            $monthName = $date->format('M'); // 'Jan', 'Feb', etc.
+            $labels[] = $monthName;
 
-            // الإيرادات للشهر الحالي
-            $revenueData[] = SaleInvoice::whereYear('issue_date', $date->year)
-                                        ->whereMonth('issue_date', $date->month)
-                                        ->sum('total_amount');
+            // حساب الإيرادات (الإيداعات النقدية والبنكية)
+            $income = CashTransaction::where('type', 'in')
+                ->whereYear('transaction_date', $date->year)
+                ->whereMonth('transaction_date', $date->month)
+                ->sum('amount_ils')
+                +
+                BankTransaction::where('type', 'deposit')
+                ->whereYear('transaction_date', $date->year)
+                ->whereMonth('transaction_date', $date->month)
+                ->sum('amount'); // نفترض أن المبالغ موحدة بالشيكل
 
-            // المصروفات للشهر الحالي
-            $expenseData[] = Expense::whereYear('date', $date->year)
-                                    ->whereMonth('date', $date->month)
-                                    ->sum('amount');
+            // حساب المصروفات
+            $expenses = Expense::whereYear('date', $date->year)
+                ->whereMonth('date', $date->month)
+                ->sum('amount_ils');
+
+            $incomeData[] = round($income, 2);
+            $expenseData[] = round($expenses, 2);
         }
 
-        // 3. الفواتير المتأخرة
-        $overdueSalesInvoices = SaleInvoice::where('status', '!=', 'paid')
-                                           ->where('due_date', '<', now())
-                                           ->latest()
-                                           ->take(5)
-                                           ->get();
-
-        $overduePurchaseInvoices = PurchaseInvoice::where('status', '!=', 'paid')
-                                                  ->where('due_date', '<', now())
-                                                  ->latest()
-                                                  ->take(5)
-                                                  ->get();
-
-
-// سنقوم بجلب اسم العميل بدلاً من الـ ID
-$latestRevenues = SaleInvoice::join('customers', 'sale_invoices.customer_id', '=', 'customers.id')
-                            ->select(
-                                'sale_invoices.issue_date as date',
-                                'customers.name as description',
-                                'sale_invoices.total_amount as amount'
-                            )
-                            ->selectRaw("'revenue' as type")
-                            ->latest('date');
-
-$latestExpenses = Expense::select(
-                                'date',
-                                'payee as description', // استخدام حقل المدفوع له
-                                'amount'
-                            )
-                           ->selectRaw("'expense' as type")
-                           ->latest('date');
-
-// دمج الحركتين وترتيبهم وأخذ آخر 10 حركات
-$latestTransactions = $latestRevenues->union($latestExpenses)
-                                      ->orderBy('date', 'desc')
-                                      ->take(10)
-                                      ->get();
-
-
-        return view('dashboard.home', compact(
-            'totalRevenue',
-            'totalExpenses',
-            'netProfit',
-            'months',
-            'revenueData',
-            'expenseData',
-            'overdueSalesInvoices',
-            'overduePurchaseInvoices',
-               'latestTransactions',
- ));
+        return [
+            'labels' => $labels,
+            'income' => $incomeData,
+            'expenses' => $expenseData,
+        ];
     }
 }
-
-

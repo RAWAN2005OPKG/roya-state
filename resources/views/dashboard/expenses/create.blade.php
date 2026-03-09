@@ -46,20 +46,36 @@
                 </div>
             @endif
 
-            <div class="form-group"><label for="date">تاريخ الدفع</label><input type="date" name="date" required value="{{ old('date', date('Y-m-d')) }}"></div>
-            <div class="form-group"><label for="payee">اسم المستفيد</label><input type="text" name="payee" required value="{{ old('payee') }}"></div>
+            {{-- كل الحقول التي طلبتها --}}
+            <div class="form-group"><label for="date">تاريخ الدفع</label><input type="date" name="date" class="form-control" required value="{{ old('date', date('Y-m-d')) }}"></div>
+            <div class="form-group"><label for="receipt_name">اسم الوصل</label><input type="text" name="receipt_name" class="form-control" value="{{ old('receipt_name') }}"></div>
+            <div class="form-group"><label for="receipt_value_shekel">قيمة الوصل (شيكل)</label><input type="number" name="receipt_value_shekel" class="form-control" step="0.01" value="{{ old('receipt_value_shekel') }}"></div>
+            <div class="form-group"><label for="cost_value_dollar">قيمة التكلفة (دولار)</label><input type="number" name="cost_value_dollar" class="form-control" step="0.01" value="{{ old('cost_value_dollar') }}"></div>
+            <div class="form-group"><label for="payee">اسم المستفيد</label><input type="text" name="payee" class="form-control" required value="{{ old('payee') }}"></div>
+            <div class="form-group"><label for="phone">رقم الجوال</label><input type="tel" name="phone" class="form-control" value="{{ old('phone') }}"></div>
+            <div class="form-group"><label for="job">العمل/المهنة</label><input type="text" name="job" class="form-control" value="{{ old('job') }}"></div>
+            <div class="form-group"><label for="id_number">رقم الهوية</label><input type="text" name="id_number" class="form-control" value="{{ old('id_number') }}"></div>
+            <div class="form-group"><label for="walid_share_amount">وليد الخالص</label><input type="number" name="walid_share_amount" class="form-control" step="0.01" value="{{ old('walid_share_amount') }}"></div>
+            <div class="form-group"><label for="mohammad_khalid_share_amount">محمد وخالد</label><input type="number" name="mohammad_khalid_share_amount" class="form-control" step="0.01" value="{{ old('mohammad_khalid_share_amount') }}"></div>
             <div class="form-group">
                 <label for="project_id">المشروع</label>
-                <select name="project_id">
-                    <option value="">-- اختر المشروع (اختياري) --</option>
-                    <option value="0" @selected(old('project_id') == '0')>مصروف عام (لا يتبع لمشروع)</option>
+                <select name="project_id" class="form-control" required>
+                    <option value="0" @selected(old('project_id') == '0')>مصروف عام</option>
                     @foreach ($projects as $project)<option value="{{ $project->id }}" @selected(old('project_id') == $project->id)>{{ $project->project_name }}</option>@endforeach
                 </select>
             </div>
-            <div class="form-group"><label for="amount">المبلغ</label><input type="number" id="amount" name="amount" min="0" step="0.01" required value="{{ old('amount') }}"></div>
+            <div class="form-group"><label for="amount">المبلغ (الأساسي)</label><input type="number" id="amount" name="amount" class="form-control" step="0.01" required value="{{ old('amount') }}"></div>
+            <div class="form-group"><label for="walid_paid_dollar">المدفوع من وليد (دولار)</label><input type="number" name="walid_paid_dollar" class="form-control" step="0.01" value="{{ old('walid_paid_dollar') }}"></div>
+            <div class="form-group"><label for="mohammad_khalid_paid_dollar">المدفوع من محمد وخالد (دولار)</label><input type="number" name="mohammad_khalid_paid_dollar" class="form-control" step="0.01" value="{{ old('mohammad_khalid_paid_dollar') }}"></div>
+            <div class="form-group"><label for="walid_paid_shekel">المدفوع من وليد (شيكل)</label><input type="number" name="walid_paid_shekel" class="form-control" step="0.01" value="{{ old('walid_paid_shekel') }}"></div>
+            <div class="form-group"><label for="mohammad_khalid_paid_shekel">المدفوع من محمد وخالد (شيكل)</label><input type="number" name="mohammad_khalid_paid_shekel" class="form-control" step="0.01" value="{{ old('mohammad_khalid_paid_shekel') }}"></div>
+            <div class="form-group"><label for="remaining_amount">المتبقي (شيكل)</label><input type="number" name="remaining_amount" class="form-control" step="0.01" value="{{ old('remaining_amount') }}"></div>
+            <div class="form-group"><label for="remaining_amount_dollar">المتبقي (دولار)</label><input type="number" name="remaining_amount_dollar" class="form-control" step="0.01" value="{{ old('remaining_amount_dollar') }}"></div>
+            <div class="form-group"><label for="difference_in_payments">الفرق بين الدفعات</label><input type="number" name="difference_in_payments" class="form-control" step="0.01" value="{{ old('difference_in_payments') }}"></div>
+            <div class="form-group"><label for="total_paid_amount">مجموع المدفوع</label><input type="number" name="total_paid_amount" class="form-control" step="0.01" value="{{ old('total_paid_amount') }}"></div>
             <div class="form-group">
-                <label for="currency">العملة</label>
-                <select id="currency" name="currency" required>
+                <label for="currency">عملة المبلغ الأساسي</label>
+                <select id="currency" name="currency" class="form-control" required>
                     <option value="ILS" @selected(old('currency', 'ILS') == 'ILS')>شيكل (ILS)</option>
                     <option value="USD" @selected(old('currency') == 'USD')>دولار (USD)</option>
                     <option value="JOD" @selected(old('currency') == 'JOD')>دينار (JOD)</option>
@@ -67,12 +83,16 @@
             </div>
             <div id="exchangeRateSection" class="form-group" style="display: none;">
                 <label for="exchange_rate">سعر الصرف مقابل الشيكل</label>
-                <input type="number" id="exchange_rate" name="exchange_rate" step="0.01" value="{{ old('exchange_rate', 1) }}">
+                <input type="number" id="exchange_rate" name="exchange_rate" class="form-control" step="0.01" value="{{ old('exchange_rate', 1) }}">
                 <small>القيمة بالشيكل: <b id="ils_value">0.00</b></small>
             </div>
             <div class="form-group">
+                <label for="payment_method">طريقة الدفع</label>
+                <select name="payment_method" class="form-control" required><option value="نقداً">نقداً</option><option value="تحويل بنكي">تحويل بنكي</option><option value="شيك">شيك</option></select>
+            </div>
+            <div class="form-group">
                 <label for="payment_source">مصدر الدفع</label>
-                <select id="payment_source" name="payment_source" required>
+                <select id="payment_source" name="payment_source" class="form-control" required>
                     <option value="">-- اختر المصدر --</option>
                     <option value="خزينة" @selected(old('payment_source') == 'خزينة')>من الخزينة العامة</option>
                     <option value="بنك" @selected(old('payment_source') == 'بنك')>من حساب بنكي</option>
@@ -80,12 +100,13 @@
             </div>
             <div id="bankAccountSection" class="form-group" style="display: none;">
                 <label for="sender_bank_account_id">من أي حساب بنكي؟</label>
-                <select id="sender_bank_account_id" name="sender_bank_account_id">
+                <select id="sender_bank_account_id" name="sender_bank_account_id" class="form-control">
                     <option value="">-- اختر الحساب --</option>
                     @foreach ($bankAccounts as $account)<option value="{{ $account->id }}" @selected(old('sender_bank_account_id') == $account->id)>{{ $account->account_name }} ({{ $account->currency }})</option>@endforeach
                 </select>
             </div>
-            <div class="form-group" style="grid-column: 1 / -1;"><label for="details">تفاصيل المصروف</label><textarea name="details" rows="3">{{ old('details') }}</textarea></div>
+            <div class="form-group" style="grid-column: 1 / -1;"><label for="details">تفاصيل</label><textarea name="details" class="form-control" rows="3">{{ old('details') }}</textarea></div>
+            <div class="form-group" style="grid-column: 1 / -1;"><label for="notes">ملاحظات</label><textarea name="notes" class="form-control" rows="3">{{ old('notes') }}</textarea></div>
             <button type="submit" class="btn-submit"><i class="fas fa-plus-circle"></i> حفظ المصروف</button>
         </form>
     </div>
@@ -110,13 +131,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function toggleExchangeRate() {
-        if (currencySelect.value === 'ILS') {
+        if (currencySelect.value === 'ILS' || currencySelect.value === 'شيكل') {
             exchangeRateSection.style.display = 'none';
             exchangeRateInput.value = 1;
         } else {
             exchangeRateSection.style.display = 'block';
-            if(currencySelect.value === 'USD') exchangeRateInput.value = {{ old('exchange_rate', 3.7) }};
-            if(currencySelect.value === 'JOD') exchangeRateInput.value = {{ old('exchange_rate', 5.2) }};
+            if(currencySelect.value === 'USD' || currencySelect.value === 'دولار') exchangeRateInput.value = {{ old('exchange_rate', 3.7) }};
+            if(currencySelect.value === 'JOD' || currencySelect.value === 'دينار') exchangeRateInput.value = {{ old('exchange_rate', 5.2) }};
         }
         calculateILS();
     }

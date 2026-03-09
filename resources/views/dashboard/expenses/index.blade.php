@@ -97,7 +97,6 @@
             </table>
         </div>
 
-        <!-- روابط التنقل بين الصفحات -->
         <div class="d-flex justify-content-center mt-4 no-print">
             {{ $expenses->appends(['search' => $search])->links() }}
         </div>

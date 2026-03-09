@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\Dashboard\ProjectController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Auth\LoginController;
 
@@ -22,7 +21,7 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
 
     // الصفحة الرئيسية للوحة التحكم
-    Route::get('/', [App\Http\Controllers\Dashboard\DashboardController::class, 'index'])->name('home'); // كان اسمه 'index' أو بدون اسم
+    Route::get('/home', [App\Http\Controllers\Dashboard\HomeController::class, 'index'])->name('home');
 
  Route::get('settings', [App\Http\Controllers\Dashboard\SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [App\Http\Controllers\Dashboard\SettingController::class, 'store'])->name('settings.store');

@@ -2,116 +2,157 @@
 @section('title', 'لوحة التحكم الرئيسية')
 
 @push('styles')
-
 <style>
-    .kpi-card {
-        background-color: #ffffff;
-        border-radius: 0.75rem; /* 12px */
-        padding: 25px;
+    /* تصميم بطاقة المبلغ الرئيسي */
+    .main-capital-card {
+        background: linear-gradient(45deg, #4e73df 0%, #36b9cc 100%);
+        color: white;
         text-align: center;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); /* ظل احترافي */
-        transition: all 0.3s ease;
-        height: 100%; /* لجعل كل الكروت بنفس الارتفاع */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        padding: 2.5rem;
+        border-radius: 1rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important;
     }
-
-    .kpi-card:hover {
-        transform: translateY(-5px); /* حركة بسيطة عند المرور بالماوس */
-        box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.1);
+    .main-capital-card h1 {
+        font-size: 1.75rem;
+        font-weight: 300;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
     }
-
-    .kpi-card .kpi-title {
-        font-size: 1rem;
-        color: #858796; /* لون رمادي متناسق */
-        margin-bottom: 10px;
-        font-weight: 600;
-    }
-
-    .kpi-card .kpi-value {
-        font-size: 2.2rem;
+    .main-capital-card .display-4 {
+        font-size: 4rem;
         font-weight: 700;
-        color: #3a3b45; /* لون أسود غير حاد */
     }
 
-    /* ألوان خاصة للأرقام الموجبة والسالبة */
-    .kpi-value.positive {
-        color: #1cc88a; /* أخضر */
+    /* تصميم بطاقات الملخصات الفرعية */
+    .sub-stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        background-color: #fff;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+        transition: transform 0.3s ease;
     }
-    .kpi-value.negative {
-        color: #e74a3b; /* أحمر */
+    .sub-stat-card:hover {
+        transform: translateY(-5px);
     }
+    .sub-stat-card .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .sub-stat-card .title { font-weight: 700; color: #5a5c69; }
+    .sub-stat-card .value { font-size: 1.75rem; font-weight: 700; }
+    .text-success { color: #1cc88a !important; }
+    .text-info { color: #36b9cc !important; }
+    .text-warning { color: #f6c23e !important; }
 
-    /* تصميم أزرار الإجراءات السريعة */
-    .quick-actions .btn {
+    /* تصميم قسم أزرار الوصول السريع */
+    .quick-actions-card {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+    }
+    .quick-actions-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #5a5c69;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    .quick-action-btn {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 110px; /* زيادة الارتفاع قليلاً */
-        font-size: 1rem;
-        font-weight: 600;
-        gap: 8px; /* مسافة بين الأيقونة والنص */
+        padding: 1rem;
         border-radius: 0.75rem;
+        text-decoration: none !important;
+        color: #fff;
+        transition: all 0.3s ease;
+        height: 120px;
     }
-
-    .quick-actions .btn i {
-        font-size: 1.8rem; /* تكبير الأيقونة */
+    .quick-action-btn:hover {
+        transform: scale(1.05);
+        color: #fff;
     }
+    .quick-action-btn i { font-size: 2rem; margin-bottom: 0.5rem; }
+    .quick-action-btn span { font-weight: 600; }
+    .bg-primary-light { background-color: #4e73df; }
+    .bg-success-light { background-color: #1cc88a; }
+    .bg-info-light { background-color: #36b9cc; }
+    .bg-warning-light { background-color: #f6c23e; }
 </style>
 @endpush
 
 @section('content')
 <div class="container-fluid">
-    {{-- صف الإحصائيات الرئيسي --}}
+
+    <!-- ================================================== -->
+    <!-- == القسم الأول: المبلغ الرئيسي (كما طلبت تماماً) == -->
+    <!-- ================================================== -->
     <div class="row">
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="kpi-card">
-                <div class="kpi-title">إجمالي الإيرادات</div>
-                <div class="kpi-value positive">{{ number_format($totalRevenue, 2) }} ج.م</div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="kpi-card">
-                <div class="kpi-title">إجمالي المصروفات</div>
-                <div class="kpi-value negative">{{ number_format($totalExpenses, 2) }} ج.م</div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-12 mb-4">
-            <div class="kpi-card">
-                <div class="kpi-title">صافي الربح / الخسارة</div>
-                <div class="kpi-value {{ $netProfit >= 0 ? 'positive' : 'negative' }}">{{ number_format($netProfit, 2) }} ج.م</div>
+        <div class="col-12">
+            <div class="main-capital-card">
+                <h1>إجمالي السيولة الحالية (المبلغ العام)</h1>
+                <div class="display-4">{{ number_format($totalCapital, 2) }} ILS</div>
             </div>
         </div>
     </div>
 
-    {{-- صف الرسم البياني والإجراءات السريعة --}}
+    <!-- ملخصات فرعية تحت المبلغ الرئيسي -->
     <div class="row">
-        {{-- الرسم البياني --}}
-        <div class="col-lg-8 mb-4">
-            <div class="card card-custom h-100">
-                <div class="card-header">
-                    <h3 class="card-title">الإيرادات مقابل المصروفات (آخر 6 أشهر)</h3>
-                </div>
-                <div class="card-body">
-                    <canvas id="revenueExpenseChart"></canvas>
-                </div>
+        <div class="col-lg-4 col-md-12 mb-4">
+            <div class="sub-stat-card">
+                <div class="icon text-success"><i class="fas fa-cash-register"></i></div>
+                <div class="title">رصيد الخزينة (الكاش)</div>
+                <div class="value text-dark">{{ number_format($totalCashBalance, 2) }} ILS</div>
             </div>
         </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="sub-stat-card">
+                <div class="icon text-info"><i class="fas fa-university"></i></div>
+                <div class="title">إجمالي أرصدة البنوك</div>
+                <div class="value text-dark">{{ number_format($totalBankBalance, 2) }} ILS</div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="sub-stat-card">
+                <div class="icon text-warning"><i class="fas fa-project-diagram"></i></div>
+                <div class="title">المشاريع النشطة</div>
+                <div class="value text-dark">{{ $activeProjectsCount }} / {{ $projectsCount }}</div>
+            </div>
+        </div>
+    </div>
 
-        {{-- الإجراءات السريعة --}}
-        <div class="col-lg-4 mb-4">
-            <div class="card card-custom h-100">
-                <div class="card-header">
-                    <h3 class="card-title">إجراءات سريعة</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row quick-actions">
-                        <div class="col-6 mb-3"><a href="{{ route('dashboard.sales.create') }}" class="btn btn-light-primary w-100"><i class="fas fa-file-invoice-dollar"></i> إنشاء فاتورة</a></div>
-                        <div class="col-6 mb-3"><a href="{{ route('dashboard.expenses.create') }}" class="btn btn-light-danger w-100"><i class="fas fa-plus-circle"></i> إضافة مصروف</a></div>
-                        <div class="col-6"><a href="{{ route('dashboard.products.create') }}" class="btn btn-light-success w-100"><i class="fas fa-box"></i> منتج جديد</a></div>
-                        <div class="col-6"><a href="{{ route('dashboard.customers.create') }}" class="btn btn-light-info w-100"><i class="fas fa-user-plus"></i> عميل جديد</a></div>
+    <!-- ================================================== -->
+    <!-- == القسم الجديد: أزرار الوصول السريع             == -->
+    <!-- ================================================== -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="quick-actions-card">
+                <h5 class="quick-actions-title">العمليات السريعة</h5>
+                <div class="row">
+                    <div class="col-lg-3 col-6 mb-3">
+                        <a href="{{ route('dashboard.expenses.create') }}" class="quick-action-btn bg-danger text-white">
+                            <i class="fas fa-minus-circle"></i>
+                            <span>إضافة مصروف</span>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-6 mb-3">
+                        <a href="{{ route('dashboard.payments.create') }}" class="quick-action-btn bg-success-light text-white">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>إضافة قيد يومي</span>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-6 mb-3">
+                        <a href="{{ route('dashboard.clients.create') }}" class="quick-action-btn bg-primary-light text-white">
+                            <i class="fas fa-user-plus"></i>
+                            <span>إضافة عميل</span>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-6 mb-3">
+                        <a href="{{ route('dashboard.projects.create') }}" class="quick-action-btn bg-warning-light text-white">
+                            <i class="fas fa-building"></i>
+                            <span>إضافة مشروع</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -119,88 +160,134 @@
     </div>
 
 
-    {{-- صف الفواتير المتأخرة --}}
+    <!-- ================================================== -->
+    <!-- == القسم الثاني: الرسوم البيانية                  == -->
+    <!-- ================================================== -->
     <div class="row">
-        {{-- فواتير مبيعات متأخرة --}}
-        <div class="col-lg-6 mb-4">
-            <div class="card card-custom h-100">
-                <div class="card-header">
-                    <h3 class="card-title">فواتير مبيعات متأخرة</h3>
-                </div>
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">نظرة عامة على التدفقات المالية (آخر 6 أشهر)</h6></div>
                 <div class="card-body">
-                    @forelse($overdueSalesInvoices as $invoice)
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div>
-                                <a href="#">{{ $invoice->customer->name ?? 'عميل محذوف' }}</a>
-                                <span class="d-block text-muted">فاتورة رقم: {{ $invoice->number }}</span>
-                            </div>
-                            <div class="text-danger font-weight-bold">{{ number_format($invoice->total_amount, 2) }} ج.م</div>
+                    <div class="chart-area" style="height: 320px;"><canvas id="monthlyFlowChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">توزيع السيولة الحالية</h6></div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4" style="height: 320px;"><canvas id="liquidityPieChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- == القسم الثالث: آخر الحركات                      == -->
+    <!-- ================================================== -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-success">آخر حركات الخزينة</h6></div>
+                <div class="card-body">
+                    @forelse($latestCash as $tx)
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                            <span>{{ $tx->source }}</span>
+                            <span class="font-weight-bold {{ $tx->type == 'in' ? 'text-success' : 'text-danger' }}">
+                                {{ $tx->type == 'in' ? '+' : '-' }} {{ number_format($tx->amount_ils, 2) }} ILS
+                            </span>
                         </div>
                     @empty
-                        <p class="text-center text-muted mt-5">لا توجد فواتير مبيعات متأخرة. عمل رائع!</p>
+                        <p class="text-center text-muted">لا توجد حركات نقدية بعد.</p>
                     @endforelse
                 </div>
             </div>
         </div>
-
-        {{-- فواتير مشتريات مستحقة --}}
         <div class="col-lg-6 mb-4">
-            <div class="card card-custom h-100">
-                <div class="card-header">
-                    <h3 class="card-title">فواتير مشتريات مستحقة</h3>
-                </div>
+            <div class="card shadow">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-info">آخر حركات البنوك</h6></div>
                 <div class="card-body">
-                    @forelse($overduePurchaseInvoices as $invoice)
-                         <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div>
-                                <a href="#">{{ $invoice->supplier->name ?? 'مورد محذوف' }}</a>
-                                <span class="d-block text-muted">فاتورة رقم: {{ $invoice->invoice_number }}</span>
-                            </div>
-                            <div class="text-warning font-weight-bold">{{ number_format($invoice->total_amount, 2) }} ج.م</div>
+                     @forelse($latestBank as $tx)
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                            <span>{{ $tx->details }}</span>
+                            <span class="font-weight-bold {{ $tx->type == 'deposit' ? 'text-success' : 'text-danger' }}">
+                                {{ $tx->type == 'deposit' ? '+' : '-' }} {{ number_format($tx->amount, 2) }} {{ $tx->currency }}
+                            </span>
                         </div>
                     @empty
-                        <p class="text-center text-muted mt-5">لا توجد فواتير مشتريات مستحقة.</p>
+                        <p class="text-center text-muted">لا توجد حركات بنكية بعد.</p>
                     @endforelse
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 @endsection
 
 @push('scripts')
-{{-- مكتبة Chart.js لرسم المخططات البيانية --}}
+{{-- مكتبة الرسوم البيانية --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function( ) {
-        const ctx = document.getElementById('revenueExpenseChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: @json($months),
-                datasets: [{
-                    label: 'الإيرادات',
-                    data: @json($revenueData),
-                    backgroundColor: 'rgba(27, 197, 189, 0.5)',
-                    borderColor: 'rgba(27, 197, 189, 1)',
-                    borderWidth: 1
-                }, {
-                    label: 'المصروفات',
-                    data: @json($expenseData),
-                    backgroundColor: 'rgba(246, 78, 96, 0.5)',
-                    borderColor: 'rgba(246, 78, 96, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
+document.addEventListener("DOMContentLoaded", function( ) {
+    // بيانات من المتحكم
+    const liquidityData = JSON.parse('{!! $liquidityData !!}');
+    const monthlyFlowData = JSON.parse('{!! $monthlyFlowData !!}');
+
+    // 1. إعداد الرسم البياني الدائري
+    new Chart(document.getElementById('liquidityPieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: liquidityData.labels,
+            datasets: [{
+                data: liquidityData.data,
+                backgroundColor: ['#1cc88a', '#36b9cc'],
+                hoverBackgroundColor: ['#17a673', '#2c9faf'],
+                hoverBorderColor: "rgba(234, 236, 244, 1)",
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10, },
+            legend: { display: true, position: 'bottom' },
+            cutoutPercentage: 80,
+        },
     });
+
+    // 2. إعداد الرسم البياني الخطي
+    new Chart(document.getElementById('monthlyFlowChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyFlowData.labels,
+            datasets: [{
+                label: "الإيرادات",
+                lineTension: 0.3,
+                backgroundColor: "rgba(28, 200, 138, 0.05)",
+                borderColor: "#1cc88a",
+                pointRadius: 3,
+                pointBackgroundColor: "#1cc88a",
+                pointBorderColor: "#1cc88a",
+                data: monthlyFlowData.income,
+            }, {
+                label: "المصروفات",
+                lineTension: 0.3,
+                backgroundColor: "rgba(231, 74, 59, 0.05)",
+                borderColor: "#e74a3b",
+                pointRadius: 3,
+                pointBackgroundColor: "#e74a3b",
+                pointBorderColor: "#e74a3b",
+                data: monthlyFlowData.expenses,
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: { xAxes: [{ gridLines: { display: false, drawBorder: false } }], yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 } }], },
+            legend: { display: true },
+            tooltips: { mode: 'index', intersect: false },
+            hover: { mode: 'nearest', intersect: true }
+        }
+    });
+});
 </script>
 @endpush
-
