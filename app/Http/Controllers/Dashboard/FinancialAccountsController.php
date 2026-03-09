@@ -36,10 +36,11 @@ class FinancialAccountsController extends Controller
         }
         $checks = $checksQuery->paginate(10, ['*'], 'checks_page');
 
-        // حساب الإجماليات
-        $totalCashBalance = $cashSafes->sum('balance');
-        $totalBankBalance = $bankAccounts->sum('balance');
-        $totalOverallBalance = $totalCashBalance + $totalBankBalance;
+        // حساب الإجماليات باستخدام FinancialService لضمان الدقة
+        $financialService = new \App\Services\FinancialService();
+        $totalCashBalance = $financialService->getCashBalance();
+        $totalBankBalance = $financialService->getBankBalance();
+        $totalOverallBalance = $financialService->getTotalCapital();
 
         return view('dashboard.financial_accounts.index', compact(
             'cashSafes',

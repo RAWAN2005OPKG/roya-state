@@ -53,6 +53,10 @@ class GeneralLedgerController extends Controller
             ->orderBy('date', 'desc')
             ->paginate(20);
 
-        return view('dashboard.treasury', compact('all_transactions'));
+        // Get total liquidity using FinancialService
+        $financialService = new \App\Services\FinancialService();
+        $totalLiquidity = $financialService->getTotalCapital();
+
+        return view('dashboard.treasury', compact('all_transactions', 'totalLiquidity'));
     }
 }

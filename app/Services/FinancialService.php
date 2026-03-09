@@ -40,7 +40,7 @@ class FinancialService
      */
     public function getCashBalance(): float
     {
-        $openingBalance = (float) Setting::where('key', 'cash_opening_balance')->value('value');
+        $openingBalance = (float) Setting::where('key', 'opening_balance')->value('value');
         $totalIn = CashTransaction::where('type', 'in')->sum('amount_ils');
         $totalOut = CashTransaction::where('type', 'out')->sum('amount_ils');
 

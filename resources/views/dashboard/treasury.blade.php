@@ -290,8 +290,7 @@
         <div class="kpi-card main">
             <div class="label">إجمالي السيولة المتاحة (كاش + بنك)</div>
             <div class="value" id="totalLiquidity">
-                {{-- سيتم تحديث هذا الرقم عبر JavaScript أو من الكونترولر --}}
-                {{ number_format(150000, 0) }} شيكل
+                {{ number_format($totalLiquidity ?? 0, 2) }} شيكل
             </div>
         </div>
     </div>
