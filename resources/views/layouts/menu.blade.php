@@ -97,12 +97,32 @@
                     </div>
                 </li>
 
+                {{-- التقارير والإحصائيات الشاملة --}}
+                <li class="menu-section"><h4 class="menu-text">التقارير والمقادير</h4><i class="menu-icon ki ki-bold-more-hor icon-md"></i></li>
+                
+                {{-- صفحة إجمالي كافة الحسابات --}}
+                <li class="menu-item {{ request()->routeIs('dashboard.financial-accounts.index') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+                    <a href="{{ route('dashboard.financial-accounts.index') }}" class="menu-link">
+                        <span class="svg-icon menu-icon"><i class="fas fa-coins"></i></span>
+                        <span class="menu-text">إجمالي كافة الحسابات</span>
+                    </a>
+                </li>
+
+                {{-- صفحة التحليل المالي والميزانية --}}
+                <li class="menu-item {{ request()->routeIs('dashboard.financial.summary') ? 'menu-item-active' : '' }}" aria-haspopup="true">
+                    <a href="{{ route('dashboard.financial.summary') }}" class="menu-link">
+                        <span class="svg-icon menu-icon"><i class="fas fa-chart-pie"></i></span>
+                        <span class="menu-text">التحليل المالي</span>
+                    </a>
+                </li>
+
+                {{-- الربح السنوي --}}
+                <li class="menu-item"><a href="{{ route('dashboard.annual-profit.index') }}" class="menu-link"><span class="svg-icon menu-icon"><i class="fas fa-chart-line"></i></span><span class="menu-text">الربح السنوي</span></a></li>
+
                 {{-- باقي القوائم --}}
+                <li class="menu-section"><h4 class="menu-text">الإعدادات والمستخدمين</h4><i class="menu-icon ki ki-bold-more-hor icon-md"></i></li>
                 <li class="menu-item"><a href="{{ route('dashboard.contracts.index') }}" class="menu-link"><span class="svg-icon menu-icon"><i class="fas fa-file-signature"></i></span><span class="menu-text">العقود</span></a></li>
                 <li class="menu-item"><a href="{{ url('dashboard/employees') }}" class="menu-link"><span class="svg-icon menu-icon"><i class="fas fa-users-cog"></i></span><span class="menu-text">المستخدمون</span></a></li>
-
-                <li class="menu-section"><h4 class="menu-text">الإعدادات والتقارير</h4><i class="menu-icon ki ki-bold-more-hor icon-md"></i></li>
-                <li class="menu-item"><a href="{{ route('dashboard.annual-profit.index') }}" class="menu-link"><span class="svg-icon menu-icon"><i class="fas fa-chart-line"></i></span><span class="menu-text">الربح السنوي</span></a></li>
                 <li class="menu-item"><a href="{{ route('dashboard.alerts.index') }}" class="menu-link"><span class="svg-icon menu-icon"><i class="fas fa-bell"></i></span><span class="menu-text">التنبيهات</span></a></li>
                 <li class="menu-item"><a href="{{ route('dashboard.settings.index') }}" class="menu-link"><i class="menu-icon fas fa-cogs"></i><span class="menu-text">الإعدادات</span></a></li>
 

@@ -21,7 +21,10 @@ class FinancialController extends Controller
         $netCashFlow = 0;
 
         // 2. بيانات الرسم البياني (آخر 6 أشهر)
-        $chartData = [];
+        $chartData = [
+            'revenue' => [],
+            'expense' => []
+        ];
         $chartLabels = [];
         for ($i = 5; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
@@ -29,18 +32,15 @@ class FinancialController extends Controller
 
             $chartData['revenue'][] = SaleInvoice::whereYear('issue_date', $date->year)
                                                 ->whereMonth('issue_date', $date->month)
-                                                ->sum('total_amount');
+                                                ->sum('total_amount') ?? 0;
 
             $chartData['expense'][] = Expense::whereYear('date', $date->year)
-                                              ->whereMonth('date', '>=', $date->month)
-                                              ->sum('amount');
+                                              ->whereMonth('date', $date->month)
+                                              ->sum('amount') ?? 0;
         }
 
         // 3. أحدث المعاملات (من قيود اليومية)
-        $latestTransactions = JournalEntry::with('items.account')
-                                          ->latest()
-                                          ->take(5)
-                                          ->get();
+        $latestTransactions = JournalEntry::with('items')->latest()->take(5)->get();
 
         // إرسال كل البيانات إلى الواجهة
         return view('dashboard.financial.summary', compact(

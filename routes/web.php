@@ -330,15 +330,3 @@ Route::resource('stocktakes', App\Http\Controllers\Dashboard\StocktakeController
 
 });
 
-
-Route::get('/create-test-user', function () {
-    if (!App\Models\User::where('email', 'rayapalinfo@gmail.com')->exists()) {
-        App\Models\User::create([
-            'email' => "rayapalinfo@gmail.com",
-            'name' => "khalid",
-            'password' => Illuminate\Support\Facades\Hash::make('khalid@20252'),
-        ]);
-        return "Test user created.";
-    }
-    return "Test user already exists.";
-});
