@@ -142,7 +142,7 @@ Route::prefix('dashboard/projects')->name('dashboard.projects.')->middleware(['a
     Route::resource('projects', App\Http\Controllers\Dashboard\ProjectController::class);
 
     // --- وحدات التحويلات ---
-    Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferCoCntroller::class)->only(['index', 'store']);
+    Route::resource('fund-transfers', App\Http\Controllers\Dashboard\FundTransferController::class)->only(['index', 'store']);
     Route::resource('project-transfers', App\Http\Controllers\Dashboard\ProjectTransferController::class)->middleware('auth');
 
  Route::get('/purchases', [App\Http\Controllers\Dashboard\PurchaseController::class, 'index'])->name('purchases.index');
@@ -331,7 +331,7 @@ Route::resource('stocktakes', App\Http\Controllers\Dashboard\StocktakeController
     Route::get('/general-ledger', [App\Http\Controllers\Dashboard\GeneralLedgerController::class, 'index'])->name('general-ledger.index');
     Route::get('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'index'])->name('bank.index');
     Route::post('/bank', [App\Http\Controllers\Dashboard\BankTransactionController::class, 'store'])->name('bank.store');
-    Route::post('/funds-transfers', [App\Http\Controllers\Dashboard\FundsTransferController::class, 'store'])->name('funds-transfers.store');
+    Route::post('/funds-transfers', [App\Http\Controllers\Dashboard\FundTransferController::class, 'store'])->name('funds-transfers.store');
 
 });
 

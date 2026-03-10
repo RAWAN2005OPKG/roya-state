@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
-use App\Models\CashSafe;
+use App\Models\Cash;
 use App\Models\FundTransfer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +15,7 @@ class FundTransferController extends Controller
     public function index()
     {
         $bankAccounts = BankAccount::where('is_active', true)->get();
-        $cashSafes = \App\Models\Cash::where('is_active', true)->get();
+        $cash = Cash::where('is_active', true)->get();
         $transfers = FundTransfer::latest()->take(15)->get();
         
         // إضافة أسماء الحسابات بشكل واضح للعرض في الجدول
@@ -24,7 +24,7 @@ class FundTransferController extends Controller
             $transfer->toAccountName = $this->getAccountName($transfer->to_type, $transfer->to_id);
         });
 
-        return view('dashboard.fund_transfers.index', compact( 'bankAccounts', 'cashSafes', 'transfers'));
+        return view('dashboard.fund_transfers.index', compact( 'bankAccounts', 'cash', 'transfers'));
     }
 
     public function store(Request $request)
@@ -82,7 +82,7 @@ class FundTransferController extends Controller
     private function getAccountModel($type, $id)
     {
         if ($type === 'cash') {
-            return CashSafe::findOrFail($id);
+            return Cash::findOrFail($id);
         }
         return BankAccount::findOrFail($id);
     }

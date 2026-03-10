@@ -3,139 +3,241 @@
 
 @section('styles')
 <style>
-    .account-card {
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        --danger-gradient: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+        --glass-bg: rgba(255, 255, 255, 0.9);
+    }
+
+    .stat-card {
         border: none;
-        margin-bottom: 20px;
-    }
-    .account-card-header {
-        background-color: #f8f9fa;
-        border-bottom: 2px solid #ebedf2;
-        padding: 15px 20px;
-        font-weight: bold;
-        font-size: 1.1rem;
-        border-radius: 10px 10px 0 0;
-    }
-    .total-balance-box {
-        background: linear-gradient(135deg, #1bc5bd 0%, #0da69e 100%);
-        color: white;
         border-radius: 15px;
-        padding: 30px;
-        text-align: center;
-        box-shadow: 0 10px 20px rgba(27, 197, 189, 0.3);
-        margin-bottom: 30px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
     }
-    .total-balance-box h2 {
-        font-size: 1.5rem;
-        margin-bottom: 10px;
-        font-weight: 400;
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
     }
-    .total-balance-box .amount {
+    .stat-card .card-body {
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+    .stat-icon {
+        position: absolute;
+        top: 20px;
+        left: 20px;
         font-size: 3rem;
+        opacity: 0.15;
+        color: white;
+    }
+    .bg-grad-primary { background: var(--primary-gradient); color: white; }
+    .bg-grad-secondary { background: var(--secondary-gradient); color: white; }
+    .bg-grad-warning { background: var(--warning-gradient); color: white; }
+
+    .data-card {
+        background: var(--glass-bg);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+    .data-card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
         font-weight: 700;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .table thead th {
+        background: #f8f9fa;
+        border-top: none;
+        text-transform: uppercase;
+        font-size: 0.85rem;
         letter-spacing: 1px;
+        font-weight: 600;
+    }
+    .table td { vertical-align: middle; }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+
+    .badge-pill {
+        padding: 0.5rem 1rem;
+        font-weight: 500;
     }
 </style>
 @endsection
 
 @section('content')
 <div class="container-fluid">
-    <!-- العنوان -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">إجمالي كافة الحسابات</h1>
-        <span class="text-muted">موقف السيولة وأرصدة البنوك والشيكات</span>
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="font-weight-bold text-dark-75 mb-1">إجمالي كافة الحسابات</h1>
+            <p class="text-muted font-size-lg">نظرة شاملة على السيولة، البنوك، وحركة الشيكات</p>
+        </div>
+        <div class="text-right">
+            <span class="text-muted d-block mb-1">تاريخ اليوم</span>
+            <span class="font-weight-bolder text-dark font-size-h5">{{ now()->format('Y-m-d') }}</span>
+        </div>
     </div>
 
+    <!-- Summary Stats -->
+    <div class="row mb-5">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card stat-card bg-grad-primary">
+                <div class="card-body">
+                    <i class="fas fa-wallet stat-icon"></i>
+                    <h5 class="text-uppercase opacity-70">إجمالي السيولة النقدية</h5>
+                    <h2 class="display-4 font-weight-bold mb-0">{{ number_format($totalCashBalance, 2) }} <small class="font-size-h4">ILS</small></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card stat-card bg-grad-secondary">
+                <div class="card-body">
+                    <i class="fas fa-university stat-icon"></i>
+                    <h5 class="text-uppercase opacity-70">إجمالي أرصدة البنوك</h5>
+                    <h2 class="display-4 font-weight-bold mb-0">{{ number_format($totalBankBalance, 2) }} <small class="font-size-h4">ILS</small></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-12 mb-4">
+            <div class="card stat-card bg-grad-warning">
+                <div class="card-body">
+                    <i class="fas fa-money-check-alt stat-icon"></i>
+                    <h5 class="text-uppercase opacity-70">إجمالي قيمة الشيكات</h5>
+                    <h2 class="display-4 font-weight-bold mb-0">{{ number_format($totalOverallBalance, 2) }} <small class="font-size-h4">ILS</small></h2>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
-        <!-- الخزينة النقدية -->
-        <div class="col-xl-6">
-            <div class="card account-card h-100">
-                <div class="account-card-header d-flex justify-content-between align-items-center">
-                    <div><i class="fas fa-wallet text-primary mr-2"></i> المحفظة النقدية (الكاش)</div>
-                    <span class="badge badge-primary badge-pill" style="font-size: 1rem;">{{ number_format($totalCashBalance, 2) }} شيكل</span>
+        <!-- Tables Section -->
+        <div class="col-xl-8">
+            <!-- Cash Safes Table -->
+            <div class="card data-card">
+                <div class="data-card-header">
+                    <span><i class="fas fa-cash-register text-primary mr-2"></i> المحافظ والخزائن</span>
+                    <a href="{{ route('dashboard.cash-safes.index') }}" class="btn btn-sm btn-light-primary font-weight-bold">إدارة <i class="fas fa-chevron-left ml-1"></i></a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover mb-0">
-                            <thead class="thead-light">
+                        <table class="table table-hover mb-0">
+                            <thead>
                                 <tr>
-                                    <th>اسم الخزينة</th>
+                                    <th class="pl-4">اسم الخزينة</th>
                                     <th>الوصف</th>
-                                    <th class="text-right">تاريخ الانشاء</th>
+                                    <th class="text-right pr-4">تاريخ الإنشاء</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($cashSafes as $safe)
                                 <tr>
-                                    <td class="font-weight-bold">{{ $safe->name }}</td>
+                                    <td class="pl-4 font-weight-bold text-dark-75">{{ $safe->name }}</td>
                                     <td>{{ $safe->description }}</td>
-                                    <td class="text-right">{{ $safe->created_at->format('Y-m-d') }}</td>
+                                    <td class="text-right pr-4">{{ $safe->created_at->format('Y-m-d') }}</td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="3" class="text-center py-4 text-muted">لا يوجد خزائن مسجلة</td></tr>
+                                <tr><td colspan="3" class="text-center py-10 text-muted">لا توجد سجلات حالياً</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="card-footer text-center py-3 bg-light">
-                    <a href="{{ route('dashboard.cash-safes.index') }}" class="btn btn-sm btn-outline-primary">إدارة الخزائن <i class="fas fa-arrow-left fa-sm ml-1"></i></a>
-                </div>
             </div>
-        </div>
 
-        <!-- الحسابات البنكية -->
-        <div class="col-xl-6">
-            <div class="card account-card h-100">
-                <div class="account-card-header d-flex justify-content-between align-items-center">
-                    <div><i class="fas fa-university text-success mr-2"></i> الحسابات البنكية</div>
-                    <span class="badge badge-success badge-pill" style="font-size: 1rem;">{{ number_format($totalBankBalance, 2) }} شيكل</span>
+            <!-- Bank Accounts Table -->
+            <div class="card data-card">
+                <div class="data-card-header">
+                    <span><i class="fas fa-building text-success mr-2"></i> الحسابات البنكية</span>
+                    <a href="{{ route('dashboard.bank-accounts.index') }}" class="btn btn-sm btn-light-success font-weight-bold">إدارة <i class="fas fa-chevron-left ml-1"></i></a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover mb-0">
-                            <thead class="thead-light">
+                        <table class="table table-hover mb-0">
+                            <thead>
                                 <tr>
-                                    <th>رقم الحساب</th>
+                                    <th class="pl-4">رقم الحساب</th>
                                     <th>البنك</th>
-                                    <th class="text-right">الرصيد الفعلي</th>
+                                    <th class="text-right pr-4">الرصيد الفعلي</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($bankAccounts as $account)
                                 <tr>
-                                    <td class="font-weight-bold">{{ $account->account_number }}</td>
-                                    <td>{{ $account->bank->name ?? 'غير محدد' }}</td>
-                                    <td class="text-right font-weight-bold {{ $account->balance < 0 ? 'text-danger' : 'text-success' }}">
+                                    <td class="pl-4 font-weight-bold text-dark-75">{{ $account->account_number }}</td>
+                                    <td>{{ $account->bank->name ?? 'N/A' }}</td>
+                                    <td class="text-right pr-4 font-weight-bolder text-success">
                                         {{ number_format($account->balance, 2) }} <small>{{ $account->currency }}</small>
                                     </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="3" class="text-center py-4 text-muted">لا يوجد حسابات بنكية</td></tr>
+                                <tr><td colspan="3" class="text-center py-10 text-muted">لا توجد سجلات حالياً</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="card-footer text-center py-3 bg-light">
-                    <a href="{{ route('dashboard.bank-accounts.index') }}" class="btn btn-sm btn-outline-success">إدارة البنوك <i class="fas fa-arrow-left fa-sm ml-1"></i></a>
+            </div>
+        </div>
+
+        <!-- Charts & Analytics Section -->
+        <div class="col-xl-4">
+            <!-- Checks Distribution Chart -->
+            <div class="card data-card h-md-100">
+                <div class="data-card-header">
+                    <span><i class="fas fa-chart-pie text-warning mr-2"></i> توزيع الشيكات</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="checkStatusChart"></canvas>
+                    </div>
+                    <div class="mt-5">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="text-muted font-weight-bold">في المحفظة</span>
+                            <span class="text-dark font-weight-bolder">{{ $checkStats['in_wallet'] }}</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="text-muted font-weight-bold">برسم التحصيل</span>
+                            <span class="text-dark font-weight-bolder">{{ $checkStats['under_collection'] }}</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="text-muted font-weight-bold">مُحصّل</span>
+                            <span class="text-dark font-weight-bolder">{{ $checkStats['cleared'] }}</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="text-muted font-weight-bold">مرتجع / ملغى</span>
+                            <span class="text-dark font-weight-bolder">{{ $checkStats['bounced'] }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- الشيكات وحالتها -->
-    <div class="row mt-4">
+    <!-- Latest Checks Table (Full-width) -->
+    <div class="row">
         <div class="col-12">
-            <div class="card account-card">
-                <div class="account-card-header d-flex justify-content-between align-items-center">
-                    <div><i class="fas fa-money-check-alt text-warning mr-2"></i> سجل الشيكات الأخير</div>
-                    <div>
-                        <!-- فلتر بسيط للشيكات -->
-                        <form action="{{ route('dashboard.financial-accounts.index') }}" method="GET" class="form-inline">
-                            <select name="check_status" class="form-control form-control-sm mr-2" onchange="this.form.submit()">
+            <div class="card data-card">
+                <div class="data-card-header">
+                    <span><i class="fas fa-history text-muted mr-2"></i> آخر حركات الشيكات</span>
+                    <div class="d-flex align-items-center">
+                        <form action="{{ route('dashboard.financial-accounts.index') }}" method="GET" class="mr-4">
+                            <select name="check_status" class="form-control form-control-sm selectpicker" data-style="btn-light" onchange="this.form.submit()">
                                 <option value="">كل الحالات</option>
                                 <option value="in_wallet" {{ request('check_status') == 'in_wallet' ? 'selected' : '' }}>في المحفظة</option>
                                 <option value="under_collection" {{ request('check_status') == 'under_collection' ? 'selected' : '' }}>برسم التحصيل</option>
@@ -143,71 +245,111 @@
                                 <option value="bounced" {{ request('check_status') == 'bounced' ? 'selected' : '' }}>مرتجع</option>
                             </select>
                         </form>
+                        <a href="{{ route('dashboard.checks.index') }}" class="btn btn-sm btn-outline-warning font-weight-bold">سجل الشيكات الكامل <i class="fas fa-external-link-alt ml-1"></i></a>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
-                            <thead class="thead-light">
+                            <thead>
                                 <tr>
-                                    <th>رقم الشيك</th>
+                                    <th class="pl-4">رقم الشيك</th>
                                     <th>النوع</th>
                                     <th>المستفيد / الساحب</th>
                                     <th>تاريخ الاستحقاق</th>
                                     <th>القيمة</th>
-                                    <th>الحالة</th>
+                                    <th class="text-center pr-4">الحالة</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($checks as $check)
                                 <tr>
-                                    <td class="font-weight-bold">{{ $check->check_number }}</td>
+                                    <td class="pl-4 font-weight-bold text-dark-75">{{ $check->check_number }}</td>
                                     <td>
                                         @if($check->type == 'receivable')
-                                            <span class="badge badge-light-success">شيك قبض</span>
+                                            <span class="label label-light-success label-inline font-weight-bold">قبض</span>
                                         @else
-                                            <span class="badge badge-light-danger">شيك صرف</span>
+                                            <span class="label label-light-danger label-inline font-weight-bold">صرف</span>
                                         @endif
                                     </td>
                                     <td>{{ $check->holder_name }}</td>
                                     <td>{{ \Carbon\Carbon::parse($check->due_date)->format('Y-m-d') }}</td>
-                                    <td class="font-weight-bold">{{ number_format($check->amount_ils, 2) }}</td>
-                                    <td>
+                                    <td class="font-weight-bolder">{{ number_format($check->amount_ils, 2) }}</td>
+                                    <td class="text-right pr-4">
                                         @php
                                             $badgeClasses = [
-                                                'in_wallet' => 'badge-info',
-                                                'under_collection' => 'badge-warning',
-                                                'cleared' => 'badge-success',
-                                                'bounced' => 'badge-danger',
+                                                'in_wallet' => 'info',
+                                                'under_collection' => 'warning',
+                                                'cleared' => 'success',
+                                                'bounced' => 'danger',
                                             ];
                                             $statusNames = [
                                                 'in_wallet' => 'في المحفظة',
                                                 'under_collection' => 'برسم التحصيل',
                                                 'cleared' => 'مُحصّل',
-                                                'bounced' => 'بالغ الدفع/مرتجع',
+                                                'bounced' => 'مرتجع/ملغى',
                                             ];
-                                            $class = $badgeClasses[$check->status] ?? 'badge-secondary';
+                                            $class = $badgeClasses[$check->status] ?? 'secondary';
                                             $name = $statusNames[$check->status] ?? $check->status;
                                         @endphp
-                                        <span class="badge {{ $class }}">{{ $name }}</span>
+                                        <span class="label label-{{ $class }} label-pill label-inline font-weight-bold">{{ $name }}</span>
                                     </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="6" class="text-center py-4 text-muted">لم يتم العثور على شيكات مطابقة</td></tr>
+                                <tr><td colspan="6" class="text-center py-10 text-muted">لا توجد شيكات تطابق البحث</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="card-footer bg-light d-flex justify-content-between align-items-center">
-                    <div>
-                        {{ $checks->appends(request()->query())->links() }}
-                    </div>
-                    <a href="{{ route('dashboard.checks.index') }}" class="btn btn-sm btn-outline-warning">إدارة الشيكات الكاملة <i class="fas fa-arrow-left fa-sm ml-1"></i></a>
+                <div class="card-footer py-2 d-flex justify-content-center">
+                    {{ $checks->appends(request()->query())->links() }}
                 </div>
             </div>
         </div>
     </div>
-
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('checkStatusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['في المحفظة', 'برسم التحصيل', 'مُحصّل', 'مرتجع/ملغى'],
+                datasets: [{
+                    data: [
+                        {{ $checkStats['in_wallet'] }}, 
+                        {{ $checkStats['under_collection'] }}, 
+                        {{ $checkStats['cleared'] }}, 
+                        {{ $checkStats['bounced'] }}
+                    ],
+                    backgroundColor: ['#3699FF', '#FFA800', '#1BC5BD', '#F64E60'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let percentage = ((context.raw / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.raw} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '70%',
+            }
+        });
+    });
+</script>
+@endpush

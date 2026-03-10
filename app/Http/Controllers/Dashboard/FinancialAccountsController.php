@@ -42,13 +42,22 @@ class FinancialAccountsController extends Controller
         $totalBankBalance = $financialService->getBankBalance();
         $totalOverallBalance = $financialService->getTotalCapital();
 
+        // حساب توزيع الشيكات حسب الحالة للرسم البياني
+        $checkStats = [
+            'in_wallet' => Check::where('status', 'in_wallet')->count(),
+            'under_collection' => Check::where('status', 'under_collection')->count(),
+            'cleared' => Check::where('status', 'cleared')->count(),
+            'bounced' => Check::where('status', 'bounced')->count(),
+        ];
+
         return view('dashboard.financial_accounts.index', compact(
             'cashSafes',
             'bankAccounts',
             'checks',
             'totalCashBalance',
             'totalBankBalance',
-            'totalOverallBalance'
+            'totalOverallBalance',
+            'checkStats'
         ));
     }
 }

@@ -49,6 +49,21 @@ class AnnualProfitController extends Controller
             ];
         }
 
-        return view('dashboard.annual_profit.index', compact('annualData'));
+        // >>== حساب البيانات الشهرية للسنة الأخيرة لعرضها في رسم بياني ==<<
+        $latestYear = $years->first();
+        $monthlyData = [
+            'labels' => ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+            'revenue' => [],
+            'expenses' => []
+        ];
+
+        if ($latestYear) {
+            for ($m = 1; $m <= 12; $m++) {
+                $monthlyData['revenue'][] = SaleInvoice::whereYear('issue_date', $latestYear)->whereMonth('issue_date', $m)->sum('total_amount') ?? 0;
+                $monthlyData['expenses'][] = Expense::whereYear('date', $latestYear)->whereMonth('date', $m)->sum('amount') ?? 0;
+            }
+        }
+
+        return view('dashboard.annual_profit.index', compact('annualData', 'monthlyData', 'latestYear'));
     }
 }
