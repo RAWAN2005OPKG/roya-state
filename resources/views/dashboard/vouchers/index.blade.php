@@ -17,6 +17,34 @@
                 <div class="col-md-3"><button type="submit" class="btn btn-primary">بحث</button> <a href="{{ route('dashboard.vouchers.index') }}" class="btn btn-secondary">إلغاء</a></div>
             </div>
         </form>
+
+        {{-- بطاقات الإجماليات --}}
+        <div class="row mb-5">
+            <div class="col-md-4">
+                <div class="card bg-light-success">
+                    <div class="card-body text-center py-4">
+                        <div class="text-success font-size-sm font-weight-bold text-uppercase mb-1">إجمالي القبض</div>
+                        <div class="font-size-h4 font-weight-bolder text-success">{{ number_format($totalReceipts, 2) }} <small>شيكل</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-light-danger">
+                    <div class="card-body text-center py-4">
+                        <div class="text-danger font-size-sm font-weight-bold text-uppercase mb-1">إجمالي الصرف</div>
+                        <div class="font-size-h4 font-weight-bolder text-danger">{{ number_format($totalPayments, 2) }} <small>شيكل</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card {{ ($netBalance ?? 0) >= 0 ? 'bg-light-primary' : 'bg-light-warning' }}">
+                    <div class="card-body text-center py-4">
+                        <div class="{{ ($netBalance ?? 0) >= 0 ? 'text-primary' : 'text-warning' }} font-size-sm font-weight-bold text-uppercase mb-1">الرصيد الصافي</div>
+                        <div class="font-size-h4 font-weight-bolder {{ ($netBalance ?? 0) >= 0 ? 'text-primary' : 'text-warning' }}">{{ number_format($netBalance ?? 0, 2) }} <small>شيكل</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div><a href="#" class="btn btn-success">تصدير Excel</a> <a href="{{ route('dashboard.vouchers.trash') }}" class="btn btn-danger">سلة المهملات</a></div>
             <form method="GET">

@@ -15,15 +15,16 @@ class FundTransferController extends Controller
     public function index()
     {
         $bankAccounts = BankAccount::where('is_active', true)->get();
+        $cashSafes = \App\Models\Cash::where('is_active', true)->get();
         $transfers = FundTransfer::latest()->take(15)->get();
-
+        
         // إضافة أسماء الحسابات بشكل واضح للعرض في الجدول
         $transfers->each(function ($transfer) {
             $transfer->fromAccountName = $this->getAccountName($transfer->from_type, $transfer->from_id);
             $transfer->toAccountName = $this->getAccountName($transfer->to_type, $transfer->to_id);
         });
 
-        return view('dashboard.fund_transfers.index', compact( 'bankAccounts', 'transfers'));
+        return view('dashboard.fund_transfers.index', compact( 'bankAccounts', 'cashSafes', 'transfers'));
     }
 
     public function store(Request $request)

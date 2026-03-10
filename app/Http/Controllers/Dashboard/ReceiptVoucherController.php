@@ -42,6 +42,6 @@ class ReceiptVoucherController extends Controller
         ReceiptVoucher::create($validator->validated());
 
 
-        return redirect()->route('dashboard.prbancascheq')->with('success', 'تم الإضافة  بنجاح!');
+        return redirect()->route('dashboard.vouchers.index')->with('success', 'تم الإضافة بنجاح!');
     }
 }

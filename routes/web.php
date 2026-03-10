@@ -211,6 +211,11 @@ Route::resource('contracts', App\Http\Controllers\Dashboard\ContractController::
       Route::get('/get-payables', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayables'])->name('getPayables');
         Route::get('/get-payable-contracts', [App\Http\Controllers\Dashboard\PaymentController::class, 'getPayableContracts'])->name('getPayableContracts');
 // ---  مصروفات الموردين (Supplier Expenses) ---
+Route::prefix('supplier-expenses')->name('supplier_expenses.')->group(function () {
+    Route::get('/trash', [\App\Http\Controllers\Dashboard\SupplierExpenseController::class, 'trash'])->name('trash');
+    Route::post('/{id}/restore', [\App\Http\Controllers\Dashboard\SupplierExpenseController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force-delete', [\App\Http\Controllers\Dashboard\SupplierExpenseController::class, 'forceDelete'])->name('forceDelete');
+});
 Route::resource('supplier-expenses', \App\Http\Controllers\Dashboard\SupplierExpenseController::class)->names('supplier_expenses')->except(['show']);
 
   // --- 1. العملاء (Clients) ---

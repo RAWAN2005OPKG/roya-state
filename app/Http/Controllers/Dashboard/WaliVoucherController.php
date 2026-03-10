@@ -14,8 +14,15 @@ use Illuminate\Support\Facades\Auth;
 class WaliVoucherController extends Controller
 {
     public function index(Request $request) {
-        $vouchers = WaliVoucher::with('user')->latest()->paginate(15);
-        return view('dashboard.wali.index', compact('vouchers'));
+        $query = WaliVoucher::with('user');
+
+        // حساب الإجماليات بالشيكل
+        $totalReceipts = WaliVoucher::where('type', 'receipt')->sum('amount_ils');
+        $totalPayments = WaliVoucher::where('type', 'payment')->sum('amount_ils');
+        $netBalance = $totalReceipts - $totalPayments;
+
+        $vouchers = $query->latest()->paginate(15);
+        return view('dashboard.wali.index', compact('vouchers', 'totalReceipts', 'totalPayments', 'netBalance'));
     }
 
     public function create() {
@@ -43,6 +50,7 @@ class WaliVoucherController extends Controller
         try {
             $detailsData = $request->only(['cash_source_name', 'handler_name', 'handler_role', 'from_bank_account_id', 'to_bank_account_id', 'check_number', 'check_owner_name', 'check_bank_name', 'check_due_date', 'check_id']);
             $voucherData = array_diff_key($validated, array_flip(array_keys($detailsData)));
+            $voucherData['amount_ils'] = ($voucherData['currency'] === 'ILS') ? $voucherData['amount'] : ($voucherData['amount'] * $voucherData['exchange_rate']);
             
             $voucher = WaliVoucher::create($voucherData + ['user_id' => Auth::id()]);
             $voucher->details()->create($detailsData);
@@ -57,7 +65,7 @@ class WaliVoucherController extends Controller
 
     public function show(WaliVoucher $wali) {
         $wali->load(['details', 'project', 'client', 'investor', 'user']);
-        return view('dashboard.wali.show', ['voucher' => $wali]);
+        return view('dashboard.wali.show', ['voucher' => $wali, 'wali' => $wali]);
     }
 
     public function edit(WaliVoucher $wali) {
@@ -92,6 +100,11 @@ class WaliVoucherController extends Controller
         try {
             $detailsData = $request->only(['cash_source_name', 'handler_name', 'handler_role', 'from_bank_account_id', 'to_bank_account_id', 'check_number', 'check_owner_name', 'check_bank_name', 'check_due_date', 'check_id']);
             $voucherData = array_diff_key($validated, array_flip(array_keys($detailsData)));
+            // حساب المبلغ بالشيكل إذا توفرت العملة وسعر الصرف، أو استخدام المبلغ الأصلي
+            $amount = $voucherData['amount'] ?? $wali->amount;
+            $currency = $request->currency ?? $wali->currency;
+            $exchangeRate = $request->exchange_rate ?? $wali->exchange_rate;
+            $voucherData['amount_ils'] = ($currency === 'ILS') ? $amount : ($amount * $exchangeRate);
 
             $wali->update($voucherData);
             

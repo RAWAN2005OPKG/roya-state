@@ -37,11 +37,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="table-info-light">
-                        <td colspan="6" class="font-weight-bold">الرصيد الافتتاحي</td>
-                        <td class="font-weight-bolder">{{ number_format($openingBalance, 2) }}</td>
-                        <td></td>
-                    </tr>
                     @forelse ($transactionsWithBalance as $transaction)
                         <tr class="{{ $transaction->type == 'in' ? 'table-success-light' : 'table-danger-light' }}">
                             <td class="font-weight-bold">{{ $transaction->voucher_id }}</td>

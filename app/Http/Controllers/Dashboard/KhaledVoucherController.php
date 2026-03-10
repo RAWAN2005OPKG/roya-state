@@ -22,9 +22,15 @@ class KhaledVoucherController extends Controller
      */
     public function index(Request $request)
     {
-        // يمكنك إضافة منطق البحث والفلترة هنا لاحقاً
-        $vouchers = KhaledVoucher::with('user')->latest()->paginate(15);
-        return view('dashboard.khaled.index', compact('vouchers'));
+        $query = KhaledVoucher::with('user');
+        
+        // حساب الإجماليات بالشيكل
+        $totalReceipts = KhaledVoucher::where('type', 'receipt')->sum('amount_ils');
+        $totalPayments = KhaledVoucher::where('type', 'payment')->sum('amount_ils');
+        $netBalance = $totalReceipts - $totalPayments;
+
+        $vouchers = $query->latest()->paginate(15);
+        return view('dashboard.khaled.index', compact('vouchers', 'totalReceipts', 'totalPayments', 'netBalance'));
     }
 
     /**
@@ -80,6 +86,8 @@ class KhaledVoucherController extends Controller
             'check_number', 'check_owner_name', 'check_bank_name', 'check_due_date', 'check_id'
         ]);
 
+        $validated['amount_ils'] = ($validated['currency'] === 'ILS') ? $validated['amount'] : ($validated['amount'] * $validated['exchange_rate']);
+
         $voucher = KhaledVoucher::create(
             array_diff_key($validated, array_flip(array_keys($detailsData))) 
             + ['user_id' => Auth::id()]
@@ -103,7 +111,7 @@ class KhaledVoucherController extends Controller
     {
         // تحميل كل العلاقات لعرضها في الواجهة
         $khaled->load(['details.cash', 'details.fromBankAccount.bank', 'details.toBankAccount.bank', 'details.check', 'project', 'client', 'investor', 'user']);
-        return view('dashboard.khaled.show', ['voucher' => $khaled]);
+        return view('dashboard.khaled.show', ['khaled' => $khaled]);
     }
 
     /**
@@ -156,7 +164,8 @@ class KhaledVoucherController extends Controller
 
         DB::beginTransaction();
         try {
-            // يمكنك إضافة منطق التراجع عن العملية القديمة قبل تحديث الأرصدة هنا
+            // حساب المبلغ بالشيكل قبل التحديث
+            $validated['amount_ils'] = ($validated['currency'] === 'ILS') ? $validated['amount'] : ($validated['amount'] * $validated['exchange_rate']);
 
             $khaled->update($validated);
             

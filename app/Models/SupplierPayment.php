@@ -13,7 +13,7 @@ class SupplierPayment extends Model
     protected $table = 'expenses';
 
     protected $fillable = [
-        'expense_date',
+        'date',
         'source_of_funds',
         'paid_by',
         'amount',
@@ -23,7 +23,7 @@ class SupplierPayment extends Model
     ];
 
     protected $casts = [
-        'expense_date' => 'date',
+        'date' => 'date',
         'amount' => 'decimal:2',
     ];
 

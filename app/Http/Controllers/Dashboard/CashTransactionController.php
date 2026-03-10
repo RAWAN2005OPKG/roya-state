@@ -3,7 +3,6 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\CashTransaction;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 use App\Exports\CashTransactionsExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -22,18 +21,20 @@ class CashTransactionController extends Controller
             });
         }
         $transactions = $query->latest('transaction_date')->latest('id')->get();
-        $openingBalance = (float) Setting::where('key', 'opening_balance')->value('value');
-        $balance = $openingBalance;
+        
+        $balance = 0;
         $transactionsWithBalance = $transactions->reverse()->map(function($transaction) use (&$balance) {
             if ($transaction->type === 'in') { $balance += $transaction->amount_ils; }
             else { $balance -= $transaction->amount_ils; }
             $transaction->balance = $balance;
             return $transaction;
         })->reverse();
+
         $totalIn = CashTransaction::where('type', 'in')->sum('amount_ils');
         $totalOut = CashTransaction::where('type', 'out')->sum('amount_ils');
-        $currentBalance = $openingBalance + $totalIn - $totalOut;
-        return view('dashboard.cash.index', compact('transactionsWithBalance', 'currentBalance', 'openingBalance'));
+        $currentBalance = $totalIn - $totalOut;
+
+        return view('dashboard.cash.index', compact('transactionsWithBalance', 'currentBalance'));
     }
 
     public function create()

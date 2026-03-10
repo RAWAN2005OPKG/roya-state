@@ -8,8 +8,8 @@ use App\Models\CashTransaction;
 use App\Models\BankAccount;
 use App\Models\Project;
 use App\Models\Expense;
-use App\Models\SupplierExpense; // **تمت إضافته**
-use App\Models\Check;            // **تمت إضافته**
+use App\Models\SupplierPayment;
+use App\Models\Check;            
 use App\Models\Payment;
 use App\Models\KhaledVoucher;
 use App\Models\MohammedVoucher;
@@ -17,20 +17,13 @@ use App\Models\WaliVoucher;
 
 class FinancialService
 {
-    /**
-     * يحسب إجمالي رأس المال (السيولة) في النظام.
-     * هو مجموع رصيد الخزينة + مجموع أرصدة كل البنوك + قيمة الشيكات قيد التحصيل.
-     *
-     * @return float
-     */
     public function getTotalCapital(): float
     {
-        $cashBalance = $this->getCashBalance();
-        $bankBalance = $this->getBankBalance();
         $checksInWallet = $this->getChecksInWalletValue(); // **تمت إضافته**
 
         // إجمالي السيولة هو ما تملكه نقداً وفي البنوك، بالإضافة إلى الشيكات التي في محفظتك
-        return $cashBalance + $bankBalance + $checksInWallet;
+        // The user asked to remove Cash & Banks from this specific total and keep them only on their individual pages.
+        return $checksInWallet; // Removed $cashBalance + $bankBalance
     }
 
     /**
@@ -73,15 +66,10 @@ class FinancialService
                             ->sum('amount_ils');
     }
 
-    /**
-     * يحسب إجمالي المصروفات المسجلة في النظام (العامة + الموردين).
-     *
-     * @return float
-     */
     public function getTotalExpenses(): float
     {
-        $generalExpenses = (float) Expense::sum('amount_ils');
-        $supplierExpenses = (float) SupplierExpense::sum('total_amount'); // نفترض أن هذا الحقل بالشيكل
+        $generalExpenses = (float) Expense::whereNull('payable_type')->sum('amount');
+        $supplierExpenses = (float) SupplierPayment::sum('amount'); // Using amount instead of total_amount
 
         return $generalExpenses + $supplierExpenses;
     }
@@ -124,8 +112,8 @@ class FinancialService
         $balance -= WaliVoucher::where('type', 'payment')->sum('amount');
 
         // **تمت إضافة المصروفات التي كانت منسية**
-        $balance -= Expense::sum('amount_ils');
-        $balance -= SupplierExpense::sum('total_amount');
+        $balance -= Expense::whereNull('payable_type')->sum('amount');
+        $balance -= SupplierPayment::sum('amount');
 
         return $balance;
     }

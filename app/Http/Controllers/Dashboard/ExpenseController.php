@@ -28,8 +28,16 @@ class ExpenseController extends Controller
                 ->orWhere('details', 'LIKE', "%{$searchTerm}%")
                 ->orWhereHas('project', fn($pq) => $pq->where('project_name', 'LIKE', "%{$searchTerm}%")));
         }
+
+        // حساب الإجماليات
+        $totalExpensesIls = (clone $query)->sum('amount_ils');
+
         $expenses = $query->paginate(15);
-        return view('dashboard.expenses.index', ['expenses' => $expenses, 'search' => $request->search ?? '']);
+        return view('dashboard.expenses.index', [
+            'expenses' => $expenses, 
+            'search' => $request->search ?? '',
+            'totalExpensesIls' => $totalExpensesIls
+        ]);
     }
 
     public function create()
@@ -96,11 +104,83 @@ class ExpenseController extends Controller
     {
         $validated = $this->validateExpense($request);
         $validated['amount_ils'] = ($validated['currency'] === 'ILS' || $validated['currency'] === 'شيكل') ? $validated['amount'] : ($validated['amount'] * ($validated['exchange_rate'] ?? 1));
-        $expense->update($validated);
-        return redirect()->route('dashboard.expenses.index')->with('success', 'تم تحديث المصروف بنجاح!');
+        
+        DB::beginTransaction();
+        try {
+            // عكس الحركات القديمة
+            $this->revertFinancialImpact($expense);
+            
+            // تحديث المصروف
+            $expense->update($validated);
+            
+            // تطبيق الحركات الجديدة
+            $this->applyFinancialImpact($expense->fresh(), $request->sender_bank_account_id);
+
+            DB::commit();
+            return redirect()->route('dashboard.expenses.index')->with('success', 'تم تحديث المصروف وتعديل الأرصدة بنجاح!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'خطأ أثناء التحديث: ' . $e->getMessage())->withInput();
+        }
     }
 
-    public function destroy(Expense $expense) { $expense->delete(); return back()->with('success', 'تم نقل المصروف إلى سلة المحذوفات!'); }
+    public function destroy(Expense $expense) 
+    { 
+        DB::beginTransaction();
+        try {
+            $this->revertFinancialImpact($expense);
+            $expense->delete(); 
+            DB::commit();
+            return back()->with('success', 'تم نقل المصروف إلى سلة المحذوفات وعكس الأرصدة!'); 
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'خطأ أثناء الحذف: ' . $e->getMessage());
+        }
+    }
+
+    protected function applyFinancialImpact(Expense $expense, $bankAccountId = null)
+    {
+        if ($expense->payment_source === 'خزينة') {
+            CashTransaction::create([
+                'type' => 'out', 
+                'transaction_date' => $expense->date,
+                'amount' => $expense->amount_ils, 
+                'amount_ils' => $expense->amount_ils,
+                'source' => 'مصروف رقم ' . $expense->id . ': ' . $expense->payee,
+                'details' => $expense->details, 
+                'voucher_id' => $expense->id,
+            ]);
+        } elseif ($expense->payment_source === 'بنك' && $bankAccountId) {
+            $bankAccount = BankAccount::findOrFail($bankAccountId);
+            BankTransaction::create([
+                'type' => 'withdrawal', 
+                'bank_account_id' => $bankAccount->id,
+                'transaction_date' => $expense->date, 
+                'amount' => $expense->amount,
+                'currency' => $bankAccount->currency,
+                'details' => 'مصروف رقم ' . $expense->id . ': ' . $expense->payee,
+            ]);
+            $bankAccount->decrement('balance', $expense->amount);
+        }
+    }
+
+    protected function revertFinancialImpact(Expense $expense)
+    {
+        if ($expense->payment_source === 'خزينة') {
+             CashTransaction::where('voucher_id', $expense->id)
+                ->where('type', 'out')
+                ->delete();
+        } elseif ($expense->payment_source === 'بنك') {
+            $transaction = BankTransaction::where('details', 'LIKE', 'مصروف رقم ' . $expense->id . ':%')->first();
+            if ($transaction) {
+                $bankAccount = BankAccount::find($transaction->bank_account_id);
+                if ($bankAccount) {
+                    $bankAccount->increment('balance', $transaction->amount);
+                }
+                $transaction->delete();
+            }
+        }
+    }
     public function trash() { $trashed = Expense::onlyTrashed()->latest()->paginate(15); return view('dashboard.expenses.trash', ['expenses' => $trashed]); }
     public function restore($id) { Expense::withTrashed()->findOrFail($id)->restore(); return back()->with('success', 'تم استعادة المصروف!'); }
     public function forceDelete($id) { Expense::withTrashed()->findOrFail($id)->forceDelete(); return back()->with('success', 'تم حذف المصروف نهائياً!'); }

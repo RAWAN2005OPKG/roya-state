@@ -31,10 +31,17 @@ class PaymentController extends Controller
         if ($request->filled('start_date')) { $query->whereDate('payment_date', '>=', $request->start_date); }
         if ($request->filled('end_date')) { $query->whereDate('payment_date', '<=', $request->end_date); }
 
+        // حساب الإجماليات من الـ query الكاملة (قبل الـ paginate)
+        $totalsQuery = clone $query;
+        $allFilteredPayments = $totalsQuery->get();
+        $totalInIls  = $allFilteredPayments->where('type', 'in')->sum(fn($p) => $p->amount * $p->exchange_rate);
+        $totalOutIls = $allFilteredPayments->where('type', 'out')->sum(fn($p) => $p->amount * $p->exchange_rate);
+        $netBalance  = $totalInIls - $totalOutIls;
+
         $payments = $query->paginate(15)->withQueryString();
         $payments->each(fn ($p) => $p->amount_ils = $p->amount * $p->exchange_rate);
 
-        return view('dashboard.payments.index', compact('payments'));
+        return view('dashboard.payments.index', compact('payments', 'totalInIls', 'totalOutIls', 'netBalance'));
     }
 
 
@@ -47,6 +54,8 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
        $validated = $request->validate([
+    'payable_id'   => 'required|integer',
+    'payable_type' => 'required|in:Client,Investor,Subcontractor',
     'payment_date' => 'required|date',
     'type' => 'required|in:in,out',
     'amount' => 'required|numeric|min:0.01',
@@ -207,5 +216,34 @@ class PaymentController extends Controller
             $payment->forceDelete();
         });
         return redirect()->route('dashboard.payments.trash')->with('success', 'تم حذف القيد نهائياً.');
+    }
+
+    public function getPayables(Request $request)
+    {
+        $type = $request->type;
+        $payables = collect();
+
+        if ($type === 'Client') {
+            $payables = Client::whereHas('contracts')->select('id', 'name', 'unique_id')->get();
+        } elseif ($type === 'Investor') {
+            $payables = Investor::whereHas('contracts')->select('id', 'name', 'unique_id')->get();
+        } elseif ($type === 'Subcontractor') {
+            $payables = Subcontractor::select('id', 'name', 'unique_id')->get(); // Subcontractors might not use contracts in the same way, adjust if needed
+        }
+
+        return response()->json($payables);
+    }
+
+    public function getPayableContracts(Request $request)
+    {
+        $payableId = $request->payable_id;
+        $payableType = 'App\\Models\\' . $request->payable_type;
+
+        $contracts = Contract::where('contractable_id', $payableId)
+            ->where('contractable_type', $payableType)
+            ->select('id', 'investment_amount')
+            ->get();
+
+        return response()->json(['contracts' => $contracts]);
     }
 }

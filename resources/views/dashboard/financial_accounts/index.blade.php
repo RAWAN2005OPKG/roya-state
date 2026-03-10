@@ -47,16 +47,6 @@
         <span class="text-muted">موقف السيولة وأرصدة البنوك والشيكات</span>
     </div>
 
-    <!-- صندوق الإجمالي العام -->
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="total-balance-box">
-                <h2>إجمالي السيولة المتوفرة (رأس المال العامل)</h2>
-                <div class="amount">{{ number_format($totalOverallBalance, 2) }} <small class="font-size-h4">شيكل</small></div>
-                <div class="mt-3 opacity-70">يحتوي على: النقدية بالخزينة + حسابات البنوك + شيكات برسم التحصيل</div>
-            </div>
-        </div>
-    </div>
 
     <div class="row">
         <!-- الخزينة النقدية -->

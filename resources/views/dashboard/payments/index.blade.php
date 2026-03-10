@@ -20,6 +20,33 @@
                 <div class="col-md-2 align-self-end"><button type="submit" class="btn btn-primary">فلترة</button><a href="{{ route('dashboard.payments.index') }}" class="btn btn-secondary ml-2">إلغاء</a></div>
             </div>
         </form>
+        {{-- بطاقات الإجماليات --}}
+        <div class="row mb-5">
+            <div class="col-md-4">
+                <div class="card bg-light-success">
+                    <div class="card-body text-center py-4">
+                        <div class="text-success font-size-sm font-weight-bold text-uppercase mb-1">إجمالي القبض</div>
+                        <div class="font-size-h4 font-weight-bolder text-success">{{ number_format($totalInIls, 2) }} <small>شيكل</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-light-danger">
+                    <div class="card-body text-center py-4">
+                        <div class="text-danger font-size-sm font-weight-bold text-uppercase mb-1">إجمالي الصرف</div>
+                        <div class="font-size-h4 font-weight-bolder text-danger">{{ number_format($totalOutIls, 2) }} <small>شيكل</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card {{ $netBalance >= 0 ? 'bg-light-primary' : 'bg-light-warning' }}">
+                    <div class="card-body text-center py-4">
+                        <div class="{{ $netBalance >= 0 ? 'text-primary' : 'text-warning' }} font-size-sm font-weight-bold text-uppercase mb-1">الرصيد الصافي</div>
+                        <div class="font-size-h4 font-weight-bolder {{ $netBalance >= 0 ? 'text-primary' : 'text-warning' }}">{{ number_format($netBalance, 2) }} <small>شيكل</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 <div class="table-responsive">
             <table class="table table-hover">
                 <thead>

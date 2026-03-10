@@ -20,8 +20,15 @@ class MohammedVoucherController extends Controller
      */
     public function index(Request $request)
     {
-        $vouchers = MohammedVoucher::with('user')->latest()->paginate(15);
-        return view('dashboard.mohammed.index', compact('vouchers'));
+        $query = MohammedVoucher::with('user');
+
+        // حساب الإجماليات بالشيكل
+        $totalReceipts = MohammedVoucher::where('type', 'receipt')->sum('amount_ils');
+        $totalPayments = MohammedVoucher::where('type', 'payment')->sum('amount_ils');
+        $netBalance = $totalReceipts - $totalPayments;
+
+        $vouchers = $query->latest()->paginate(15);
+        return view('dashboard.mohammed.index', compact('vouchers', 'totalReceipts', 'totalPayments', 'netBalance'));
     }
 
     /**
@@ -68,6 +75,7 @@ class MohammedVoucherController extends Controller
         try {
             $detailsData = $request->only(['cash_source_name', 'handler_name', 'handler_role', 'from_bank_account_id', 'to_bank_account_id', 'check_number', 'check_owner_name', 'check_bank_name', 'check_due_date', 'check_id']);
             $voucherData = array_diff_key($validated, array_flip(array_keys($detailsData)));
+            $voucherData['amount_ils'] = ($voucherData['currency'] === 'ILS') ? $voucherData['amount'] : ($voucherData['amount'] * $voucherData['exchange_rate']);
 
             $voucher = MohammedVoucher::create($voucherData + ['user_id' => Auth::id()]);
             $voucher->details()->create($detailsData);
@@ -86,7 +94,7 @@ class MohammedVoucherController extends Controller
     public function show(MohammedVoucher $mohammed)
     {
         $mohammed->load(['details', 'project', 'client', 'investor', 'user']);
-        return view('dashboard.mohammed.show', ['voucher' => $mohammed]);
+        return view('dashboard.mohammed.show', ['voucher' => $mohammed, 'mohammed' => $mohammed]);
     }
 
     /**
@@ -131,6 +139,7 @@ class MohammedVoucherController extends Controller
         try {
             $detailsData = $request->only(['cash_source_name', 'handler_name', 'handler_role', 'from_bank_account_id', 'to_bank_account_id', 'check_number', 'check_owner_name', 'check_bank_name', 'check_due_date', 'check_id']);
             $voucherData = array_diff_key($validated, array_flip(array_keys($detailsData)));
+            $voucherData['amount_ils'] = ($voucherData['currency'] === 'ILS') ? $voucherData['amount'] : ($voucherData['amount'] * $voucherData['exchange_rate']);
 
             $mohammed->update($voucherData);
 

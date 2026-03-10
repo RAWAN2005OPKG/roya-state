@@ -51,17 +51,25 @@
             {{-- ================== 1. تحديد الكيان ================== --}}
             <h4 class="mb-5 text-primary">1. تحديد الكيان</h4>
             <div class="row">
-              <div class="col-md-4 form-group">
-             <label>العقد المرتبط <span class="text-danger">*</span></label>
-             <select name="contract_id" id="contract_id" class="form-control" required>
-            <option value="">اختر العقد أولاً</option>
-         </select>
-        </div>
+                <div class="col-md-3 form-group">
+                    <label>نوع الكيان <span class="text-danger">*</span></label>
+                    <select name="payable_type" id="payable_type" class="form-control" required>
+                        <option value="">-- اختر النوع --</option>
+                        <option value="Client">عميل</option>
+                        <option value="Investor">مستثمر</option>
+                        <option value="Subcontractor">مقاول</option>
+                    </select>
                 </div>
-                <div class="col-md-6 form-group">
+                <div class="col-md-3 form-group">
                     <label>اسم الكيان <span class="text-danger">*</span></label>
                     <select name="payable_id" id="payable_id" class="form-control" required disabled>
-                        {{-- سيتم ملء هذه القائمة عبر AJAX --}}
+                        <option value="">اختر النوع أولاً</option>
+                    </select>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>العقد المرتبط</label>
+                    <select name="contract_id" id="contract_id" class="form-control">
+                        <option value="">اختر الكيان أولاً</option>
                     </select>
                 </div>
             </div>

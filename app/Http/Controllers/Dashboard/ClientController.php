@@ -49,10 +49,12 @@ class ClientController extends Controller
             'name' => 'required|string|max:255',
             'id_number' => 'nullable|string|max:20|unique:clients,id_number',
             'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
             'contracts' => 'required|array|min:1',
             'contracts.*.unit_id' => 'required|exists:project_units,id',
             'contracts.*.sale_date' => 'required|date',
-            'contracts.*.total_amount' => 'required|numeric|min:0', // اسم الحقل من النموذج
+            'contracts.*.total_amount' => 'required|numeric|min:0',
             'contracts.*.currency' => 'required|in:USD,JOD,ILS',
             'contracts.*.exchange_rate' => 'required|numeric|min:0',
             'contracts.*.total_amount_ils' => 'required|numeric|min:0',
@@ -61,23 +63,29 @@ class ClientController extends Controller
 
         try {
             DB::beginTransaction();
-            $client = Client::create($validated);
+            
+            // إنشاء العميل ببياناته فقط
+            $clientData = $request->only(['name', 'id_number', 'phone', 'address', 'notes']);
+            $client = Client::create($clientData);
+
             foreach ($validated['contracts'] as $contractData) {
-
+                $unit = ProjectUnit::find($contractData['unit_id']);
+                
                 $contract = new Contract();
-                $contract->client_id = $client->id;
-                $contract->project_unit_id = $contractData['unit_id'];
+                $contract->unique_id = 'CON-' . time() . '-' . rand(100, 999);
+                $contract->contractable_id = $client->id;
+                $contract->contractable_type = Client::class;
+                $contract->project_id = $unit->project_id;
+                $contract->project_unit_id = $unit->id;
                 $contract->contract_date = $contractData['sale_date'];
-
                 $contract->contract_value = $contractData['total_amount'];
-
                 $contract->currency = $contractData['currency'];
                 $contract->exchange_rate = $contractData['exchange_rate'];
                 $contract->total_amount_ils = $contractData['total_amount_ils'];
                 $contract->status = 'active';
                 $contract->save();
 
-                ProjectUnit::where('id', $contractData['unit_id'])->update(['status' => 'sold']);
+                $unit->update(['status' => 'sold']);
 
                 if (!empty($contractData['down_payment']) && $contractData['down_payment'] > 0) {
                     $client->payments()->create([
@@ -125,25 +133,32 @@ class ClientController extends Controller
 
         try {
             DB::beginTransaction();
-            $client->update($validated);
+            
+            $clientData = $request->only(['name', 'id_number', 'phone', 'address', 'notes']);
+            $client->update($clientData);
 
             $existingContractIds = [];
             if (!empty($validated['contracts'])) {
                 foreach ($validated['contracts'] as $contractData) {
-
-                    $contract = $client->contracts()->updateOrCreate(
+                    $unit = ProjectUnit::find($contractData['unit_id']);
+                    
+                    $contract = Contract::updateOrCreate(
                         ['id' => $contractData['id'] ?? null],
                         [
-                            'project_unit_id' => $contractData['unit_id'],
+                            'unique_id' => $contractData['id'] ? Contract::find($contractData['id'])->unique_id : ('CON-' . time() . '-' . rand(100, 999)),
+                            'contractable_id' => $client->id,
+                            'contractable_type' => Client::class,
+                            'project_id' => $unit->project_id,
+                            'project_unit_id' => $unit->id,
                             'contract_date' => $contractData['sale_date'],
-
                             'contract_value' => $contractData['total_amount'],
-
                             'currency' => $contractData['currency'],
                             'exchange_rate' => $contractData['exchange_rate'],
                             'total_amount_ils' => $contractData['total_amount_ils'],
                         ]
                     );
+                    
+                    $unit->update(['status' => 'sold']);
                     $existingContractIds[] = $contract->id;
                 }
             }

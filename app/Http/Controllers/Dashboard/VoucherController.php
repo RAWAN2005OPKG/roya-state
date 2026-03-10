@@ -26,10 +26,15 @@ class VoucherController extends Controller
         if ($request->filled('to_date')) $query->where('voucher_date', '<=', $request->to_date);
         if ($request->filled('type')) $query->where('type', $request->type);
 
+        // حساب الإجماليات بناءً على الفلترة
+        $totalReceipts = (clone $query)->where('type', 'receipt')->sum('amount_ils');
+        $totalPayments = (clone $query)->where('type', 'payment')->sum('amount_ils');
+        $netBalance = $totalReceipts - $totalPayments;
+
         $perPage = $request->input('per_page', 10);
         $vouchers = $query->paginate($perPage == 'all' ? 9999 : $perPage)->appends($request->query());
 
-        return view('dashboard.vouchers.index', compact('vouchers'));
+        return view('dashboard.vouchers.index', compact('vouchers', 'totalReceipts', 'totalPayments', 'netBalance'));
     }
 
     public function create()

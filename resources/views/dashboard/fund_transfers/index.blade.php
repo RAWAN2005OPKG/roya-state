@@ -94,7 +94,7 @@
                                         <optgroup label="الحسابات البنكية">
                                             @foreach($bankAccounts as $account)
                                                 <option value="bank-{{ $account->id }}">
-                                                    {{ $account->account_name }} ({{ $account->bank_name }}) (الرصيد: {{ number_format($account->balance, 2) }})
+                                                    {{ $account->account_name }} ({{ $account->bank->name ?? 'بنك' }}) (الرصيد: {{ number_format($account->balance, 2) }})
                                                 </option>
                                             @endforeach
                                         </optgroup>
@@ -124,7 +124,7 @@
                                         </optgroup>
                                         <optgroup label="الحسابات البنكية">
                                             @foreach($bankAccounts as $account)
-                                                <option value="bank-{{ $account->id }}">{{ $account->account_name }} ({{ $account->bank_name }})</option>
+                                                <option value="bank-{{ $account->id }}">{{ $account->account_name }} ({{ $account->bank->name ?? 'بنك' }})</option>
                                             @endforeach
                                         </optgroup>
                                     </select>
@@ -144,9 +144,10 @@
                                 <span class="input-group-text"><i class="fas fa-money-bill-wave text-success"></i></span>
                             </div>
                             <input type="number" id="amount" name="amount" class="form-control" step="0.01" placeholder="0.00" required>
-                            <select id="currency" name="currency" class="form-control" required style="max-width: 120px;">
-                                <option value="SAR" selected>SAR</option>
+                             <select id="currency" name="currency" class="form-control" required style="max-width: 120px;">
+                                <option value="ILS" selected>ILS</option>
                                 <option value="USD">USD</option>
+                                <option value="JOD">JOD</option>
                             </select>
                         </div>
                     </div>

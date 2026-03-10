@@ -44,7 +44,6 @@ class CheckController extends Controller
         'projects',
         'projectUnits'
     ));
-        return view('dashboard.checks.create', compact('bankAccounts', 'projects'));
     }
 
     /**
@@ -101,7 +100,6 @@ class CheckController extends Controller
         'projects',
         'projectUnits'
     ));
-        return view('dashboard.checks.edit', compact('check', 'bankAccounts', 'projects'));
     }
 
     /**

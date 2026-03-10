@@ -41,7 +41,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                  @forelse($trashedChecks as $check)
+                  @forelse($checks as $check)
                     <tr>
                         <td>{{ $check->check_number }}</td>
                         <td>{{ $check->bank_name }}</td>
